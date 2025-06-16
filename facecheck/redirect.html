@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Face Check Redirect</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script>
+    function getDeepLinkFromQuery() {
+      const params = new URLSearchParams(window.location.search);
+      return params.get("deeplink");
+    }
+
+    window.onload = function () {
+      const deepLink = getDeepLinkFromQuery();
+
+      if (deepLink) {
+        // Redirect to the deep link
+        window.location.href = deepLink;
+
+        // Optional fallback after 2 seconds
+        setTimeout(() => {
+          window.location.href = "https://contosohelpdesk.co.uk/help";
+        }, 2000);
+      } else {
+        document.body.innerHTML = "<p>Error: Missing or invalid 'deeplink' parameter.</p>";
+      }
+    };
+  </script>
+</head>
+<body>
+  <p>Redirecting you to Microsoft Authenticator for identity verification...</p>
+</body>
+</html>
