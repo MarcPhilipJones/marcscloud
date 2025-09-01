@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Account Closure & Final Payment — Chris Walker</title>
+  <style>
+    :root{ --bg:#ffffff; --card:#ffffff; --muted:#6b7280; --text:#111827; --border:#e5e7eb; --accent:#1a73e8; --ok:#16a34a; --warn:#ea580c; }
+    *{box-sizing:border-box}
+    body{margin:0;padding:24px;background:var(--bg);color:var(--text);font:14px/1.4 ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial}
+    h1{font-size:22px;margin:0 0 4px}
+    h2{font-size:16px;margin:0 0 12px}
+    small, .muted{color:var(--muted)}
+    .container{max-width:1180px;margin:0 auto}
+    .header{display:flex;gap:12px;align-items:flex-start;justify-content:space-between;margin-bottom:16px}
+    .badges{display:flex;gap:8px;flex-wrap:wrap}
+    .badge{padding:4px 8px;border:1px solid var(--border);border-radius:999px;color:#111827;background:#f3f4f6} 
+    .badge-outline{background:transparent}
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:16px}
+    .grid{display:grid;gap:16px}
+    @media(min-width:900px){.grid.cols-3{grid-template-columns:2fr 1fr}}
+    .row{display:grid;gap:12px}
+    @media(min-width:700px){.row.cols-3{grid-template-columns:repeat(3,1fr)}.row.cols-2{grid-template-columns:repeat(2,1fr)}}
+    label{display:block;font-size:12px;color:var(--muted);margin-bottom:4px}
+    input, select, textarea{width:100%;padding:10px 12px;background:#ffffff;color:#111827;border:1px solid var(--border);border-radius:10px} 
+    input[readonly]{opacity:.9}
+    .help{font-size:12px;color:var(--muted)}
+    .actions{display:flex;gap:8px;flex-wrap:wrap}
+    button{appearance:none;border:0;background:var(--accent);color:white;padding:10px 14px;border-radius:10px;font-weight:600;cursor:pointer}
+    button.secondary{background:transparent;border:1px solid var(--border);color:var(--text)}
+    table{width:100%;border-collapse:collapse}
+    th, td{padding:10px;border-bottom:1px solid var(--border);text-align:left}
+    th{color:var(--muted);font-weight:600}
+    .kpi{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border:1px solid var(--border);border-radius:12px}
+    .kpi .value{font-weight:700}
+    .note{background:#f9fafb;border:1px dashed var(--border);padding:10px;border-radius:10px} 
+    .footer{margin-top:16px;color:var(--muted);font-size:12px}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div>
+        <h1>Account Closure & Final Payment</h1>
+        <small>Close the account for a customer moving out today and take a one‑off payment securely. Demo data only.</small>
+      </div>
+      <div class="badges">
+        <span class="badge">Status: Moving out today <span id="todayBadge"></span></span>
+        <span class="badge badge-outline">Domestic</span>
+        <span class="badge">Water & Wastewater</span>
+      </div>
+    </div>
+
+    <!-- Customer & Premise Summary -->
+    
+
+    <div class="grid$1"$2>
+      <div class="grid" style="gap:16px">
+        <!-- Closure & Meter -->
+        <section class="card" aria-labelledby="meter-heading">
+          <h2 id="meter-heading">Closure & meter</h2>
+          <div class="row cols-3">
+            <div>
+              <label>Meter serial</label>
+              <input value="WAT1234567" readonly />
+            </div>
+            <div>
+              <label>Previous read (27 Aug 2025)</label>
+              <input id="prevRead" value="23456 m³" readonly />
+            </div>
+            <div>
+              <label>Closing read (m³)</label>
+              <input id="closingRead" type="number" value="23478" />
+            </div>
+          </div>
+          <div class="row cols-3" style="margin-top:12px">
+            <div>
+              <label>Estimated consumption</label>
+              <input id="consumption" value="22 m³" readonly />
+            </div>
+            <div>
+              <label>Days since last bill</label>
+              <input id="daysSinceBill" readonly />
+            </div>
+            <div>
+              <label>Meter location</label>
+              <input value="External meter box" readonly />
+            </div>
+          </div>
+          <p class="help" style="margin-top:8px">Tariff illustration only – not real rates. Domestic water & wastewater are currently zero‑rated for VAT.</p>
+        </section>
+
+        <!-- Balance & Charges -->
+        <section class="card" aria-labelledby="charges-heading">
+          <h2 id="charges-heading">Balance & charges to today</h2>
+          <div class="row cols-3">
+            <div class="kpi"><span class="muted">Fixed charges</span><span class="value" id="fixedCharges">£0.00</span></div>
+            <div class="kpi"><span class="muted">Volumetric charges</span><span class="value" id="volumetricCharges">£0.00</span></div>
+            <div class="kpi"><span class="muted">Subtotal</span><span class="value" id="subtotal">£0.00</span></div>
+          </div>
+          <div class="row cols-3" style="margin-top:12px">
+            <div class="kpi"><span class="muted">Payments since last bill</span><span class="value" id="credits">-£0.00</span></div>
+            <div class="kpi"><span class="muted">Last bill</span><span class="value" id="lastBill">30 Jun 2025 · £84.50</span></div>
+            <div class="kpi"><span class="muted">Last payment</span><span class="value" id="lastPayment">15 Jul 2025 · £84.50 (Direct Debit)</span></div>
+          </div>
+          <div class="kpi" style="margin-top:12px;border-width:2px;background:#e8f0fe;border-color:#1a73e8">
+            <span class="muted">Estimated final balance today</span>
+            <span class="value" id="finalBalance" style="font-size:22px">£0.00</span>
+          </div>
+        </section>
+      </div>
+
+      <!-- Payment column -->
+      
+    </div>
+
+    <!-- Payments history -->
+    <section class="card" style="margin-top:16px" aria-labelledby="history-heading">
+      <h2 id="history-heading">Last 6 payments</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Method</th>
+            <th>Reference</th>
+            <th>Amount</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="paymentsBody"></tbody>
+      </table>
+      
+    </section>
+
+    <!-- Flags & notes -->
+    <section class="card" style="margin-top:16px">
+      <h2>Flags & compliance</h2>
+      <div class="row cols-2" style="margin-top:6px">
+        <div class="kpi"><span class="muted">Priority Services Register</span><span class="value">None recorded</span></div>
+        <div class="kpi"><span class="muted">Complaint / billing hold</span><span class="value">No open cases</span></div>
+      </div>
+      
+    </section>
+
+    <section class="card" style="margin-top:16px">
+      <h2>Agent notes</h2>
+      <textarea id="agentNotes" rows="3" placeholder="e.g. Customer moving out today; confirmed forwarding address; read photo captured; took £62.38 via secure card capture."></textarea>
+    </section>
+
+    
+  </div>
+
+  <script>
+    const gbp = (v)=> new Intl.NumberFormat('en-GB',{style:'currency', currency:'GBP'}).format(v);
+
+    // Seed/demo values
+    const today = new Date();
+    const lastBillDate = new Date('2025-06-30T00:00:00');
+    const lastPaymentDate = new Date('2025-07-15T00:00:00');
+    const rates = { dailyFixedWater: 0.23, dailyFixedWaste: 0.29, volumetricWater: 1.65, volumetricWaste: 1.10 };
+    const prevRead = 23456; // m³ (27 Aug 2025)
+
+    // Header badges
+    document.getElementById('todayBadge').textContent = `(${today.toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' })})`;
+    
+
+    // Days since last bill
+    const daysSince = Math.max(0, Math.ceil((today - lastBillDate) / 86400000));
+    document.getElementById('daysSinceBill').value = String(daysSince);
+
+    // Consumption calculation
+    const closingEl = document.getElementById('closingRead');
+    const consumptionEl = document.getElementById('consumption');
+
+    function recalc(){
+      const closing = parseInt(closingEl.value || '0', 10);
+      const cons = Math.max(0, closing - prevRead);
+      consumptionEl.value = `${cons} m³`;
+      const fixed = (rates.dailyFixedWater + rates.dailyFixedWaste) * daysSince;
+      const volumetric = cons * (rates.volumetricWater + rates.volumetricWaste);
+      const subtotal = fixed + volumetric;
+      const credits = 0.00; // assumes no additional credits since last bill
+      const due = Math.max(0, subtotal - credits);
+      document.getElementById('fixedCharges').textContent = gbp(fixed);
+      document.getElementById('volumetricCharges').textContent = gbp(volumetric);
+      document.getElementById('subtotal').textContent = gbp(subtotal);
+      document.getElementById('credits').textContent = '-' + gbp(credits);
+      document.getElementById('finalBalance').textContent = gbp(due);
+      /* amount field removed in this variant */
+      document.getElementById('lastBill').textContent = `${lastBillDate.toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' })} · ${gbp(84.50)}`;
+      document.getElementById('lastPayment').textContent = `${lastPaymentDate.toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' })} · ${gbp(84.50)} (Direct Debit)`;
+    }
+
+    closingEl.addEventListener('input', recalc);
+    
+    recalc();
+
+    // Payments history — first row = LAST MONTH, then previous 5 months
+    function addMonths(d, n){ const dt = new Date(d); dt.setMonth(dt.getMonth() + n); return dt; }
+    const tbody = document.getElementById('paymentsBody');
+    const start = new Date(today.getFullYear(), today.getMonth() - 1, 15); // 15th of last month
+
+    const lastSix = Array.from({length:6}, (_,i)=>{
+      const dt = addMonths(start, -i);
+      let raw = 42.5 + Math.sin((i+1)*1.2) * 3.2; // realistic variation £38–£48
+      raw = Math.min(48, Math.max(38, raw));
+      const amt = Math.round(raw * 100) / 100;
+      const ref = `DD${String(dt.getFullYear()).slice(2)}${String(dt.getMonth()+1).padStart(2,'0')}15`;
+      return { date: dt, method: 'Direct Debit', reference: ref, amount: amt, status: 'Settled' };
+    });
+
+    lastSix.forEach(p=>{
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${p.date.toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' })}</td>
+        <td>${p.method}</td>
+        <td>${p.reference}</td>
+        <td>${gbp(p.amount)}</td>
+        <td>${p.status}</td>
+      `;
+      tbody.appendChild(tr);
+    });
+
+    // Non-functional demo buttons
+                      </script>
+</body>
+</html>
