@@ -1,0 +1,56 @@
+<html>
+<head>
+	<title>Microsoft Chat</title>
+
+<!-- YOUR LIVE CHAT SCRIPT HERE -->
+	<script id="Microsoft_Omnichannel_LCWidget" src="https://oc-cdn-public-eur.azureedge.net/livechatwidget/scripts/LiveChatBootstrapper.js" data-app-id="867de7d1-3b4f-4239-ab99-2cdfafbe9456" data-lcw-version="prod" data-org-id="f2d6ac98-f65e-ef11-bfdf-000d3ab5d940" data-org-url="https://m-f2d6ac98-f65e-ef11-bfdf-000d3ab5d940.eu.omnichannelengagementhub.com"></script>
+<!-- END -->
+
+<script>
+		window.addEventListener("lcw:ready", function handleLivechatReadyEvent() {
+
+			Microsoft.Omnichannel.LiveChatWidget.SDK.setContextProvider(function contextProvider() {
+				return {
+					'SelfService': {
+						'value':
+							'[ {"msdyn_displaytitle":"Page visited", "msdyn_starttime":"yyyy-mm-ddThh:mm:ssZ","msdyn_type":192350000}, \
+					   {"msdyn_displaytitle":"Phrase searched", "msdyn_starttime":"yyyy-mm-ddThh:mm:ssZ","msdyn_type":192350001}, \
+					   {"msdyn_displaytitle":"Knowledge article viewed", "msdyn_starttime":"yyyy-mm-ddThh:mm:ssZ","msdyn_type":192350002}, \
+					   {"msdyn_displaytitle":"Custom action performed", "msdyn_starttime":"yyyy-mm-ddThh:mm:ssZ","msdyn_type":192350003} \
+					 ]'
+					}, // Additional context can be added as shown below
+                    'emailaddress1': 'chriswalker@d365demotsce63319057.onmicrosoft.com', // contact email in Dynamics
+					'Name': { 'value': 'Chris Walker', isDisplayable: true }, // contact name in Dynamics
+					//'Account Number': { 'value': '118842', isDisplayable: true },
+                    //'msdyn_CustomerId': { 'value': 'a7bf9a01-b056-e711-abaa-00155d701c02', 'isDisplayable': true },
+					//'msdyn_CustomerName': { 'value': 'Brad Garza', 'isDisplayable': true },
+					//'Location': 'New York, York', // string value
+					//'Authenticated': 'Authenticated' // string value
+				};
+			});
+		});
+	</script>
+	<style>
+		html, body {
+			margin: 0;
+			padding: 0;
+			width: 100%;
+			height: auto;
+			overflow-x: hidden; /* Prevents unwanted horizontal scrolling */
+			text-align: center; /* Centers the image */
+		}
+	
+		/* Ensures the image is fully visible and scrollable */
+		.full-image {
+			display: block;
+			width: 100%; /* Adjusts to screen width */
+			height: auto; /* Maintains aspect ratio */
+		}
+	</style>
+	</head>
+	<body>
+	<!-- Add the image as part of the content -->
+	<img src="website.png" alt="Full Image" class="full-image">
+	
+	</body>
+	</html>
