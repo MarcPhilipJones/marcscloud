@@ -1,0 +1,2289 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "logicAppName": {
+      "type": "string",
+      "metadata": {
+        "description": "Name of the Logic App"
+      }
+    },
+    "analyseCustomerLogicAppName": {
+      "type": "string",
+      "defaultValue": "AnalyseCustomer",
+      "metadata": {
+        "description": "Name of the AnalyseCustomer Logic App"
+      }
+    },
+    "analyseCustomer2LogicAppName": {
+      "type": "string",
+      "defaultValue": "AnalyseCustomer2",
+      "metadata": {
+        "description": "Name of the AnalyseCustomer2 Logic App"
+      }
+    },
+    "analyseCustomerVersion2LogicAppName": {
+      "type": "string",
+      "defaultValue": "AnalyseCustomerVersion2",
+      "metadata": {
+        "description": "Name of the AnalyseCustomerVersion2 Logic App"
+      }
+    },
+    "location": {
+      "type": "string",
+      "defaultValue": "[resourceGroup().location]",
+      "metadata": {
+        "description": "Location for all resources"
+      }
+    },
+    "dataverseBaseUrl": {
+      "type": "string",
+      "metadata": {
+        "description": "Base URL of the Dataverse environment, e.g. https://<org>.crm4.dynamics.com"
+      }
+    },
+    "dataverseTenantId": {
+      "type": "string",
+      "metadata": {
+        "description": "Azure AD Tenant ID"
+      }
+    },
+    "dataverseClientId": {
+      "type": "string",
+      "metadata": {
+        "description": "Application (client) ID"
+      }
+    },
+    "dataverseClientSecret": {
+      "type": "securestring",
+      "metadata": {
+        "description": "Client secret for the app registration"
+      }
+    },
+    "openAiEndpoint": {
+      "type": "string",
+      "defaultValue": "https://mjopenai2.openai.azure.com/",
+      "metadata": {
+        "description": "Azure OpenAI endpoint, e.g. https://<resource>.openai.azure.com/"
+      }
+    },
+    "openAiDeployment": {
+      "type": "string",
+      "defaultValue": "gpt-4o",
+      "metadata": {
+        "description": "Azure OpenAI deployment name"
+      }
+    },
+    "openAiApiVersion": {
+      "type": "string",
+      "defaultValue": "2024-10-21",
+      "metadata": {
+        "description": "Azure OpenAI API version"
+      }
+    },
+    "openAiApiKey": {
+      "type": "securestring",
+      "metadata": {
+        "description": "Azure OpenAI API key"
+      }
+    }
+  },
+  "variables": {
+    "logicAppDataverseConnectionName": "[concat(parameters('logicAppName'), '-dataverse')]",
+    "analyseCustomerDataverseConnectionName": "[concat(parameters('analyseCustomerLogicAppName'), '-dataverse')]",
+    "analyseCustomer2DataverseConnectionName": "[concat(parameters('analyseCustomer2LogicAppName'), '-dataverse')]",
+    "analyseCustomerVersion2DataverseConnectionName": "[concat(parameters('analyseCustomerVersion2LogicAppName'), '-dataverse')]",
+    "dataverseManagedApiId": "[concat(subscription().id, '/providers/Microsoft.Web/locations/', parameters('location'), '/managedApis/commondataservice')]"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Web/connections",
+      "apiVersion": "2016-06-01",
+      "name": "[variables('logicAppDataverseConnectionName')]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "displayName": "[concat(parameters('logicAppName'), ' Dataverse')]",
+        "api": {
+          "id": "[variables('dataverseManagedApiId')]"
+        },
+        "parameterValues": {
+          "token:TenantId": "[parameters('dataverseTenantId')]",
+          "token:clientId": "[parameters('dataverseClientId')]",
+          "token:clientSecret": "[parameters('dataverseClientSecret')]",
+          "token:grantType": "client_credentials",
+          "token:resourceUri": "[parameters('dataverseBaseUrl')]"
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Web/connections",
+      "apiVersion": "2016-06-01",
+      "name": "[variables('analyseCustomerDataverseConnectionName')]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "displayName": "[concat(parameters('analyseCustomerLogicAppName'), ' Dataverse')]",
+        "api": {
+          "id": "[variables('dataverseManagedApiId')]"
+        },
+        "parameterValues": {
+          "token:TenantId": "[parameters('dataverseTenantId')]",
+          "token:clientId": "[parameters('dataverseClientId')]",
+          "token:clientSecret": "[parameters('dataverseClientSecret')]",
+          "token:grantType": "client_credentials",
+          "token:resourceUri": "[parameters('dataverseBaseUrl')]"
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Web/connections",
+      "apiVersion": "2016-06-01",
+      "name": "[variables('analyseCustomer2DataverseConnectionName')]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "displayName": "[concat(parameters('analyseCustomer2LogicAppName'), ' Dataverse')]",
+        "api": {
+          "id": "[variables('dataverseManagedApiId')]"
+        },
+        "parameterValues": {
+          "token:TenantId": "[parameters('dataverseTenantId')]",
+          "token:clientId": "[parameters('dataverseClientId')]",
+          "token:clientSecret": "[parameters('dataverseClientSecret')]",
+          "token:grantType": "client_credentials",
+          "token:resourceUri": "[parameters('dataverseBaseUrl')]"
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Web/connections",
+      "apiVersion": "2016-06-01",
+      "name": "[variables('analyseCustomerVersion2DataverseConnectionName')]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "displayName": "[concat(parameters('analyseCustomerVersion2LogicAppName'), ' Dataverse')]",
+        "api": {
+          "id": "[variables('dataverseManagedApiId')]"
+        },
+        "parameterValues": {
+          "token:TenantId": "[parameters('dataverseTenantId')]",
+          "token:clientId": "[parameters('dataverseClientId')]",
+          "token:clientSecret": "[parameters('dataverseClientSecret')]",
+          "token:grantType": "client_credentials",
+          "token:resourceUri": "[parameters('dataverseBaseUrl')]"
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Logic/workflows",
+      "apiVersion": "2019-05-01",
+      "name": "[parameters('logicAppName')]",
+      "location": "[parameters('location')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/connections', variables('logicAppDataverseConnectionName'))]"
+      ],
+      "properties": {
+        "state": "Enabled",
+        "definition": {
+          "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+          "contentVersion": "1.0.0.0",
+          "parameters": {
+            "dataverseBaseUrl": {
+              "type": "String",
+              "metadata": {
+                "description": "Base URL of the Dataverse environment, e.g. https://<org>.crm4.dynamics.com"
+              }
+            },
+            "dataverseTenantId": {
+              "type": "String",
+              "metadata": {
+                "description": "Azure AD Tenant ID"
+              }
+            },
+            "dataverseClientId": {
+              "type": "String",
+              "metadata": {
+                "description": "Application (client) ID"
+              }
+            },
+            "dataverseClientSecret": {
+              "type": "SecureString",
+              "metadata": {
+                "description": "Client secret for the app registration"
+              }
+            },
+            "$connections": {
+              "type": "Object",
+              "defaultValue": {}
+            }
+          },
+          "triggers": {
+            "manual": {
+              "type": "Request",
+              "kind": "Http",
+              "inputs": {
+                "schema": {
+                  "type": "object",
+                  "properties": {}
+                }
+              }
+            }
+          },
+          "actions": {
+            "Initialize_variable_-_ConversationTranscript": {
+              "runAfter": {},
+              "type": "InitializeVariable",
+              "inputs": {
+                "variables": [
+                  {
+                    "name": "ConversationTranscript",
+                    "type": "string",
+                    "value": ""
+                  },
+                  {
+                    "name": "ConversationTranscriptRaw",
+                    "type": "string",
+                    "value": ""
+                  },
+                  {
+                    "name": "ConversationTranscriptSource",
+                    "type": "string",
+                    "value": ""
+                  },
+                  {
+                    "name": "DataverseTranscriptCount",
+                    "type": "integer",
+                    "value": 0
+                  },
+                  {
+                    "name": "DataverseTranscriptId",
+                    "type": "string",
+                    "value": ""
+                  },
+                  {
+                    "name": "DataverseTranscriptUri",
+                    "type": "string",
+                    "value": ""
+                  },
+                  {
+                    "name": "DataverseTranscriptAnnotationCount",
+                    "type": "integer",
+                    "value": 0
+                  },
+                  {
+                    "name": "ConversationMessages",
+                    "type": "array",
+                    "value": []
+                  },
+                  {
+                    "name": "ConversationTranscriptText",
+                    "type": "string",
+                    "value": ""
+                  }
+                ]
+              }
+            },
+            "Get_Case": {
+              "runAfter": {
+                "Initialize_variable_-_ConversationTranscript": [
+                  "Succeeded"
+                ]
+              },
+              "type": "Http",
+              "inputs": {
+                "uri": "@{concat(parameters('dataverseBaseUrl'), '/api/data/v9.1/incidents(f64da835-b7dc-f011-8407-7c1e5221088b)?$select=incidentid,ticketnumber,title,description,createdon')}",
+                "method": "GET",
+                "headers": {
+                  "OData-MaxVersion": "4.0",
+                  "OData-Version": "4.0",
+                  "Accept": "application/json;odata.metadata=none",
+                  "Content-Type": "application/json; charset=utf-8",
+                  "Prefer": "return=representation"
+                },
+                "authentication": {
+                  "type": "ActiveDirectoryOAuth",
+                  "tenant": "@{parameters('dataverseTenantId')}",
+                  "audience": "@{parameters('dataverseBaseUrl')}",
+                  "clientId": "@{parameters('dataverseClientId')}",
+                  "secret": "@{parameters('dataverseClientSecret')}"
+                }
+              }
+            },
+            "Get_LiveWorkItem": {
+              "runAfter": {
+                "Get_Case": [
+                  "Succeeded"
+                ]
+              },
+              "type": "Http",
+              "inputs": {
+                "uri": "@{concat(parameters('dataverseBaseUrl'), '/api/data/v9.2/msdyn_ocliveworkitems(08d1ec57-7fa4-4405-9780-da640e0b1357)?$select=activityid,activitytypecode,subject,msdyn_title,createdon,modifiedon,msdyn_transcriptcontrol,description,msdyn_conversationsummaryfield,_msdyn_lastsessionid_value,_regardingobjectid_value')}",
+                "method": "GET",
+                "headers": {
+                  "OData-MaxVersion": "4.0",
+                  "OData-Version": "4.0",
+                  "Accept": "application/json;odata.metadata=none",
+                  "Content-Type": "application/json; charset=utf-8",
+                  "Prefer": "return=representation"
+                },
+                "authentication": {
+                  "type": "ActiveDirectoryOAuth",
+                  "tenant": "@{parameters('dataverseTenantId')}",
+                  "audience": "@{parameters('dataverseBaseUrl')}",
+                  "clientId": "@{parameters('dataverseClientId')}",
+                  "secret": "@{parameters('dataverseClientSecret')}"
+                }
+              }
+            },
+            "Set_variable_-_ConversationTranscriptRaw": {
+              "runAfter": {
+                "Get_LiveWorkItem": [
+                  "Succeeded"
+                ]
+              },
+              "type": "SetVariable",
+              "inputs": {
+                "name": "ConversationTranscriptRaw",
+                "value": "@coalesce(body('Get_LiveWorkItem')?['msdyn_transcriptcontrol'], body('Get_LiveWorkItem')?['description'], body('Get_LiveWorkItem')?['msdyn_conversationsummaryfield'], '')"
+              }
+            },
+            "If_TranscriptRaw_Looks_Base64": {
+              "runAfter": {
+                "Set_variable_-_ConversationTranscriptRaw": [
+                  "Succeeded"
+                ]
+              },
+              "type": "If",
+              "expression": "@and(greater(length(variables('ConversationTranscriptRaw')), 0), equals(mod(length(variables('ConversationTranscriptRaw')), 4), 0), matches(variables('ConversationTranscriptRaw'), '^[A-Za-z0-9+/=\\r\\n]+$'))",
+              "actions": {
+                "Set_variable_-_ConversationTranscript_Decoded": {
+                  "runAfter": {},
+                  "type": "SetVariable",
+                  "inputs": {
+                    "name": "ConversationTranscript",
+                    "value": "@base64ToString(variables('ConversationTranscriptRaw'))"
+                  }
+                },
+                "Set_variable_-_ConversationTranscriptSource_Base64": {
+                  "runAfter": {
+                    "Set_variable_-_ConversationTranscript_Decoded": [
+                      "Succeeded"
+                    ]
+                  },
+                  "type": "SetVariable",
+                  "inputs": {
+                    "name": "ConversationTranscriptSource",
+                    "value": "msdyn_ocliveworkitem (base64 decoded)"
+                  }
+                }
+              },
+              "else": {
+                "actions": {
+                  "Set_variable_-_ConversationTranscript_Raw": {
+                    "runAfter": {},
+                    "type": "SetVariable",
+                    "inputs": {
+                      "name": "ConversationTranscript",
+                      "value": "@variables('ConversationTranscriptRaw')"
+                    }
+                  },
+                  "Set_variable_-_ConversationTranscriptSource_Raw": {
+                    "runAfter": {
+                      "Set_variable_-_ConversationTranscript_Raw": [
+                        "Succeeded"
+                      ]
+                    },
+                    "type": "SetVariable",
+                    "inputs": {
+                      "name": "ConversationTranscriptSource",
+                      "value": "msdyn_ocliveworkitem (raw)"
+                    }
+                  }
+                }
+              }
+            },
+            "List_Transcripts_For_LiveWorkItem": {
+              "runAfter": {
+                "If_TranscriptRaw_Looks_Base64": [
+                  "Succeeded",
+                  "Failed",
+                  "Skipped",
+                  "TimedOut"
+                ]
+              },
+              "type": "Http",
+              "inputs": {
+                "uri": "@{concat(parameters('dataverseBaseUrl'), '/api/data/v9.2/msdyn_transcripts?$select=msdyn_transcriptid,msdyn_transcripturi,createdon&$filter=_msdyn_liveworkitemidid_value eq ', body('Get_LiveWorkItem')?['activityid'], '&$orderby=createdon desc&$top=1')}",
+                "method": "GET",
+                "headers": {
+                  "OData-MaxVersion": "4.0",
+                  "OData-Version": "4.0",
+                  "Accept": "application/json;odata.metadata=none",
+                  "Content-Type": "application/json; charset=utf-8"
+                },
+                "authentication": {
+                  "type": "ActiveDirectoryOAuth",
+                  "tenant": "@{parameters('dataverseTenantId')}",
+                  "audience": "@{parameters('dataverseBaseUrl')}",
+                  "clientId": "@{parameters('dataverseClientId')}",
+                  "secret": "@{parameters('dataverseClientSecret')}"
+                }
+              }
+            },
+            "Set_variable_-_DataverseTranscriptCount": {
+              "runAfter": {
+                "List_Transcripts_For_LiveWorkItem": [
+                  "Succeeded",
+                  "Failed",
+                  "Skipped",
+                  "TimedOut"
+                ]
+              },
+              "type": "SetVariable",
+              "inputs": {
+                "name": "DataverseTranscriptCount",
+                "value": "@length(body('List_Transcripts_For_LiveWorkItem')?['value'])"
+              }
+            },
+            "If_Transcript_Empty_Try_Dataverse_Transcript": {
+              "runAfter": {
+                "Set_variable_-_DataverseTranscriptCount": [
+                  "Succeeded",
+                  "Failed",
+                  "Skipped",
+                  "TimedOut"
+                ]
+              },
+              "type": "If",
+              "expression": "@and(equals(variables('ConversationTranscript'), ''), greater(variables('DataverseTranscriptCount'), 0))",
+              "actions": {
+                "Set_variable_-_ConversationTranscriptSource_DataverseTranscript": {
+                  "runAfter": {},
+                  "type": "SetVariable",
+                  "inputs": {
+                    "name": "ConversationTranscriptSource",
+                    "value": "msdyn_transcripts (linked to live work item)"
+                  }
+                },
+                "Set_variable_-_DataverseTranscriptId": {
+                  "runAfter": {
+                    "Set_variable_-_ConversationTranscriptSource_DataverseTranscript": [
+                      "Succeeded"
+                    ]
+                  },
+                  "type": "SetVariable",
+                  "inputs": {
+                    "name": "DataverseTranscriptId",
+                    "value": "@string(first(body('List_Transcripts_For_LiveWorkItem')?['value'])?['msdyn_transcriptid'])"
+                  }
+                },
+                "Set_variable_-_DataverseTranscriptUri": {
+                  "runAfter": {
+                    "Set_variable_-_DataverseTranscriptId": [
+                      "Succeeded"
+                    ]
+                  },
+                  "type": "SetVariable",
+                  "inputs": {
+                    "name": "DataverseTranscriptUri",
+                    "value": "@coalesce(string(first(body('List_Transcripts_For_LiveWorkItem')?['value'])?['msdyn_transcripturi']), '')"
+                  }
+                },
+                "List_Transcript_Annotations": {
+                  "runAfter": {
+                    "Set_variable_-_DataverseTranscriptUri": [
+                      "Succeeded"
+                    ]
+                  },
+                  "type": "Http",
+                  "inputs": {
+                    "uri": "@{concat(parameters('dataverseBaseUrl'), '/api/data/v9.2/msdyn_transcripts(', variables('DataverseTranscriptId'), ')/msdyn_transcript_Annotations?$select=annotationid,subject,createdon,isdocument,filename,mimetype,notetext&$orderby=createdon desc&$top=1')}",
+                    "method": "GET",
+                    "headers": {
+                      "OData-MaxVersion": "4.0",
+                      "OData-Version": "4.0",
+                      "Accept": "application/json;odata.metadata=none",
+                      "Content-Type": "application/json; charset=utf-8"
+                    },
+                    "authentication": {
+                      "type": "ActiveDirectoryOAuth",
+                      "tenant": "@{parameters('dataverseTenantId')}",
+                      "audience": "@{parameters('dataverseBaseUrl')}",
+                      "clientId": "@{parameters('dataverseClientId')}",
+                      "secret": "@{parameters('dataverseClientSecret')}"
+                    }
+                  }
+                },
+                "Set_variable_-_DataverseTranscriptAnnotationCount": {
+                  "runAfter": {
+                    "List_Transcript_Annotations": [
+                      "Succeeded",
+                      "Failed",
+                      "Skipped",
+                      "TimedOut"
+                    ]
+                  },
+                  "type": "SetVariable",
+                  "inputs": {
+                    "name": "DataverseTranscriptAnnotationCount",
+                    "value": "@length(body('List_Transcript_Annotations')?['value'])"
+                  }
+                },
+                "If_Transcript_Annotation_Found": {
+                  "runAfter": {
+                    "Set_variable_-_DataverseTranscriptAnnotationCount": [
+                      "Succeeded",
+                      "Failed",
+                      "Skipped",
+                      "TimedOut"
+                    ]
+                  },
+                  "type": "If",
+                  "expression": "@greater(length(body('List_Transcript_Annotations')?['value']), 0)",
+                  "actions": {
+                    "Set_variable_-_ConversationTranscript_FromTranscriptAnnotation": {
+                      "runAfter": {},
+                      "type": "SetVariable",
+                      "inputs": {
+                        "name": "ConversationTranscript",
+                        "value": "@coalesce(first(body('List_Transcript_Annotations')?['value'])?['notetext'], '')"
+                      }
+                    },
+                    "Set_variable_-_ConversationTranscriptSource_TranscriptAnnotation": {
+                      "runAfter": {
+                        "Set_variable_-_ConversationTranscript_FromTranscriptAnnotation": [
+                          "Succeeded"
+                        ]
+                      },
+                      "type": "SetVariable",
+                      "inputs": {
+                        "name": "ConversationTranscriptSource",
+                        "value": "msdyn_transcript -> annotations"
+                      }
+                    },
+                    "If_Transcript_Still_Empty_And_IsDocument": {
+                      "runAfter": {
+                        "Set_variable_-_ConversationTranscriptSource_TranscriptAnnotation": [
+                          "Succeeded"
+                        ]
+                      },
+                      "type": "If",
+                      "expression": "@and(equals(variables('ConversationTranscript'), ''), equals(first(body('List_Transcript_Annotations')?['value'])?['isdocument'], true))",
+                      "actions": {
+                        "Get_Transcript_Annotation_DocumentBody": {
+                          "runAfter": {},
+                          "type": "Http",
+                          "inputs": {
+                            "uri": "@{concat(parameters('dataverseBaseUrl'), '/api/data/v9.2/annotations(', first(body('List_Transcript_Annotations')?['value'])?['annotationid'], ')?$select=documentbody')}",
+                            "method": "GET",
+                            "headers": {
+                              "OData-MaxVersion": "4.0",
+                              "OData-Version": "4.0",
+                              "Accept": "application/json;odata.metadata=none",
+                              "Content-Type": "application/json; charset=utf-8"
+                            },
+                            "authentication": {
+                              "type": "ActiveDirectoryOAuth",
+                              "tenant": "@{parameters('dataverseTenantId')}",
+                              "audience": "@{parameters('dataverseBaseUrl')}",
+                              "clientId": "@{parameters('dataverseClientId')}",
+                              "secret": "@{parameters('dataverseClientSecret')}"
+                            }
+                          }
+                        },
+                        "Set_variable_-_ConversationTranscript_FromDocumentBody": {
+                          "runAfter": {
+                            "Get_Transcript_Annotation_DocumentBody": [
+                              "Succeeded"
+                            ]
+                          },
+                          "type": "SetVariable",
+                          "inputs": {
+                            "name": "ConversationTranscript",
+                            "value": "@if(equals(body('Get_Transcript_Annotation_DocumentBody')?['documentbody'], null), '', base64ToString(body('Get_Transcript_Annotation_DocumentBody')?['documentbody']))"
+                          }
+                        },
+                        "Set_variable_-_ConversationTranscriptSource_TranscriptAnnotationDocument": {
+                          "runAfter": {
+                            "Set_variable_-_ConversationTranscript_FromDocumentBody": [
+                              "Succeeded"
+                            ]
+                          },
+                          "type": "SetVariable",
+                          "inputs": {
+                            "name": "ConversationTranscriptSource",
+                            "value": "msdyn_transcript -> annotation documentbody"
+                          }
+                        },
+                        "If_Transcript_Is_MessagesJson": {
+                          "runAfter": {
+                            "Set_variable_-_ConversationTranscriptSource_TranscriptAnnotationDocument": [
+                              "Succeeded"
+                            ]
+                          },
+                          "type": "If",
+                          "expression": "@and(startsWith(trim(variables('ConversationTranscript')), '['), contains(variables('ConversationTranscript'), 'Content'))",
+                          "actions": {
+                            "Set_variable_-_ConversationMessages_FromTranscript": {
+                              "runAfter": {},
+                              "type": "SetVariable",
+                              "inputs": {
+                                "name": "ConversationMessages",
+                                "value": "@json(first(json(variables('ConversationTranscript')))?['Content'])"
+                              }
+                            },
+                            "For_each_-_ConversationMessages": {
+                              "runAfter": {
+                                "Set_variable_-_ConversationMessages_FromTranscript": [
+                                  "Succeeded"
+                                ]
+                              },
+                              "foreach": "@variables('ConversationMessages')",
+                              "type": "Foreach",
+                              "actions": {
+                                "If_Is_NonControl_Message": {
+                                  "runAfter": {},
+                                  "type": "If",
+                                  "expression": "@and(equals(item()?['isControlMessage'], false), greater(length(coalesce(item()?['content'], '')), 0))",
+                                  "actions": {
+                                    "Append_to_string_variable_-_ConversationTranscriptText": {
+                                      "runAfter": {},
+                                      "type": "AppendToStringVariable",
+                                      "inputs": {
+                                        "name": "ConversationTranscriptText",
+                                        "value": "@{concat(coalesce(item()?['from']?['user']?['displayName'], item()?['from']?['application']?['displayName'], 'Unknown'), ': ', coalesce(item()?['content'], ''), '\n')}"
+                                      }
+                                    }
+                                  },
+                                  "else": {
+                                    "actions": {}
+                                  }
+                                }
+                              }
+                            },
+                            "Set_variable_-_ConversationTranscript_FromParsedText": {
+                              "runAfter": {
+                                "For_each_-_ConversationMessages": [
+                                  "Succeeded"
+                                ]
+                              },
+                              "type": "SetVariable",
+                              "inputs": {
+                                "name": "ConversationTranscript",
+                                "value": "@trim(variables('ConversationTranscriptText'))"
+                              }
+                            },
+                            "Set_variable_-_ConversationTranscriptSource_TranscriptParsed": {
+                              "runAfter": {
+                                "Set_variable_-_ConversationTranscript_FromParsedText": [
+                                  "Succeeded"
+                                ]
+                              },
+                              "type": "SetVariable",
+                              "inputs": {
+                                "name": "ConversationTranscriptSource",
+                                "value": "msdyn_transcript - parsed messages"
+                              }
+                            }
+                          },
+                          "else": {
+                            "actions": {}
+                          }
+                        }
+                      },
+                      "else": {
+                        "actions": {}
+                      }
+                    }
+                  },
+                  "else": {
+                    "actions": {
+                      "If_TranscriptUri_Present": {
+                        "runAfter": {},
+                        "type": "If",
+                        "expression": "@not(equals(variables('DataverseTranscriptUri'), ''))",
+                        "actions": {
+                          "Set_variable_-_ConversationTranscript_FromTranscriptUri": {
+                            "runAfter": {},
+                            "type": "SetVariable",
+                            "inputs": {
+                              "name": "ConversationTranscript",
+                              "value": "@variables('DataverseTranscriptUri')"
+                            }
+                          },
+                          "Set_variable_-_ConversationTranscriptSource_TranscriptUri": {
+                            "runAfter": {
+                              "Set_variable_-_ConversationTranscript_FromTranscriptUri": [
+                                "Succeeded"
+                              ]
+                            },
+                            "type": "SetVariable",
+                            "inputs": {
+                              "name": "ConversationTranscriptSource",
+                              "value": "msdyn_transcripturi"
+                            }
+                          }
+                        },
+                        "else": {
+                          "actions": {}
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "else": {
+                "actions": {}
+              }
+            },
+            "If_Transcript_Empty_Try_Omnichannel_Session": {
+              "runAfter": {
+                "If_Transcript_Empty_Try_Dataverse_Transcript": [
+                  "Succeeded",
+                  "Failed",
+                  "Skipped",
+                  "TimedOut"
+                ]
+              },
+              "type": "If",
+              "expression": "@and(equals(variables('ConversationTranscript'), ''), not(equals(body('Get_LiveWorkItem')?['_msdyn_lastsessionid_value'], null)))",
+              "actions": {
+                "Set_variable_-_ConversationTranscriptSource_Omnichannel": {
+                  "runAfter": {},
+                  "type": "SetVariable",
+                  "inputs": {
+                    "name": "ConversationTranscriptSource",
+                    "value": "msdyn_conversationmessageblock via msdyn_ocsessions(lastSessionId)"
+                  }
+                },
+                "List_CustomerMessageBlocks": {
+                  "runAfter": {
+                    "Set_variable_-_ConversationTranscriptSource_Omnichannel": [
+                      "Succeeded"
+                    ]
+                  },
+                  "type": "Http",
+                  "inputs": {
+                    "uri": "@{concat(parameters('dataverseBaseUrl'), '/api/data/v9.2/msdyn_ocsessions(', body('Get_LiveWorkItem')?['_msdyn_lastsessionid_value'], ')/msdyn_ocsession_msdyn_conversationmessageblock_msdyn_customermessagesessionid?$orderby=createdon asc&$top=20')}",
+                    "method": "GET",
+                    "headers": {
+                      "OData-MaxVersion": "4.0",
+                      "OData-Version": "4.0",
+                      "Accept": "application/json;odata.metadata=none",
+                      "Content-Type": "application/json; charset=utf-8"
+                    },
+                    "authentication": {
+                      "type": "ActiveDirectoryOAuth",
+                      "tenant": "@{parameters('dataverseTenantId')}",
+                      "audience": "@{parameters('dataverseBaseUrl')}",
+                      "clientId": "@{parameters('dataverseClientId')}",
+                      "secret": "@{parameters('dataverseClientSecret')}"
+                    }
+                  }
+                },
+                "List_AgentMessageBlocks": {
+                  "runAfter": {
+                    "List_CustomerMessageBlocks": [
+                      "Succeeded",
+                      "Failed",
+                      "Skipped",
+                      "TimedOut"
+                    ]
+                  },
+                  "type": "Http",
+                  "inputs": {
+                    "uri": "@{concat(parameters('dataverseBaseUrl'), '/api/data/v9.2/msdyn_ocsessions(', body('Get_LiveWorkItem')?['_msdyn_lastsessionid_value'], ')/msdyn_ocsession_msdyn_conversationmessageblock_msdyn_agentresponsesessionid?$orderby=createdon asc&$top=20')}",
+                    "method": "GET",
+                    "headers": {
+                      "OData-MaxVersion": "4.0",
+                      "OData-Version": "4.0",
+                      "Accept": "application/json;odata.metadata=none",
+                      "Content-Type": "application/json; charset=utf-8"
+                    },
+                    "authentication": {
+                      "type": "ActiveDirectoryOAuth",
+                      "tenant": "@{parameters('dataverseTenantId')}",
+                      "audience": "@{parameters('dataverseBaseUrl')}",
+                      "clientId": "@{parameters('dataverseClientId')}",
+                      "secret": "@{parameters('dataverseClientSecret')}"
+                    }
+                  }
+                },
+                "If_CustomerMessageBlocks_Found": {
+                  "runAfter": {
+                    "List_AgentMessageBlocks": [
+                      "Succeeded",
+                      "Failed",
+                      "Skipped",
+                      "TimedOut"
+                    ]
+                  },
+                  "type": "If",
+                  "expression": "@greater(length(body('List_CustomerMessageBlocks')?['value']), 0)",
+                  "actions": {
+                    "For_each_-_CustomerMessageBlocks": {
+                      "foreach": "@body('List_CustomerMessageBlocks')?['value']",
+                      "runAfter": {},
+                      "type": "Foreach",
+                      "actions": {
+                        "Append_to_string_variable_-_ConversationTranscript_Customer": {
+                          "runAfter": {},
+                          "type": "AppendToStringVariable",
+                          "inputs": {
+                            "name": "ConversationTranscript",
+                            "value": "@{concat(coalesce(item()?['msdyn_plaintext'], item()?['msdyn_text'], item()?['msdyn_message'], item()?['msdyn_messagetext'], item()?['msdyn_content'], item()?['text'], item()?['message'], ''), '\n')}"
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "else": {
+                    "actions": {
+                      "For_each_-_AgentMessageBlocks": {
+                        "foreach": "@body('List_AgentMessageBlocks')?['value']",
+                        "runAfter": {},
+                        "type": "Foreach",
+                        "actions": {
+                          "Append_to_string_variable_-_ConversationTranscript_Agent": {
+                            "runAfter": {},
+                            "type": "AppendToStringVariable",
+                            "inputs": {
+                              "name": "ConversationTranscript",
+                              "value": "@{concat(coalesce(item()?['msdyn_plaintext'], item()?['msdyn_text'], item()?['msdyn_message'], item()?['msdyn_messagetext'], item()?['msdyn_content'], item()?['text'], item()?['message'], ''), '\n')}"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "else": {
+                "actions": {}
+              }
+            },
+            "Get_Latest_Text_Transcript_Note": {
+              "runAfter": {
+                "If_Transcript_Empty_Try_Omnichannel_Session": [
+                  "Succeeded",
+                  "Failed",
+                  "Skipped",
+                  "TimedOut"
+                ]
+              },
+              "type": "Http",
+              "inputs": {
+                "uri": "@{concat(parameters('dataverseBaseUrl'), '/api/data/v9.1/annotations?$select=notetext,subject,createdon&$filter=_objectid_value eq f64da835-b7dc-f011-8407-7c1e5221088b and isdocument eq false and notetext ne null&$orderby=createdon desc&$top=1')}",
+                "method": "GET",
+                "headers": {
+                  "OData-MaxVersion": "4.0",
+                  "OData-Version": "4.0",
+                  "Accept": "application/json;odata.metadata=none",
+                  "Content-Type": "application/json; charset=utf-8",
+                  "Prefer": "return=representation"
+                },
+                "authentication": {
+                  "type": "ActiveDirectoryOAuth",
+                  "tenant": "@{parameters('dataverseTenantId')}",
+                  "audience": "@{parameters('dataverseBaseUrl')}",
+                  "clientId": "@{parameters('dataverseClientId')}",
+                  "secret": "@{parameters('dataverseClientSecret')}"
+                }
+              }
+            },
+            "Get_Latest_Transcript_Attachment": {
+              "runAfter": {
+                "Get_Latest_Text_Transcript_Note": [
+                  "Succeeded"
+                ]
+              },
+              "type": "Http",
+              "inputs": {
+                "uri": "@{concat(parameters('dataverseBaseUrl'), '/api/data/v9.1/annotations?$select=documentbody,filename,mimetype,subject,createdon&$filter=_objectid_value eq f64da835-b7dc-f011-8407-7c1e5221088b and isdocument eq true&$orderby=createdon desc&$top=1')}",
+                "method": "GET",
+                "headers": {
+                  "OData-MaxVersion": "4.0",
+                  "OData-Version": "4.0",
+                  "Accept": "application/json;odata.metadata=none",
+                  "Content-Type": "application/json; charset=utf-8",
+                  "Prefer": "return=representation"
+                },
+                "authentication": {
+                  "type": "ActiveDirectoryOAuth",
+                  "tenant": "@{parameters('dataverseTenantId')}",
+                  "audience": "@{parameters('dataverseBaseUrl')}",
+                  "clientId": "@{parameters('dataverseClientId')}",
+                  "secret": "@{parameters('dataverseClientSecret')}"
+                }
+              }
+            },
+            "Get_Recent_Annotations_Debug": {
+              "runAfter": {
+                "Get_Latest_Transcript_Attachment": [
+                  "Succeeded"
+                ]
+              },
+              "type": "Http",
+              "inputs": {
+                "uri": "@{concat(parameters('dataverseBaseUrl'), '/api/data/v9.1/annotations?$select=annotationid,subject,createdon,isdocument,filename,mimetype,notetext&$filter=_objectid_value eq f64da835-b7dc-f011-8407-7c1e5221088b&$orderby=createdon desc&$top=5')}",
+                "method": "GET",
+                "headers": {
+                  "OData-MaxVersion": "4.0",
+                  "OData-Version": "4.0",
+                  "Accept": "application/json;odata.metadata=none",
+                  "Content-Type": "application/json; charset=utf-8",
+                  "Prefer": "return=representation"
+                },
+                "authentication": {
+                  "type": "ActiveDirectoryOAuth",
+                  "tenant": "@{parameters('dataverseTenantId')}",
+                  "audience": "@{parameters('dataverseBaseUrl')}",
+                  "clientId": "@{parameters('dataverseClientId')}",
+                  "secret": "@{parameters('dataverseClientSecret')}"
+                }
+              }
+            },
+            "If_Transcript_Found": {
+              "runAfter": {
+                "Get_Recent_Annotations_Debug": [
+                  "Succeeded"
+                ]
+              },
+              "type": "If",
+              "expression": "@or(greater(length(coalesce(body('Get_Latest_Text_Transcript_Note')?['value'], json('[]'))), 0), greater(length(coalesce(body('Get_Latest_Transcript_Attachment')?['value'], json('[]'))), 0))",
+              "actions": {
+                "Set_variable_-_ConversationTranscript": {
+                  "runAfter": {},
+                  "type": "SetVariable",
+                  "inputs": {
+                    "name": "ConversationTranscript",
+                    "value": "@if(greater(length(coalesce(body('Get_Latest_Text_Transcript_Note')?['value'], json('[]'))), 0), string(first(coalesce(body('Get_Latest_Text_Transcript_Note')?['value'], json('[]')))?['notetext']), if(greater(length(coalesce(body('Get_Latest_Transcript_Attachment')?['value'], json('[]'))), 0), base64ToString(first(coalesce(body('Get_Latest_Transcript_Attachment')?['value'], json('[]')))?['documentbody']), ''))"
+                  }
+                }
+              },
+              "else": {
+                "actions": {}
+              },
+              "description": "Fallback-only: this block populates ConversationTranscript from annotations if present; msdyn_ocliveworkitem transcript is handled earlier."
+            },
+            "Return_Response": {
+              "runAfter": {
+                "If_Transcript_Found": [
+                  "Succeeded",
+                  "Failed",
+                  "Skipped",
+                  "TimedOut"
+                ]
+              },
+              "type": "Response",
+              "inputs": {
+                "statusCode": 200,
+                "headers": {
+                  "Content-Type": "application/json"
+                },
+                "body": {
+                  "case": {
+                    "incidentid": "@{body('Get_Case')?['incidentid']}",
+                    "ticketnumber": "@{body('Get_Case')?['ticketnumber']}",
+                    "title": "@{body('Get_Case')?['title']}",
+                    "description": "@{body('Get_Case')?['description']}",
+                    "createdon": "@{body('Get_Case')?['createdon']}"
+                  },
+                  "conversationTranscript": "@{variables('ConversationTranscript')}",
+                  "debug": {
+                    "inputs": {
+                      "caseGuid": "f64da835-b7dc-f011-8407-7c1e5221088b",
+                      "liveWorkItemId": "08d1ec57-7fa4-4405-9780-da640e0b1357"
+                    },
+                    "liveWorkItem": {
+                      "subject": "@{body('Get_LiveWorkItem')?['subject']}",
+                      "msdyn_title": "@{body('Get_LiveWorkItem')?['msdyn_title']}",
+                      "activitytypecode": "@{body('Get_LiveWorkItem')?['activitytypecode']}",
+                      "regardingObjectId": "@{body('Get_LiveWorkItem')?['_regardingobjectid_value']}",
+                      "lastSessionId": "@{body('Get_LiveWorkItem')?['_msdyn_lastsessionid_value']}",
+                      "msdyn_transcriptcontrol_present": "@{not(equals(body('Get_LiveWorkItem')?['msdyn_transcriptcontrol'], null))}",
+                      "description_present": "@{not(equals(body('Get_LiveWorkItem')?['description'], null))}",
+                      "msdyn_conversationsummaryfield_present": "@{not(equals(body('Get_LiveWorkItem')?['msdyn_conversationsummaryfield'], null))}"
+                    },
+                    "transcript": {
+                      "source": "@{variables('ConversationTranscriptSource')}",
+                      "rawLength": "@{length(variables('ConversationTranscriptRaw'))}",
+                      "decodedLength": "@{length(variables('ConversationTranscript'))}",
+                      "rawLooksBase64": "@{and(greater(length(variables('ConversationTranscriptRaw')), 0), equals(mod(length(variables('ConversationTranscriptRaw')), 4), 0), matches(variables('ConversationTranscriptRaw'), '^[A-Za-z0-9+/=\\r\\n]+$'))}",
+                      "dataverseTranscriptCount": "@{variables('DataverseTranscriptCount')}",
+                      "dataverseTranscriptId": "@{variables('DataverseTranscriptId')}",
+                      "dataverseTranscriptUri": "@{variables('DataverseTranscriptUri')}",
+                      "dataverseTranscriptAnnotationCount": "@{variables('DataverseTranscriptAnnotationCount')}"
+                    },
+                    "omnichannel": {
+                      "customerBlocks": {
+                        "status": "@{actions('List_CustomerMessageBlocks')?['status']}",
+                        "statusCode": "@{actions('List_CustomerMessageBlocks')?['outputs']?['statusCode']}",
+                        "count": "@{length(coalesce(body('List_CustomerMessageBlocks')?['value'], json('[]')))}",
+                        "first": null
+                      },
+                      "agentBlocks": {
+                        "status": "@{actions('List_AgentMessageBlocks')?['status']}",
+                        "statusCode": "@{actions('List_AgentMessageBlocks')?['outputs']?['statusCode']}",
+                        "count": "@{length(coalesce(body('List_AgentMessageBlocks')?['value'], json('[]')))}",
+                        "first": null
+                      }
+                    },
+                    "textNoteQueryCount": "@{length(coalesce(body('Get_Latest_Text_Transcript_Note')?['value'], json('[]')))}",
+                    "attachmentQueryCount": "@{length(coalesce(body('Get_Latest_Transcript_Attachment')?['value'], json('[]')))}",
+                    "recentAnnotations": "@{body('Get_Recent_Annotations_Debug')?['value']}"
+                  }
+                }
+              }
+            }
+          },
+          "outputs": {}
+        },
+        "parameters": {
+          "$connections": {
+            "value": {
+              "commondataservice": {
+                "connectionId": "[resourceId('Microsoft.Web/connections', variables('logicAppDataverseConnectionName'))]",
+                "connectionName": "[variables('logicAppDataverseConnectionName')]",
+                "id": "[variables('dataverseManagedApiId')]"
+              }
+            }
+          },
+          "dataverseBaseUrl": {
+            "value": "[parameters('dataverseBaseUrl')]"
+          },
+          "dataverseTenantId": {
+            "value": "[parameters('dataverseTenantId')]"
+          },
+          "dataverseClientId": {
+            "value": "[parameters('dataverseClientId')]"
+          },
+          "dataverseClientSecret": {
+            "value": "[parameters('dataverseClientSecret')]"
+          }
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Logic/workflows",
+      "apiVersion": "2019-05-01",
+      "name": "[parameters('analyseCustomerLogicAppName')]",
+      "location": "[parameters('location')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/connections', variables('analyseCustomerDataverseConnectionName'))]"
+      ],
+      "properties": {
+        "state": "Enabled",
+        "definition": {
+          "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+          "contentVersion": "1.0.0.0",
+          "parameters": {
+            "dataverseBaseUrl": {
+              "type": "String",
+              "defaultValue": ""
+            },
+            "dataverseTenantId": {
+              "type": "String",
+              "defaultValue": ""
+            },
+            "dataverseClientId": {
+              "type": "String",
+              "defaultValue": ""
+            },
+            "dataverseClientSecret": {
+              "type": "SecureString",
+              "defaultValue": ""
+            },
+            "openAiEndpoint": {
+              "type": "String",
+              "defaultValue": ""
+            },
+            "openAiDeployment": {
+              "type": "String",
+              "defaultValue": "gpt-4o"
+            },
+            "openAiApiVersion": {
+              "type": "String",
+              "defaultValue": "2024-10-21"
+            },
+            "openAiApiKey": {
+              "type": "SecureString",
+              "defaultValue": ""
+            },
+            "$connections": {
+              "defaultValue": {},
+              "type": "Object"
+            }
+          },
+          "triggers": {
+            "When_MJ_RefreshAnalysis_file_changes": {
+              "type": "ApiConnectionWebhook",
+              "inputs": {
+                "host": {
+                  "connection": {
+                    "name": "@parameters('$connections')['commondataservice']['connectionId']"
+                  }
+                },
+                "body": {
+                  "entityname": "contact",
+                  "message": 3,
+                  "scope": 4,
+                  "filterexpression": "mj_refreshanalysis eq true",
+                  "version": 1,
+                  "url": "@listCallbackUrl()",
+                  "filteringattributes": "mj_refreshanalysis"
+                },
+                "headers": {
+                  "organization": "@{parameters('dataverseBaseUrl')}",
+                  "Consistency": "Strong",
+                  "catalog": "all",
+                  "category": "all"
+                },
+                "path": "/api/data/v9.1/callbackregistrations"
+              }
+            }
+          },
+          "actions": {
+            "Initialize_variable_-_ReceivedDataverseChange": {
+              "type": "InitializeVariable",
+              "inputs": {
+                "variables": [
+                  {
+                    "name": "ReceivedDataverseChange",
+                    "type": "Object",
+                    "value": "@triggerBody()"
+                  },
+                  {
+                    "name": "ContactId",
+                    "type": "String",
+                    "value": "@string(coalesce(triggerBody()?['contactid'], triggerBody()?['ContactId'], triggerBody()?['id'], triggerBody()?['Id'], triggerBody()?['ItemInternalId'], triggerBody()?['body']?['contactid'], triggerBody()?['body']?['ContactId'], triggerBody()?['body']?['id'], triggerBody()?['body']?['Id'], triggerBody()?['body']?['recordId'], triggerBody()?['body']?['recordid'], triggerBody()?['body']?['primaryKey'], triggerBody()?['body']?['RowId'], triggerBody()?['body']?['rowId'], triggerBody()?['body']?['entity']?['contactid'], triggerBody()?['body']?['entity']?['ContactId']))"
+                  }
+                ]
+              },
+              "runAfter": {}
+            },
+            "If_ContactId_Is_Empty": {
+              "type": "If",
+              "expression": "@empty(variables('ContactId'))",
+              "actions": {
+                "Compose_-_MissingContactId": {
+                  "type": "Compose",
+                  "inputs": {
+                    "message": "ContactId could not be extracted from the Dataverse change payload.",
+                    "triggerBody": "@triggerBody()"
+                  },
+                  "runAfter": {}
+                },
+                "Terminate_-_MissingContactId": {
+                  "type": "Terminate",
+                  "inputs": {
+                    "runStatus": "Failed",
+                    "code": "MissingContactId",
+                    "message": "ContactId could not be extracted from the Dataverse change payload."
+                  },
+                  "runAfter": {
+                    "Compose_-_MissingContactId": [
+                      "Succeeded"
+                    ]
+                  }
+                }
+              },
+              "else": {
+                "actions": {}
+              },
+              "runAfter": {
+                "Initialize_variable_-_ReceivedDataverseChange": [
+                  "Succeeded"
+                ]
+              }
+            },
+            "Initialize_variable_-_RefreshCheckAttempt": {
+              "type": "InitializeVariable",
+              "inputs": {
+                "variables": [
+                  {
+                    "name": "RefreshCheckAttempt",
+                    "type": "Integer",
+                    "value": 0
+                  }
+                ]
+              },
+              "runAfter": {
+                "If_ContactId_Is_Empty": [
+                  "Succeeded"
+                ]
+              }
+            },
+            "Initialize_variable_-_RefreshCheckIsTrue": {
+              "type": "InitializeVariable",
+              "inputs": {
+                "variables": [
+                  {
+                    "name": "RefreshCheckIsTrue",
+                    "type": "Boolean",
+                    "value": false
+                  }
+                ]
+              },
+              "runAfter": {
+                "Initialize_variable_-_RefreshCheckAttempt": [
+                  "Succeeded"
+                ]
+              }
+            },
+            "Until_-_RefreshAnalysis_Visible": {
+              "type": "Until",
+              "expression": "@or(equals(variables('RefreshCheckIsTrue'), true), greaterOrEquals(variables('RefreshCheckAttempt'), 6))",
+              "limit": {
+                "count": 6,
+                "timeout": "PT45S"
+              },
+              "actions": {
+                "Increment_variable_-_RefreshCheckAttempt": {
+                  "type": "IncrementVariable",
+                  "inputs": {
+                    "name": "RefreshCheckAttempt",
+                    "value": 1
+                  },
+                  "runAfter": {}
+                },
+                "Get_Contact_-_RefreshOnly": {
+                  "type": "Http",
+                  "inputs": {
+                    "uri": "@{concat(parameters('dataverseBaseUrl'), '/api/data/v9.2/contacts(', variables('ContactId'), ')?$select=mj_refreshanalysis,modifiedon')}",
+                    "method": "GET",
+                    "headers": {
+                      "OData-MaxVersion": "4.0",
+                      "OData-Version": "4.0",
+                      "Accept": "application/json;odata.metadata=none",
+                      "Content-Type": "application/json; charset=utf-8",
+                      "Prefer": "odata.include-annotations=\"OData.Community.Display.V1.FormattedValue\""
+                    },
+                    "authentication": {
+                      "type": "ActiveDirectoryOAuth",
+                      "tenant": "@{parameters('dataverseTenantId')}",
+                      "audience": "@{parameters('dataverseBaseUrl')}",
+                      "clientId": "@{parameters('dataverseClientId')}",
+                      "secret": "@{parameters('dataverseClientSecret')}"
+                    }
+                  },
+                  "runAfter": {
+                    "Increment_variable_-_RefreshCheckAttempt": [
+                      "Succeeded"
+                    ]
+                  }
+                },
+                "Set_variable_-_RefreshCheckIsTrue": {
+                  "type": "SetVariable",
+                  "inputs": {
+                    "name": "RefreshCheckIsTrue",
+                    "value": "@or(equals(body('Get_Contact_-_RefreshOnly')?['mj_refreshanalysis'], true), equals(body('Get_Contact_-_RefreshOnly')?['mj_refreshanalysis@OData.Community.Display.V1.FormattedValue'], 'Yes'), equals(toLower(string(body('Get_Contact_-_RefreshOnly')?['mj_refreshanalysis'])), 'true'))"
+                  },
+                  "runAfter": {
+                    "Get_Contact_-_RefreshOnly": [
+                      "Succeeded"
+                    ]
+                  }
+                },
+                "If_-_RefreshStillNotTrue": {
+                  "type": "If",
+                  "expression": "@not(equals(variables('RefreshCheckIsTrue'), true))",
+                  "actions": {
+                    "Delay_-_Between_RefreshChecks": {
+                      "type": "Wait",
+                      "inputs": {
+                        "interval": {
+                          "count": 2,
+                          "unit": "Second"
+                        }
+                      },
+                      "runAfter": {}
+                    }
+                  },
+                  "else": {
+                    "actions": {}
+                  },
+                  "runAfter": {
+                    "Set_variable_-_RefreshCheckIsTrue": [
+                      "Succeeded"
+                    ]
+                  }
+                }
+              },
+              "runAfter": {
+                "Initialize_variable_-_RefreshCheckIsTrue": [
+                  "Succeeded"
+                ]
+              }
+            },
+            "If_-_RefreshAnalysis_Not_Visible_After_Retries": {
+              "type": "If",
+              "expression": "@not(equals(variables('RefreshCheckIsTrue'), true))",
+              "actions": {
+                "Terminate_-_RefreshAnalysis_Not_Visible": {
+                  "type": "Terminate",
+                  "inputs": {
+                    "runStatus": "Succeeded",
+                    "code": "RefreshAnalysisNotVisible",
+                    "message": "mj_refreshanalysis was not readable as true/Yes after retries; run ignored to avoid false negatives."
+                  },
+                  "runAfter": {}
+                }
+              },
+              "else": {
+                "actions": {}
+              },
+              "runAfter": {
+                "Until_-_RefreshAnalysis_Visible": [
+                  "Succeeded"
+                ]
+              }
+            },
+            "Get_Contact": {
+              "type": "Http",
+              "inputs": {
+                "uri": "@{concat(parameters('dataverseBaseUrl'), '/api/data/v9.2/contacts(', variables('ContactId'), ')?$select=fullname,firstname,lastname,emailaddress1,telephone1,mobilephone,address1_line1,address1_line2,address1_line3,address1_city,address1_postalcode,address1_country,address1_composite,address1_latitude,address1_longitude,birthdate,familystatuscode,gendercode,governmentid,jobtitle,lastonholdtime,lastusedincampaign,leadsourcecode,preferredcontactmethodcode,_mj_primarystore_value,mj_refreshanalysis,mj_boilermake,mj_boilermodel,mj_installationdate,mj_repairedrecently,mj_homecarecover,mj_homecaretypeofcover,mj_energytariff,mj_smartmeter,mj_doyouhaveasmartmeter,mj_utility_ev_owner,mj_homeevcharger,mj_doyouhaveahivethermostat,mj_doyouhavesmartradiatorvalves,mj_conversationpoints,mj_conversationlogic,mj_initiateoutboundcall,mj_priorityregister')}",
+                "method": "GET",
+                "headers": {
+                  "OData-MaxVersion": "4.0",
+                  "OData-Version": "4.0",
+                  "Accept": "application/json;odata.metadata=none",
+                  "Content-Type": "application/json; charset=utf-8",
+                  "Prefer": "odata.include-annotations=\"OData.Community.Display.V1.FormattedValue\""
+                },
+                "authentication": {
+                  "type": "ActiveDirectoryOAuth",
+                  "tenant": "@{parameters('dataverseTenantId')}",
+                  "audience": "@{parameters('dataverseBaseUrl')}",
+                  "clientId": "@{parameters('dataverseClientId')}",
+                  "secret": "@{parameters('dataverseClientSecret')}"
+                }
+              },
+              "runAfter": {
+                "If_-_RefreshAnalysis_Not_Visible_After_Retries": [
+                  "Succeeded"
+                ]
+              }
+            },
+            "If_MJ_RefreshAnalysis_Is_Not_True_After_Get": {
+              "type": "If",
+              "expression": "@not(or(equals(body('Get_Contact')?['mj_refreshanalysis'], true), equals(body('Get_Contact')?['mj_refreshanalysis@OData.Community.Display.V1.FormattedValue'], 'Yes'), equals(toLower(string(body('Get_Contact')?['mj_refreshanalysis'])), 'true')))",
+              "actions": {
+                "Terminate_-_RefreshAnalysis_Not_True": {
+                  "type": "Terminate",
+                  "inputs": {
+                    "runStatus": "Succeeded",
+                    "code": "RefreshAnalysisNotTrue",
+                    "message": "mj_refreshanalysis is not true/Yes on the Contact record; run ignored."
+                  },
+                  "runAfter": {}
+                }
+              },
+              "else": {
+                "actions": {}
+              },
+              "runAfter": {
+                "Get_Contact": [
+                  "Succeeded"
+                ]
+              }
+            },
+            "Compose_-_CustomerData": {
+              "type": "Compose",
+              "inputs": {
+                "dataverseFields": {
+                  "address1_city": "@{coalesce(body('Get_Contact')?['address1_city'], triggerBody()?['address1_city'], '')}",
+                  "address1_composite": "@{coalesce(body('Get_Contact')?['address1_composite'], triggerBody()?['address1_composite'], '')}",
+                  "address1_country": "@{coalesce(body('Get_Contact')?['address1_country'], triggerBody()?['address1_country'], '')}",
+                  "address1_latitude": "@{coalesce(body('Get_Contact')?['address1_latitude'], triggerBody()?['address1_latitude'], null)}",
+                  "address1_line1": "@{coalesce(body('Get_Contact')?['address1_line1'], triggerBody()?['address1_line1'], '')}",
+                  "address1_longitude": "@{coalesce(body('Get_Contact')?['address1_longitude'], triggerBody()?['address1_longitude'], null)}",
+                  "address1_postalcode": "@{coalesce(body('Get_Contact')?['address1_postalcode'], triggerBody()?['address1_postalcode'], '')}",
+                  "birthdate": "@{coalesce(body('Get_Contact')?['birthdate@OData.Community.Display.V1.FormattedValue'], string(body('Get_Contact')?['birthdate']), triggerBody()?['birthdate@OData.Community.Display.V1.FormattedValue'], string(triggerBody()?['birthdate']), '')}",
+                  "emailaddress1": "@{coalesce(body('Get_Contact')?['emailaddress1'], triggerBody()?['emailaddress1'], '')}",
+                  "familystatuscode": "@{coalesce(body('Get_Contact')?['familystatuscode@OData.Community.Display.V1.FormattedValue'], string(body('Get_Contact')?['familystatuscode']), triggerBody()?['familystatuscode@OData.Community.Display.V1.FormattedValue'], string(triggerBody()?['familystatuscode']), '')}",
+                  "firstname": "@{coalesce(body('Get_Contact')?['firstname'], triggerBody()?['firstname'], '')}",
+                  "fullname": "@{coalesce(body('Get_Contact')?['fullname'], triggerBody()?['fullname'], '')}",
+                  "gendercode": "@{coalesce(body('Get_Contact')?['gendercode@OData.Community.Display.V1.FormattedValue'], string(body('Get_Contact')?['gendercode']), triggerBody()?['gendercode@OData.Community.Display.V1.FormattedValue'], string(triggerBody()?['gendercode']), '')}",
+                  "governmentid": "@{coalesce(body('Get_Contact')?['governmentid'], triggerBody()?['governmentid'], null)}",
+                  "jobtitle": "@{coalesce(body('Get_Contact')?['jobtitle'], triggerBody()?['jobtitle'], '')}",
+                  "lastname": "@{coalesce(body('Get_Contact')?['lastname'], triggerBody()?['lastname'], '')}",
+                  "mj_primarystore": "@{coalesce(body('Get_Contact')?['_mj_primarystore_value@OData.Community.Display.V1.FormattedValue'], string(body('Get_Contact')?['_mj_primarystore_value']), triggerBody()?['_mj_primarystore_value@OData.Community.Display.V1.FormattedValue'], string(triggerBody()?['_mj_primarystore_value']), '')}",
+                  "lastonholdtime": "@{coalesce(body('Get_Contact')?['lastonholdtime@OData.Community.Display.V1.FormattedValue'], string(body('Get_Contact')?['lastonholdtime']), triggerBody()?['lastonholdtime@OData.Community.Display.V1.FormattedValue'], string(triggerBody()?['lastonholdtime']), '')}",
+                  "lastusedincampaign": "@{coalesce(body('Get_Contact')?['lastusedincampaign@OData.Community.Display.V1.FormattedValue'], string(body('Get_Contact')?['lastusedincampaign']), triggerBody()?['lastusedincampaign@OData.Community.Display.V1.FormattedValue'], string(triggerBody()?['lastusedincampaign']), '')}",
+                  "leadsourcecode": "@{coalesce(body('Get_Contact')?['leadsourcecode@OData.Community.Display.V1.FormattedValue'], string(body('Get_Contact')?['leadsourcecode']), triggerBody()?['leadsourcecode@OData.Community.Display.V1.FormattedValue'], string(triggerBody()?['leadsourcecode']), '')}",
+                  "mj_boilermake": "@{coalesce(body('Get_Contact')?['mj_boilermake@OData.Community.Display.V1.FormattedValue'], string(body('Get_Contact')?['mj_boilermake']), triggerBody()?['mj_boilermake@OData.Community.Display.V1.FormattedValue'], string(triggerBody()?['mj_boilermake']), '')}",
+                  "mj_boilermodel": "@{coalesce(body('Get_Contact')?['mj_boilermodel'], triggerBody()?['mj_boilermodel'], '')}",
+                  "mj_doyouhaveahivethermostat": "@{coalesce(body('Get_Contact')?['mj_doyouhaveahivethermostat@OData.Community.Display.V1.FormattedValue'], string(body('Get_Contact')?['mj_doyouhaveahivethermostat']), triggerBody()?['mj_doyouhaveahivethermostat@OData.Community.Display.V1.FormattedValue'], string(triggerBody()?['mj_doyouhaveahivethermostat']), '')}",
+                  "mj_doyouhaveasmartmeter": "@{coalesce(body('Get_Contact')?['mj_doyouhaveasmartmeter@OData.Community.Display.V1.FormattedValue'], string(body('Get_Contact')?['mj_doyouhaveasmartmeter']), triggerBody()?['mj_doyouhaveasmartmeter@OData.Community.Display.V1.FormattedValue'], string(triggerBody()?['mj_doyouhaveasmartmeter']), '')}",
+                  "mj_doyouhavesmartradiatorvalves": "@{coalesce(body('Get_Contact')?['mj_doyouhavesmartradiatorvalves@OData.Community.Display.V1.FormattedValue'], string(body('Get_Contact')?['mj_doyouhavesmartradiatorvalves']), triggerBody()?['mj_doyouhavesmartradiatorvalves@OData.Community.Display.V1.FormattedValue'], string(triggerBody()?['mj_doyouhavesmartradiatorvalves']), '')}",
+                  "mj_energytariff": "@{coalesce(body('Get_Contact')?['mj_energytariff@OData.Community.Display.V1.FormattedValue'], string(body('Get_Contact')?['mj_energytariff']), triggerBody()?['mj_energytariff@OData.Community.Display.V1.FormattedValue'], string(triggerBody()?['mj_energytariff']), '')}",
+                  "mj_homecarecover": "@{coalesce(body('Get_Contact')?['mj_homecarecover@OData.Community.Display.V1.FormattedValue'], string(body('Get_Contact')?['mj_homecarecover']), triggerBody()?['mj_homecarecover@OData.Community.Display.V1.FormattedValue'], string(triggerBody()?['mj_homecarecover']), '')}",
+                  "mj_homecaretypeofcover": "@{coalesce(body('Get_Contact')?['mj_homecaretypeofcover@OData.Community.Display.V1.FormattedValue'], string(body('Get_Contact')?['mj_homecaretypeofcover']), triggerBody()?['mj_homecaretypeofcover@OData.Community.Display.V1.FormattedValue'], triggerBody()?['mj_homecaretypeofcover'], '')}",
+                  "mj_homeevcharger": "@{coalesce(body('Get_Contact')?['mj_homeevcharger@OData.Community.Display.V1.FormattedValue'], string(body('Get_Contact')?['mj_homeevcharger']), triggerBody()?['mj_homeevcharger@OData.Community.Display.V1.FormattedValue'], string(triggerBody()?['mj_homeevcharger']), '')}",
+                  "mj_initiateoutboundcall": "@{coalesce(body('Get_Contact')?['mj_initiateoutboundcall@OData.Community.Display.V1.FormattedValue'], string(body('Get_Contact')?['mj_initiateoutboundcall']), triggerBody()?['mj_initiateoutboundcall@OData.Community.Display.V1.FormattedValue'], string(triggerBody()?['mj_initiateoutboundcall']), '')}",
+                  "mj_installationdate": "@{coalesce(body('Get_Contact')?['mj_installationdate@OData.Community.Display.V1.FormattedValue'], string(body('Get_Contact')?['mj_installationdate']), triggerBody()?['mj_installationdate@OData.Community.Display.V1.FormattedValue'], string(triggerBody()?['mj_installationdate']), '')}",
+                  "mj_priorityregister": "@{coalesce(body('Get_Contact')?['mj_priorityregister@OData.Community.Display.V1.FormattedValue'], string(body('Get_Contact')?['mj_priorityregister']), triggerBody()?['mj_priorityregister@OData.Community.Display.V1.FormattedValue'], string(triggerBody()?['mj_priorityregister']), '')}",
+                  "mj_refreshanalysis": "@{coalesce(body('Get_Contact')?['mj_refreshanalysis@OData.Community.Display.V1.FormattedValue'], string(body('Get_Contact')?['mj_refreshanalysis']), triggerBody()?['mj_refreshanalysis@OData.Community.Display.V1.FormattedValue'], string(triggerBody()?['mj_refreshanalysis']), '')}",
+                  "mj_repairedrecently": "@{coalesce(body('Get_Contact')?['mj_repairedrecently@OData.Community.Display.V1.FormattedValue'], string(body('Get_Contact')?['mj_repairedrecently']), triggerBody()?['mj_repairedrecently@OData.Community.Display.V1.FormattedValue'], string(triggerBody()?['mj_repairedrecently']), '')}",
+                  "mj_smartmeter": "@{coalesce(body('Get_Contact')?['mj_smartmeter@OData.Community.Display.V1.FormattedValue'], string(body('Get_Contact')?['mj_smartmeter']), triggerBody()?['mj_smartmeter@OData.Community.Display.V1.FormattedValue'], string(triggerBody()?['mj_smartmeter']), '')}",
+                  "mj_utility_ev_owner": "@{coalesce(body('Get_Contact')?['mj_utility_ev_owner@OData.Community.Display.V1.FormattedValue'], string(body('Get_Contact')?['mj_utility_ev_owner']), triggerBody()?['mj_utility_ev_owner@OData.Community.Display.V1.FormattedValue'], string(triggerBody()?['mj_utility_ev_owner']), '')}",
+                  "preferredcontactmethodcode": "@{coalesce(body('Get_Contact')?['preferredcontactmethodcode@OData.Community.Display.V1.FormattedValue'], string(body('Get_Contact')?['preferredcontactmethodcode']), triggerBody()?['preferredcontactmethodcode@OData.Community.Display.V1.FormattedValue'], string(triggerBody()?['preferredcontactmethodcode']), '')}",
+                  "telephone1": "@{coalesce(body('Get_Contact')?['telephone1'], triggerBody()?['telephone1'], '')}",
+                  "mobilephone": "@{coalesce(body('Get_Contact')?['mobilephone'], triggerBody()?['mobilephone'], '')}"
+                },
+                "contact": {
+                  "contactId": "@{variables('ContactId')}",
+                  "fullName": "@{coalesce(body('Get_Contact')?['fullname'], '')}",
+                  "firstName": "@{coalesce(body('Get_Contact')?['firstname'], '')}",
+                  "lastName": "@{coalesce(body('Get_Contact')?['lastname'], '')}",
+                  "email": "@{coalesce(body('Get_Contact')?['emailaddress1'], '')}",
+                  "phone": "@{coalesce(body('Get_Contact')?['telephone1'], '')}",
+                  "mobile": "@{coalesce(body('Get_Contact')?['mobilephone'], '')}",
+                  "address": {
+                    "composite": "@{coalesce(body('Get_Contact')?['address1_composite'], '')}",
+                    "line1": "@{coalesce(body('Get_Contact')?['address1_line1'], '')}",
+                    "line2": "@{coalesce(body('Get_Contact')?['address1_line2'], '')}",
+                    "line3": "@{coalesce(body('Get_Contact')?['address1_line3'], '')}",
+                    "city": "@{coalesce(body('Get_Contact')?['address1_city'], '')}",
+                    "postcode": "@{coalesce(body('Get_Contact')?['address1_postalcode'], '')}",
+                    "country": "@{coalesce(body('Get_Contact')?['address1_country'], '')}",
+                    "latitude": "@{coalesce(body('Get_Contact')?['address1_latitude'], null)}",
+                    "longitude": "@{coalesce(body('Get_Contact')?['address1_longitude'], null)}"
+                  }
+                },
+                "productsAndServices": {
+                  "refreshAnalysis": "@{coalesce(body('Get_Contact')?['mj_refreshanalysis@OData.Community.Display.V1.FormattedValue'], string(body('Get_Contact')?['mj_refreshanalysis']), '')}",
+                  "boiler": {
+                    "make": "@{coalesce(body('Get_Contact')?['mj_boilermake@OData.Community.Display.V1.FormattedValue'], string(body('Get_Contact')?['mj_boilermake']), '')}",
+                    "model": "@{coalesce(body('Get_Contact')?['mj_boilermodel'], '')}",
+                    "installationDate": "@{coalesce(body('Get_Contact')?['mj_installationdate@OData.Community.Display.V1.FormattedValue'], string(body('Get_Contact')?['mj_installationdate']), '')}",
+                    "repairedRecently": "@{coalesce(body('Get_Contact')?['mj_repairedrecently@OData.Community.Display.V1.FormattedValue'], string(body('Get_Contact')?['mj_repairedrecently']), '')}"
+                  },
+                  "heatingAndCover": {
+                    "homeCareCover": "@{coalesce(body('Get_Contact')?['mj_homecarecover@OData.Community.Display.V1.FormattedValue'], string(body('Get_Contact')?['mj_homecarecover']), '')}",
+                    "typeOfCover": "@{coalesce(body('Get_Contact')?['mj_homecaretypeofcover@OData.Community.Display.V1.FormattedValue'], string(body('Get_Contact')?['mj_homecaretypeofcover']), triggerBody()?['mj_homecaretypeofcover@OData.Community.Display.V1.FormattedValue'], triggerBody()?['mj_homecaretypeofcover'], '')}"
+                  },
+                  "energySupply": {
+                    "energyTariff": "@{coalesce(body('Get_Contact')?['mj_energytariff@OData.Community.Display.V1.FormattedValue'], string(body('Get_Contact')?['mj_energytariff']), '')}",
+                    "smartMeter": "@{coalesce(body('Get_Contact')?['mj_smartmeter@OData.Community.Display.V1.FormattedValue'], string(body('Get_Contact')?['mj_smartmeter']), '')}",
+                    "doYouHaveASmartMeter": "@{coalesce(body('Get_Contact')?['mj_doyouhaveasmartmeter@OData.Community.Display.V1.FormattedValue'], string(body('Get_Contact')?['mj_doyouhaveasmartmeter']), triggerBody()?['mj_doyouhaveasmartmeter@OData.Community.Display.V1.FormattedValue'], string(triggerBody()?['mj_doyouhaveasmartmeter']), '')}"
+                  },
+                  "electricVehicle": {
+                    "evOwner": "@{coalesce(body('Get_Contact')?['mj_utility_ev_owner@OData.Community.Display.V1.FormattedValue'], string(body('Get_Contact')?['mj_utility_ev_owner']), '')}",
+                    "homeEvCharger": "@{coalesce(body('Get_Contact')?['mj_homeevcharger@OData.Community.Display.V1.FormattedValue'], string(body('Get_Contact')?['mj_homeevcharger']), '')}"
+                  },
+                  "smartHome": {
+                    "hiveThermostat": "@{coalesce(body('Get_Contact')?['mj_doyouhaveahivethermostat@OData.Community.Display.V1.FormattedValue'], string(body('Get_Contact')?['mj_doyouhaveahivethermostat']), '')}",
+                    "smartRadiatorValves": "@{coalesce(body('Get_Contact')?['mj_doyouhavesmartradiatorvalves@OData.Community.Display.V1.FormattedValue'], string(body('Get_Contact')?['mj_doyouhavesmartradiatorvalves']), '')}"
+                  },
+                  "serviceFlags": {
+                    "initiateOutboundCall": "@{coalesce(body('Get_Contact')?['mj_initiateoutboundcall@OData.Community.Display.V1.FormattedValue'], string(body('Get_Contact')?['mj_initiateoutboundcall']), '')}",
+                    "priorityRegister": "@{coalesce(body('Get_Contact')?['mj_priorityregister@OData.Community.Display.V1.FormattedValue'], string(body('Get_Contact')?['mj_priorityregister']), '')}",
+                    "preferredContactMethod": "@{coalesce(body('Get_Contact')?['preferredcontactmethodcode@OData.Community.Display.V1.FormattedValue'], string(body('Get_Contact')?['preferredcontactmethodcode']), '')}"
+                  },
+                  "analysis": {
+                    "conversationPoints": "@{coalesce(body('Get_Contact')?['mj_conversationpoints'], '')}",
+                    "conversationLogic": "@{coalesce(body('Get_Contact')?['mj_conversationlogic'], '')}"
+                  }
+                }
+              },
+              "runAfter": {
+                "If_MJ_RefreshAnalysis_Is_Not_True_After_Get": [
+                  "Succeeded"
+                ]
+              }
+            },
+            "OpenAI_-_Summarise_Customer": {
+              "type": "Http",
+              "inputs": {
+                "uri": "@{concat(if(endsWith(parameters('openAiEndpoint'), '/'), parameters('openAiEndpoint'), concat(parameters('openAiEndpoint'), '/')), 'openai/deployments/', parameters('openAiDeployment'), '/chat/completions?api-version=', parameters('openAiApiVersion'))}",
+                "method": "POST",
+                "headers": {
+                  "Content-Type": "application/json",
+                  "api-key": "@{parameters('openAiApiKey')}"
+                },
+                "body": {
+                  "messages": [
+                    {
+                      "role": "system",
+                      "content": "You generate next-best conversation recommendations for an agent speaking with a customer."
+                    },
+                    {
+                      "role": "user",
+                      "content": "Make next best conversation recommendations based ONLY on the provided fields (do not invent or assume missing data).\n\nOutput MUST be plain text in this structure (repeat sections as needed):\n\nRecommended Next Conversations\n\n<HomeCare Boiler Cover>\nPosition: ...\nExample:\n\"...\"\n\n<Boiler Replacement>\nPosition: ...\nExample:\n\"...\"\n\n<Hive Smart Thermostat>\nPosition: ...\nExample:\n\"...\"\n\n<Home EV Charger>\nPosition: ...\nExample:\n\"...\"\n\n<EV Tariff>\nPosition: ...\nExample:\n\"...\"\n\nRules to apply (use best-effort based on provided fields):\n- If boiler repaired recently AND no HomeCare cover => recommend HomeCare Boiler Cover.\n- If EV Owner is Yes AND Home EV Charger is No => recommend Home EV Charger.\n- If EV Owner is Yes AND energy tariff is NOT an EV tariff => recommend EV Tariff. (Heuristic: if the energy tariff label/value does not contain 'EV', treat as not an EV tariff.)\n- If Hive Thermostat is No => recommend Hive Smart Thermostat (energy savings + convenience).\n- If boiler installation date indicates an older boiler (>8 years) => recommend Boiler Replacement AND HomeCare Boiler Cover.\n\nInclude 3-6 sections; omit any that do not apply.\n\nCustomer data (JSON):\n@{string(outputs('Compose_-_CustomerData'))}"
+                    }
+                  ],
+                  "temperature": 0.2,
+                  "max_tokens": 700
+                }
+              },
+              "runAfter": {
+                "Compose_-_CustomerData": [
+                  "Succeeded"
+                ]
+              }
+            },
+            "Compose_-_OpenAiSummary": {
+              "type": "Compose",
+              "inputs": "@coalesce(body('OpenAI_-_Summarise_Customer')?['choices']?[0]?['message']?['content'], string(body('OpenAI_-_Summarise_Customer')))",
+              "runAfter": {
+                "OpenAI_-_Summarise_Customer": [
+                  "Succeeded"
+                ]
+              }
+            },
+            "Compose_-_ConversationPoints_Truncated": {
+              "type": "Compose",
+              "inputs": "@if(greater(length(string(outputs('Compose_-_OpenAiSummary'))), 1048576), substring(string(outputs('Compose_-_OpenAiSummary')), 0, 1048576), string(outputs('Compose_-_OpenAiSummary'))) ",
+              "runAfter": {
+                "Compose_-_OpenAiSummary": [
+                  "Succeeded"
+                ]
+              }
+            },
+            "Update_Contact_-_Set_mj_conversationpoints": {
+              "type": "Http",
+              "inputs": {
+                "uri": "@{concat(parameters('dataverseBaseUrl'), '/api/data/v9.2/contacts(', variables('ContactId'), ')')}",
+                "method": "PATCH",
+                "headers": {
+                  "OData-MaxVersion": "4.0",
+                  "OData-Version": "4.0",
+                  "Accept": "application/json;odata.metadata=none",
+                  "Content-Type": "application/json; charset=utf-8",
+                  "If-Match": "*"
+                },
+                "body": {
+                  "mj_conversationpoints": "@{outputs('Compose_-_ConversationPoints_Truncated')}"
+                },
+                "authentication": {
+                  "type": "ActiveDirectoryOAuth",
+                  "tenant": "@{parameters('dataverseTenantId')}",
+                  "audience": "@{parameters('dataverseBaseUrl')}",
+                  "clientId": "@{parameters('dataverseClientId')}",
+                  "secret": "@{parameters('dataverseClientSecret')}"
+                }
+              },
+              "runAfter": {
+                "Compose_-_ConversationPoints_Truncated": [
+                  "Succeeded"
+                ]
+              }
+            },
+            "Compose_-_Debug_View": {
+              "type": "Compose",
+              "inputs": "@variables('ReceivedDataverseChange')",
+              "runAfter": {
+                "Update_Contact_-_Set_mj_conversationpoints": [
+                  "Succeeded"
+                ]
+              }
+            },
+            "Compose_-_AnalysisLastRun_UK": {
+              "type": "Compose",
+              "inputs": "@{concat(formatDateTime(convertTimeZone(utcNow(), 'UTC', 'GMT Standard Time'), 'dddd '), string(dayOfMonth(convertTimeZone(utcNow(), 'UTC', 'GMT Standard Time'))), if(or(equals(dayOfMonth(convertTimeZone(utcNow(), 'UTC', 'GMT Standard Time')), 11), equals(dayOfMonth(convertTimeZone(utcNow(), 'UTC', 'GMT Standard Time')), 12), equals(dayOfMonth(convertTimeZone(utcNow(), 'UTC', 'GMT Standard Time')), 13)), 'th', if(equals(mod(dayOfMonth(convertTimeZone(utcNow(), 'UTC', 'GMT Standard Time')), 10), 1), 'st', if(equals(mod(dayOfMonth(convertTimeZone(utcNow(), 'UTC', 'GMT Standard Time')), 10), 2), 'nd', if(equals(mod(dayOfMonth(convertTimeZone(utcNow(), 'UTC', 'GMT Standard Time')), 10), 3), 'rd', 'th')))), ' ', formatDateTime(convertTimeZone(utcNow(), 'UTC', 'GMT Standard Time'), 'MMMM'), ', ', formatDateTime(convertTimeZone(utcNow(), 'UTC', 'GMT Standard Time'), 'HH:mm'))} ",
+              "runAfter": {
+                "Compose_-_Debug_View": [
+                  "Succeeded"
+                ]
+              }
+            },
+            "Update_Contact_-_Set_AnalysisLastRun": {
+              "type": "Http",
+              "inputs": {
+                "uri": "@{concat(parameters('dataverseBaseUrl'), '/api/data/v9.2/contacts(', variables('ContactId'), ')')}",
+                "method": "PATCH",
+                "headers": {
+                  "OData-MaxVersion": "4.0",
+                  "OData-Version": "4.0",
+                  "Accept": "application/json;odata.metadata=none",
+                  "Content-Type": "application/json; charset=utf-8",
+                  "If-Match": "*"
+                },
+                "body": {
+                  "mj_analysislastrun": "@{outputs('Compose_-_AnalysisLastRun_UK')}"
+                },
+                "authentication": {
+                  "type": "ActiveDirectoryOAuth",
+                  "tenant": "@{parameters('dataverseTenantId')}",
+                  "audience": "@{parameters('dataverseBaseUrl')}",
+                  "clientId": "@{parameters('dataverseClientId')}",
+                  "secret": "@{parameters('dataverseClientSecret')}"
+                }
+              },
+              "runAfter": {
+                "Compose_-_AnalysisLastRun_UK": [
+                  "Succeeded"
+                ]
+              }
+            },
+            "Update_Contact_-_Set_AnalysisLastRun_Alt": {
+              "type": "Http",
+              "inputs": {
+                "uri": "@{concat(parameters('dataverseBaseUrl'), '/api/data/v9.2/contacts(', variables('ContactId'), ')')}",
+                "method": "PATCH",
+                "headers": {
+                  "OData-MaxVersion": "4.0",
+                  "OData-Version": "4.0",
+                  "Accept": "application/json;odata.metadata=none",
+                  "Content-Type": "application/json; charset=utf-8",
+                  "If-Match": "*"
+                },
+                "body": {
+                  "mj_AnalysisLastRun": "@{outputs('Compose_-_AnalysisLastRun_UK')}"
+                },
+                "authentication": {
+                  "type": "ActiveDirectoryOAuth",
+                  "tenant": "@{parameters('dataverseTenantId')}",
+                  "audience": "@{parameters('dataverseBaseUrl')}",
+                  "clientId": "@{parameters('dataverseClientId')}",
+                  "secret": "@{parameters('dataverseClientSecret')}"
+                }
+              },
+              "runAfter": {
+                "Update_Contact_-_Set_AnalysisLastRun": [
+                  "Failed"
+                ]
+              }
+            },
+            "Update_Contact_-_Reset_MJ_RefreshAnalysis": {
+              "type": "Http",
+              "inputs": {
+                "uri": "@{concat(parameters('dataverseBaseUrl'), '/api/data/v9.2/contacts(', variables('ContactId'), ')')}",
+                "method": "PATCH",
+                "headers": {
+                  "OData-MaxVersion": "4.0",
+                  "OData-Version": "4.0",
+                  "Accept": "application/json;odata.metadata=none",
+                  "Content-Type": "application/json; charset=utf-8",
+                  "If-Match": "*"
+                },
+                "body": {
+                  "mj_refreshanalysis": false
+                },
+                "authentication": {
+                  "type": "ActiveDirectoryOAuth",
+                  "tenant": "@{parameters('dataverseTenantId')}",
+                  "audience": "@{parameters('dataverseBaseUrl')}",
+                  "clientId": "@{parameters('dataverseClientId')}",
+                  "secret": "@{parameters('dataverseClientSecret')}"
+                }
+              },
+              "runAfter": {
+                "Update_Contact_-_Set_AnalysisLastRun": [
+                  "Succeeded"
+                ],
+                "Update_Contact_-_Set_AnalysisLastRun_Alt": [
+                  "Succeeded",
+                  "Failed",
+                  "Skipped"
+                ]
+              }
+            }
+          },
+          "outputs": {}
+        },
+        "parameters": {
+          "$connections": {
+            "value": {
+              "commondataservice": {
+                "connectionId": "[resourceId('Microsoft.Web/connections', variables('analyseCustomerDataverseConnectionName'))]",
+                "connectionName": "[variables('analyseCustomerDataverseConnectionName')]",
+                "id": "[variables('dataverseManagedApiId')]"
+              }
+            }
+          },
+          "dataverseBaseUrl": {
+            "value": "[parameters('dataverseBaseUrl')]"
+          },
+          "dataverseTenantId": {
+            "value": "[parameters('dataverseTenantId')]"
+          },
+          "dataverseClientId": {
+            "value": "[parameters('dataverseClientId')]"
+          },
+          "dataverseClientSecret": {
+            "value": "[parameters('dataverseClientSecret')]"
+          },
+          "openAiEndpoint": {
+            "value": "[parameters('openAiEndpoint')]"
+          },
+          "openAiDeployment": {
+            "value": "[parameters('openAiDeployment')]"
+          },
+          "openAiApiVersion": {
+            "value": "[parameters('openAiApiVersion')]"
+          },
+          "openAiApiKey": {
+            "value": "[parameters('openAiApiKey')]"
+          }
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Logic/workflows",
+      "apiVersion": "2019-05-01",
+      "name": "[parameters('analyseCustomer2LogicAppName')]",
+      "location": "[parameters('location')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/connections', variables('analyseCustomer2DataverseConnectionName'))]",
+        "[resourceId('Microsoft.Logic/workflows', parameters('analyseCustomerLogicAppName'))]"
+      ],
+      "properties": {
+        "state": "Enabled",
+        "definition": "[reference(resourceId('Microsoft.Logic/workflows', parameters('analyseCustomerLogicAppName')), '2019-05-01').definition]",
+        "parameters": {
+          "$connections": {
+            "value": {
+              "commondataservice": {
+                "connectionId": "[resourceId('Microsoft.Web/connections', variables('analyseCustomer2DataverseConnectionName'))]",
+                "connectionName": "[variables('analyseCustomer2DataverseConnectionName')]",
+                "id": "[variables('dataverseManagedApiId')]"
+              }
+            }
+          },
+          "dataverseBaseUrl": {
+            "value": "[parameters('dataverseBaseUrl')]"
+          },
+          "dataverseTenantId": {
+            "value": "[parameters('dataverseTenantId')]"
+          },
+          "dataverseClientId": {
+            "value": "[parameters('dataverseClientId')]"
+          },
+          "dataverseClientSecret": {
+            "value": "[parameters('dataverseClientSecret')]"
+          },
+          "openAiEndpoint": {
+            "value": "[parameters('openAiEndpoint')]"
+          },
+          "openAiDeployment": {
+            "value": "[parameters('openAiDeployment')]"
+          },
+          "openAiApiVersion": {
+            "value": "[parameters('openAiApiVersion')]"
+          },
+          "openAiApiKey": {
+            "value": "[parameters('openAiApiKey')]"
+          }
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Logic/workflows",
+      "apiVersion": "2019-05-01",
+      "name": "[parameters('analyseCustomerVersion2LogicAppName')]",
+      "location": "[parameters('location')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/connections', variables('analyseCustomerVersion2DataverseConnectionName'))]",
+        "[resourceId('Microsoft.Logic/workflows', parameters('analyseCustomerLogicAppName'))]"
+      ],
+      "properties": {
+        "state": "Enabled",
+        "definition": {
+          "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+          "contentVersion": "1.0.0.0",
+          "parameters": {
+            "dataverseBaseUrl": {
+              "type": "String",
+              "defaultValue": ""
+            },
+            "dataverseTenantId": {
+              "type": "String",
+              "defaultValue": ""
+            },
+            "dataverseClientId": {
+              "type": "String",
+              "defaultValue": ""
+            },
+            "dataverseClientSecret": {
+              "type": "SecureString",
+              "defaultValue": ""
+            },
+            "openAiEndpoint": {
+              "type": "String",
+              "defaultValue": ""
+            },
+            "openAiDeployment": {
+              "type": "String",
+              "defaultValue": "gpt-4o"
+            },
+            "openAiApiVersion": {
+              "type": "String",
+              "defaultValue": "2024-10-21"
+            },
+            "openAiApiKey": {
+              "type": "SecureString",
+              "defaultValue": ""
+            },
+            "$connections": {
+              "defaultValue": {},
+              "type": "Object"
+            }
+          },
+          "triggers": {
+            "When_an_HTTP_request_is_received": {
+              "type": "Request",
+              "kind": "Http",
+              "inputs": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "contactId": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "actions": {
+            "Initialize_variable_-_ReceivedDataverseChange": {
+              "type": "InitializeVariable",
+              "inputs": {
+                "variables": [
+                  {
+                    "name": "ReceivedDataverseChange",
+                    "type": "Object",
+                    "value": "@triggerBody()"
+                  }
+                ]
+              },
+              "runAfter": {}
+            },
+            "Initialize_variable_-_ContactId": {
+              "type": "InitializeVariable",
+              "inputs": {
+                "variables": [
+                  {
+                    "name": "ContactId",
+                    "type": "String",
+                    "value": "@string(coalesce(triggerBody()?['contactId'], triggerBody()?['ContactId'], triggerBody()?['contactid'], triggerBody()?['id'], triggerBody()?['Id'], triggerBody()?['ItemInternalId'], triggerBody()?['body']?['contactId'], triggerBody()?['body']?['ContactId'], triggerBody()?['body']?['contactid'], triggerBody()?['body']?['id'], triggerBody()?['body']?['Id'], triggerBody()?['body']?['recordId'], triggerBody()?['body']?['recordid'], triggerBody()?['body']?['primaryKey'], triggerBody()?['body']?['RowId'], triggerBody()?['body']?['rowId'], triggerBody()?['body']?['entity']?['contactid'], triggerBody()?['body']?['entity']?['ContactId']))"
+                  }
+                ]
+              },
+              "runAfter": {
+                "Initialize_variable_-_ReceivedDataverseChange": [
+                  "Succeeded"
+                ]
+              }
+            },
+            "If_ContactId_Is_Empty": {
+              "type": "If",
+              "expression": "@empty(variables('ContactId'))",
+              "actions": {
+                "Return_HTTP_400_BadRequest": {
+                  "type": "Response",
+                  "kind": "Http",
+                  "inputs": {
+                    "statusCode": 400,
+                    "headers": {
+                      "Content-Type": "application/json"
+                    },
+                    "body": {
+                      "status": "error",
+                      "message": "contactId is required",
+                      "processedAt": "@{utcNow()}"
+                    }
+                  },
+                  "runAfter": {}
+                },
+                "Terminate_-_BadRequest": {
+                  "type": "Terminate",
+                  "inputs": {
+                    "runStatus": "Succeeded",
+                    "code": "BadRequest",
+                    "message": "contactId is required"
+                  },
+                  "runAfter": {
+                    "Return_HTTP_400_BadRequest": [
+                      "Succeeded"
+                    ]
+                  }
+                }
+              },
+              "else": {
+                "actions": {}
+              },
+              "runAfter": {
+                "Initialize_variable_-_ContactId": [
+                  "Succeeded"
+                ]
+              }
+            },
+            "Get_Contact": {
+              "type": "Http",
+              "inputs": {
+                "uri": "@{concat(parameters('dataverseBaseUrl'), '/api/data/v9.2/contacts(', variables('ContactId'), ')?$select=fullname,firstname,lastname,emailaddress1,telephone1,mobilephone,address1_line1,address1_line2,address1_line3,address1_city,address1_postalcode,address1_country,address1_composite,address1_latitude,address1_longitude,birthdate,familystatuscode,gendercode,governmentid,jobtitle,lastonholdtime,lastusedincampaign,leadsourcecode,preferredcontactmethodcode,_mj_primarystore_value,mj_refreshanalysis,mj_boilermake,mj_boilermodel,mj_installationdate,mj_repairedrecently,mj_homecarecover,mj_homecaretypeofcover,mj_energytariff,mj_smartmeter,mj_doyouhaveasmartmeter,mj_utility_ev_owner,mj_homeevcharger,mj_doyouhaveahivethermostat,mj_doyouhavesmartradiatorvalves,mj_conversationpoints,mj_conversationlogic,mj_initiateoutboundcall,mj_priorityregister')}",
+                "method": "GET",
+                "headers": {
+                  "OData-MaxVersion": "4.0",
+                  "OData-Version": "4.0",
+                  "Accept": "application/json;odata.metadata=none",
+                  "Content-Type": "application/json; charset=utf-8",
+                  "Prefer": "odata.include-annotations=\"OData.Community.Display.V1.FormattedValue\""
+                },
+                "authentication": {
+                  "type": "ActiveDirectoryOAuth",
+                  "tenant": "@{parameters('dataverseTenantId')}",
+                  "audience": "@{parameters('dataverseBaseUrl')}",
+                  "clientId": "@{parameters('dataverseClientId')}",
+                  "secret": "@{parameters('dataverseClientSecret')}"
+                }
+              },
+              "runAfter": {
+                "If_ContactId_Is_Empty": [
+                  "Succeeded"
+                ]
+              }
+            },
+            "Compose_-_CustomerData": {
+              "type": "Compose",
+              "inputs": {
+                "dataverseFields": {
+                  "address1_city": "@{coalesce(body('Get_Contact')?['address1_city'], triggerBody()?['address1_city'], '')}",
+                  "address1_composite": "@{coalesce(body('Get_Contact')?['address1_composite'], triggerBody()?['address1_composite'], '')}",
+                  "address1_country": "@{coalesce(body('Get_Contact')?['address1_country'], triggerBody()?['address1_country'], '')}",
+                  "address1_latitude": "@{coalesce(body('Get_Contact')?['address1_latitude'], triggerBody()?['address1_latitude'], null)}",
+                  "address1_line1": "@{coalesce(body('Get_Contact')?['address1_line1'], triggerBody()?['address1_line1'], '')}",
+                  "address1_longitude": "@{coalesce(body('Get_Contact')?['address1_longitude'], triggerBody()?['address1_longitude'], null)}",
+                  "address1_postalcode": "@{coalesce(body('Get_Contact')?['address1_postalcode'], triggerBody()?['address1_postalcode'], '')}",
+                  "birthdate": "@{coalesce(body('Get_Contact')?['birthdate@OData.Community.Display.V1.FormattedValue'], string(body('Get_Contact')?['birthdate']), triggerBody()?['birthdate@OData.Community.Display.V1.FormattedValue'], string(triggerBody()?['birthdate']), '')}",
+                  "emailaddress1": "@{coalesce(body('Get_Contact')?['emailaddress1'], triggerBody()?['emailaddress1'], '')}",
+                  "familystatuscode": "@{coalesce(body('Get_Contact')?['familystatuscode@OData.Community.Display.V1.FormattedValue'], string(body('Get_Contact')?['familystatuscode']), triggerBody()?['familystatuscode@OData.Community.Display.V1.FormattedValue'], string(triggerBody()?['familystatuscode']), '')}",
+                  "firstname": "@{coalesce(body('Get_Contact')?['firstname'], triggerBody()?['firstname'], '')}",
+                  "fullname": "@{coalesce(body('Get_Contact')?['fullname'], triggerBody()?['fullname'], '')}",
+                  "gendercode": "@{coalesce(body('Get_Contact')?['gendercode@OData.Community.Display.V1.FormattedValue'], string(body('Get_Contact')?['gendercode']), triggerBody()?['gendercode@OData.Community.Display.V1.FormattedValue'], string(triggerBody()?['gendercode']), '')}",
+                  "governmentid": "@{coalesce(body('Get_Contact')?['governmentid'], triggerBody()?['governmentid'], null)}",
+                  "jobtitle": "@{coalesce(body('Get_Contact')?['jobtitle'], triggerBody()?['jobtitle'], '')}",
+                  "lastname": "@{coalesce(body('Get_Contact')?['lastname'], triggerBody()?['lastname'], '')}",
+                  "mj_primarystore": "@{coalesce(body('Get_Contact')?['_mj_primarystore_value@OData.Community.Display.V1.FormattedValue'], string(body('Get_Contact')?['_mj_primarystore_value']), triggerBody()?['_mj_primarystore_value@OData.Community.Display.V1.FormattedValue'], string(triggerBody()?['_mj_primarystore_value']), '')}",
+                  "lastonholdtime": "@{coalesce(body('Get_Contact')?['lastonholdtime@OData.Community.Display.V1.FormattedValue'], string(body('Get_Contact')?['lastonholdtime']), triggerBody()?['lastonholdtime@OData.Community.Display.V1.FormattedValue'], string(triggerBody()?['lastonholdtime']), '')}",
+                  "lastusedincampaign": "@{coalesce(body('Get_Contact')?['lastusedincampaign@OData.Community.Display.V1.FormattedValue'], string(body('Get_Contact')?['lastusedincampaign']), triggerBody()?['lastusedincampaign@OData.Community.Display.V1.FormattedValue'], string(triggerBody()?['lastusedincampaign']), '')}",
+                  "leadsourcecode": "@{coalesce(body('Get_Contact')?['leadsourcecode@OData.Community.Display.V1.FormattedValue'], string(body('Get_Contact')?['leadsourcecode']), triggerBody()?['leadsourcecode@OData.Community.Display.V1.FormattedValue'], string(triggerBody()?['leadsourcecode']), '')}",
+                  "mj_boilermake": "@{coalesce(body('Get_Contact')?['mj_boilermake@OData.Community.Display.V1.FormattedValue'], string(body('Get_Contact')?['mj_boilermake']), triggerBody()?['mj_boilermake@OData.Community.Display.V1.FormattedValue'], string(triggerBody()?['mj_boilermake']), '')}",
+                  "mj_boilermodel": "@{coalesce(body('Get_Contact')?['mj_boilermodel'], triggerBody()?['mj_boilermodel'], '')}",
+                  "mj_doyouhaveahivethermostat": "@{coalesce(body('Get_Contact')?['mj_doyouhaveahivethermostat@OData.Community.Display.V1.FormattedValue'], string(body('Get_Contact')?['mj_doyouhaveahivethermostat']), triggerBody()?['mj_doyouhaveahivethermostat@OData.Community.Display.V1.FormattedValue'], string(triggerBody()?['mj_doyouhaveahivethermostat']), '')}",
+                  "mj_doyouhaveasmartmeter": "@{coalesce(body('Get_Contact')?['mj_doyouhaveasmartmeter@OData.Community.Display.V1.FormattedValue'], string(body('Get_Contact')?['mj_doyouhaveasmartmeter']), triggerBody()?['mj_doyouhaveasmartmeter@OData.Community.Display.V1.FormattedValue'], string(triggerBody()?['mj_doyouhaveasmartmeter']), '')}",
+                  "mj_doyouhavesmartradiatorvalves": "@{coalesce(body('Get_Contact')?['mj_doyouhavesmartradiatorvalves@OData.Community.Display.V1.FormattedValue'], string(body('Get_Contact')?['mj_doyouhavesmartradiatorvalves']), triggerBody()?['mj_doyouhavesmartradiatorvalves@OData.Community.Display.V1.FormattedValue'], string(triggerBody()?['mj_doyouhavesmartradiatorvalves']), '')}",
+                  "mj_energytariff": "@{coalesce(body('Get_Contact')?['mj_energytariff@OData.Community.Display.V1.FormattedValue'], string(body('Get_Contact')?['mj_energytariff']), triggerBody()?['mj_energytariff@OData.Community.Display.V1.FormattedValue'], string(triggerBody()?['mj_energytariff']), '')}",
+                  "mj_homecarecover": "@{coalesce(body('Get_Contact')?['mj_homecarecover@OData.Community.Display.V1.FormattedValue'], string(body('Get_Contact')?['mj_homecarecover']), triggerBody()?['mj_homecarecover@OData.Community.Display.V1.FormattedValue'], string(triggerBody()?['mj_homecarecover']), '')}",
+                  "mj_homecaretypeofcover": "@{coalesce(body('Get_Contact')?['mj_homecaretypeofcover@OData.Community.Display.V1.FormattedValue'], string(body('Get_Contact')?['mj_homecaretypeofcover']), triggerBody()?['mj_homecaretypeofcover@OData.Community.Display.V1.FormattedValue'], triggerBody()?['mj_homecaretypeofcover'], '')}",
+                  "mj_homeevcharger": "@{coalesce(body('Get_Contact')?['mj_homeevcharger@OData.Community.Display.V1.FormattedValue'], string(body('Get_Contact')?['mj_homeevcharger']), triggerBody()?['mj_homeevcharger@OData.Community.Display.V1.FormattedValue'], string(triggerBody()?['mj_homeevcharger']), '')}",
+                  "mj_initiateoutboundcall": "@{coalesce(body('Get_Contact')?['mj_initiateoutboundcall@OData.Community.Display.V1.FormattedValue'], string(body('Get_Contact')?['mj_initiateoutboundcall']), triggerBody()?['mj_initiateoutboundcall@OData.Community.Display.V1.FormattedValue'], string(triggerBody()?['mj_initiateoutboundcall']), '')}",
+                  "mj_installationdate": "@{coalesce(body('Get_Contact')?['mj_installationdate@OData.Community.Display.V1.FormattedValue'], string(body('Get_Contact')?['mj_installationdate']), triggerBody()?['mj_installationdate@OData.Community.Display.V1.FormattedValue'], string(triggerBody()?['mj_installationdate']), '')}",
+                  "mj_priorityregister": "@{coalesce(body('Get_Contact')?['mj_priorityregister@OData.Community.Display.V1.FormattedValue'], string(body('Get_Contact')?['mj_priorityregister']), triggerBody()?['mj_priorityregister@OData.Community.Display.V1.FormattedValue'], string(triggerBody()?['mj_priorityregister']), '')}",
+                  "mj_refreshanalysis": "@{coalesce(body('Get_Contact')?['mj_refreshanalysis@OData.Community.Display.V1.FormattedValue'], string(body('Get_Contact')?['mj_refreshanalysis']), triggerBody()?['mj_refreshanalysis@OData.Community.Display.V1.FormattedValue'], string(triggerBody()?['mj_refreshanalysis']), '')}",
+                  "mj_repairedrecently": "@{coalesce(body('Get_Contact')?['mj_repairedrecently@OData.Community.Display.V1.FormattedValue'], string(body('Get_Contact')?['mj_repairedrecently']), triggerBody()?['mj_repairedrecently@OData.Community.Display.V1.FormattedValue'], string(triggerBody()?['mj_repairedrecently']), '')}",
+                  "mj_smartmeter": "@{coalesce(body('Get_Contact')?['mj_smartmeter@OData.Community.Display.V1.FormattedValue'], string(body('Get_Contact')?['mj_smartmeter']), triggerBody()?['mj_smartmeter@OData.Community.Display.V1.FormattedValue'], string(triggerBody()?['mj_smartmeter']), '')}",
+                  "mj_utility_ev_owner": "@{coalesce(body('Get_Contact')?['mj_utility_ev_owner@OData.Community.Display.V1.FormattedValue'], string(body('Get_Contact')?['mj_utility_ev_owner']), triggerBody()?['mj_utility_ev_owner@OData.Community.Display.V1.FormattedValue'], string(triggerBody()?['mj_utility_ev_owner']), '')}",
+                  "preferredcontactmethodcode": "@{coalesce(body('Get_Contact')?['preferredcontactmethodcode@OData.Community.Display.V1.FormattedValue'], string(body('Get_Contact')?['preferredcontactmethodcode']), triggerBody()?['preferredcontactmethodcode@OData.Community.Display.V1.FormattedValue'], string(triggerBody()?['preferredcontactmethodcode']), '')}",
+                  "telephone1": "@{coalesce(body('Get_Contact')?['telephone1'], triggerBody()?['telephone1'], '')}",
+                  "mobilephone": "@{coalesce(body('Get_Contact')?['mobilephone'], triggerBody()?['mobilephone'], '')}"
+                },
+                "contact": {
+                  "contactId": "@{variables('ContactId')}",
+                  "fullName": "@{coalesce(body('Get_Contact')?['fullname'], '')}",
+                  "firstName": "@{coalesce(body('Get_Contact')?['firstname'], '')}",
+                  "lastName": "@{coalesce(body('Get_Contact')?['lastname'], '')}",
+                  "email": "@{coalesce(body('Get_Contact')?['emailaddress1'], '')}",
+                  "phone": "@{coalesce(body('Get_Contact')?['telephone1'], '')}",
+                  "mobile": "@{coalesce(body('Get_Contact')?['mobilephone'], '')}",
+                  "address": {
+                    "composite": "@{coalesce(body('Get_Contact')?['address1_composite'], '')}",
+                    "line1": "@{coalesce(body('Get_Contact')?['address1_line1'], '')}",
+                    "line2": "@{coalesce(body('Get_Contact')?['address1_line2'], '')}",
+                    "line3": "@{coalesce(body('Get_Contact')?['address1_line3'], '')}",
+                    "city": "@{coalesce(body('Get_Contact')?['address1_city'], '')}",
+                    "postcode": "@{coalesce(body('Get_Contact')?['address1_postalcode'], '')}",
+                    "country": "@{coalesce(body('Get_Contact')?['address1_country'], '')}",
+                    "latitude": "@{coalesce(body('Get_Contact')?['address1_latitude'], null)}",
+                    "longitude": "@{coalesce(body('Get_Contact')?['address1_longitude'], null)}"
+                  }
+                },
+                "productsAndServices": {
+                  "refreshAnalysis": "@{coalesce(body('Get_Contact')?['mj_refreshanalysis@OData.Community.Display.V1.FormattedValue'], string(body('Get_Contact')?['mj_refreshanalysis']), '')}",
+                  "boiler": {
+                    "make": "@{coalesce(body('Get_Contact')?['mj_boilermake@OData.Community.Display.V1.FormattedValue'], string(body('Get_Contact')?['mj_boilermake']), '')}",
+                    "model": "@{coalesce(body('Get_Contact')?['mj_boilermodel'], '')}",
+                    "installationDate": "@{coalesce(body('Get_Contact')?['mj_installationdate@OData.Community.Display.V1.FormattedValue'], string(body('Get_Contact')?['mj_installationdate']), '')}",
+                    "repairedRecently": "@{coalesce(body('Get_Contact')?['mj_repairedrecently@OData.Community.Display.V1.FormattedValue'], string(body('Get_Contact')?['mj_repairedrecently']), '')}"
+                  },
+                  "heatingAndCover": {
+                    "homeCareCover": "@{coalesce(body('Get_Contact')?['mj_homecarecover@OData.Community.Display.V1.FormattedValue'], string(body('Get_Contact')?['mj_homecarecover']), '')}",
+                    "typeOfCover": "@{coalesce(body('Get_Contact')?['mj_homecaretypeofcover@OData.Community.Display.V1.FormattedValue'], string(body('Get_Contact')?['mj_homecaretypeofcover']), triggerBody()?['mj_homecaretypeofcover@OData.Community.Display.V1.FormattedValue'], triggerBody()?['mj_homecaretypeofcover'], '')}"
+                  },
+                  "energySupply": {
+                    "energyTariff": "@{coalesce(body('Get_Contact')?['mj_energytariff@OData.Community.Display.V1.FormattedValue'], string(body('Get_Contact')?['mj_energytariff']), '')}",
+                    "smartMeter": "@{coalesce(body('Get_Contact')?['mj_smartmeter@OData.Community.Display.V1.FormattedValue'], string(body('Get_Contact')?['mj_smartmeter']), '')}",
+                    "doYouHaveASmartMeter": "@{coalesce(body('Get_Contact')?['mj_doyouhaveasmartmeter@OData.Community.Display.V1.FormattedValue'], string(body('Get_Contact')?['mj_doyouhaveasmartmeter']), triggerBody()?['mj_doyouhaveasmartmeter@OData.Community.Display.V1.FormattedValue'], string(triggerBody()?['mj_doyouhaveasmartmeter']), '')}"
+                  },
+                  "electricVehicle": {
+                    "evOwner": "@{coalesce(body('Get_Contact')?['mj_utility_ev_owner@OData.Community.Display.V1.FormattedValue'], string(body('Get_Contact')?['mj_utility_ev_owner']), '')}",
+                    "homeEvCharger": "@{coalesce(body('Get_Contact')?['mj_homeevcharger@OData.Community.Display.V1.FormattedValue'], string(body('Get_Contact')?['mj_homeevcharger']), '')}"
+                  },
+                  "smartHome": {
+                    "hiveThermostat": "@{coalesce(body('Get_Contact')?['mj_doyouhaveahivethermostat@OData.Community.Display.V1.FormattedValue'], string(body('Get_Contact')?['mj_doyouhaveahivethermostat']), '')}",
+                    "smartRadiatorValves": "@{coalesce(body('Get_Contact')?['mj_doyouhavesmartradiatorvalves@OData.Community.Display.V1.FormattedValue'], string(body('Get_Contact')?['mj_doyouhavesmartradiatorvalves']), '')}"
+                  },
+                  "serviceFlags": {
+                    "initiateOutboundCall": "@{coalesce(body('Get_Contact')?['mj_initiateoutboundcall@OData.Community.Display.V1.FormattedValue'], string(body('Get_Contact')?['mj_initiateoutboundcall']), '')}",
+                    "priorityRegister": "@{coalesce(body('Get_Contact')?['mj_priorityregister@OData.Community.Display.V1.FormattedValue'], string(body('Get_Contact')?['mj_priorityregister']), '')}",
+                    "preferredContactMethod": "@{coalesce(body('Get_Contact')?['preferredcontactmethodcode@OData.Community.Display.V1.FormattedValue'], string(body('Get_Contact')?['preferredcontactmethodcode']), '')}"
+                  },
+                  "analysis": {
+                    "conversationPoints": "@{coalesce(body('Get_Contact')?['mj_conversationpoints'], '')}",
+                    "conversationLogic": "@{coalesce(body('Get_Contact')?['mj_conversationlogic'], '')}"
+                  }
+                }
+              },
+              "runAfter": {
+                "Get_Contact": [
+                  "Succeeded"
+                ]
+              }
+            },
+            "OpenAI_-_Summarise_Customer": {
+              "type": "Http",
+              "inputs": {
+                "uri": "@{concat(if(endsWith(parameters('openAiEndpoint'), '/'), parameters('openAiEndpoint'), concat(parameters('openAiEndpoint'), '/')), 'openai/deployments/', parameters('openAiDeployment'), '/chat/completions?api-version=', parameters('openAiApiVersion'))}",
+                "method": "POST",
+                "headers": {
+                  "Content-Type": "application/json",
+                  "api-key": "@{parameters('openAiApiKey')}"
+                },
+                "body": {
+                  "messages": [
+                    {
+                      "role": "system",
+                      "content": "You generate next-best conversation recommendations for an agent speaking with a customer."
+                    },
+                    {
+                      "role": "user",
+                      "content": "Make next best conversation recommendations based ONLY on the provided fields (do not invent or assume missing data).\n\nOutput MUST be plain text in this structure (repeat sections as needed):\n\nRecommended Next Conversations\n\n<HomeCare Boiler Cover>\nPosition: ...\nExample:\n\"...\"\n\n<Boiler Replacement>\nPosition: ...\nExample:\n\"...\"\n\n<Hive Smart Thermostat>\nPosition: ...\nExample:\n\"...\"\n\n<Home EV Charger>\nPosition: ...\nExample:\n\"...\"\n\n<EV Tariff>\nPosition: ...\nExample:\n\"...\"\n\nRules to apply (use best-effort based on provided fields):\n- If boiler repaired recently AND no HomeCare cover => recommend HomeCare Boiler Cover.\n- If EV Owner is Yes AND Home EV Charger is No => recommend Home EV Charger.\n- If EV Owner is Yes AND energy tariff is NOT an EV tariff => recommend EV Tariff. (Heuristic: if the energy tariff label/value does not contain 'EV', treat as not an EV tariff.)\n- If Hive Thermostat is No => recommend Hive Smart Thermostat (energy savings + convenience).\n- If boiler installation date indicates an older boiler (>8 years) => recommend Boiler Replacement AND HomeCare Boiler Cover.\n\nInclude 3-6 sections; omit any that do not apply.\n\nCustomer data (JSON):\n@{string(outputs('Compose_-_CustomerData'))}"
+                    }
+                  ],
+                  "temperature": 0.2,
+                  "max_tokens": 700
+                }
+              },
+              "runAfter": {
+                "Compose_-_CustomerData": [
+                  "Succeeded"
+                ]
+              }
+            },
+            "Compose_-_OpenAiSummary": {
+              "type": "Compose",
+              "inputs": "@coalesce(body('OpenAI_-_Summarise_Customer')?['choices']?[0]?['message']?['content'], string(body('OpenAI_-_Summarise_Customer')))",
+              "runAfter": {
+                "OpenAI_-_Summarise_Customer": [
+                  "Succeeded"
+                ]
+              }
+            },
+            "Compose_-_ConversationPoints_Truncated": {
+              "type": "Compose",
+              "inputs": "@if(greater(length(string(outputs('Compose_-_OpenAiSummary'))), 1048576), substring(string(outputs('Compose_-_OpenAiSummary')), 0, 1048576), string(outputs('Compose_-_OpenAiSummary'))) ",
+              "runAfter": {
+                "Compose_-_OpenAiSummary": [
+                  "Succeeded"
+                ]
+              }
+            },
+            "Update_Contact_-_Set_mj_conversationpoints": {
+              "type": "Http",
+              "inputs": {
+                "uri": "@{concat(parameters('dataverseBaseUrl'), '/api/data/v9.2/contacts(', variables('ContactId'), ')')}",
+                "method": "PATCH",
+                "headers": {
+                  "OData-MaxVersion": "4.0",
+                  "OData-Version": "4.0",
+                  "Accept": "application/json;odata.metadata=none",
+                  "Content-Type": "application/json; charset=utf-8",
+                  "If-Match": "*"
+                },
+                "body": {
+                  "mj_conversationpoints": "@{outputs('Compose_-_ConversationPoints_Truncated')}"
+                },
+                "authentication": {
+                  "type": "ActiveDirectoryOAuth",
+                  "tenant": "@{parameters('dataverseTenantId')}",
+                  "audience": "@{parameters('dataverseBaseUrl')}",
+                  "clientId": "@{parameters('dataverseClientId')}",
+                  "secret": "@{parameters('dataverseClientSecret')}"
+                }
+              },
+              "runAfter": {
+                "Compose_-_ConversationPoints_Truncated": [
+                  "Succeeded"
+                ]
+              }
+            },
+            "Compose_-_Debug_View": {
+              "type": "Compose",
+              "inputs": "@variables('ReceivedDataverseChange')",
+              "runAfter": {
+                "Update_Contact_-_Set_mj_conversationpoints": [
+                  "Succeeded"
+                ]
+              }
+            },
+            "Compose_-_AnalysisLastRun_UK": {
+              "type": "Compose",
+              "inputs": "@{concat(formatDateTime(convertTimeZone(utcNow(), 'UTC', 'GMT Standard Time'), 'dddd '), string(dayOfMonth(convertTimeZone(utcNow(), 'UTC', 'GMT Standard Time'))), if(or(equals(dayOfMonth(convertTimeZone(utcNow(), 'UTC', 'GMT Standard Time')), 11), equals(dayOfMonth(convertTimeZone(utcNow(), 'UTC', 'GMT Standard Time')), 12), equals(dayOfMonth(convertTimeZone(utcNow(), 'UTC', 'GMT Standard Time')), 13)), 'th', if(equals(mod(dayOfMonth(convertTimeZone(utcNow(), 'UTC', 'GMT Standard Time')), 10), 1), 'st', if(equals(mod(dayOfMonth(convertTimeZone(utcNow(), 'UTC', 'GMT Standard Time')), 10), 2), 'nd', if(equals(mod(dayOfMonth(convertTimeZone(utcNow(), 'UTC', 'GMT Standard Time')), 10), 3), 'rd', 'th')))), ' ', formatDateTime(convertTimeZone(utcNow(), 'UTC', 'GMT Standard Time'), 'MMMM'), ', ', formatDateTime(convertTimeZone(utcNow(), 'UTC', 'GMT Standard Time'), 'HH:mm'))} ",
+              "runAfter": {
+                "Compose_-_Debug_View": [
+                  "Succeeded"
+                ]
+              }
+            },
+            "Update_Contact_-_Set_AnalysisLastRun": {
+              "type": "Http",
+              "inputs": {
+                "uri": "@{concat(parameters('dataverseBaseUrl'), '/api/data/v9.2/contacts(', variables('ContactId'), ')')}",
+                "method": "PATCH",
+                "headers": {
+                  "OData-MaxVersion": "4.0",
+                  "OData-Version": "4.0",
+                  "Accept": "application/json;odata.metadata=none",
+                  "Content-Type": "application/json; charset=utf-8",
+                  "If-Match": "*"
+                },
+                "body": {
+                  "mj_analysislastrun": "@{outputs('Compose_-_AnalysisLastRun_UK')}"
+                },
+                "authentication": {
+                  "type": "ActiveDirectoryOAuth",
+                  "tenant": "@{parameters('dataverseTenantId')}",
+                  "audience": "@{parameters('dataverseBaseUrl')}",
+                  "clientId": "@{parameters('dataverseClientId')}",
+                  "secret": "@{parameters('dataverseClientSecret')}"
+                }
+              },
+              "runAfter": {
+                "Compose_-_AnalysisLastRun_UK": [
+                  "Succeeded"
+                ]
+              }
+            },
+            "Update_Contact_-_Set_AnalysisLastRun_Alt": {
+              "type": "Http",
+              "inputs": {
+                "uri": "@{concat(parameters('dataverseBaseUrl'), '/api/data/v9.2/contacts(', variables('ContactId'), ')')}",
+                "method": "PATCH",
+                "headers": {
+                  "OData-MaxVersion": "4.0",
+                  "OData-Version": "4.0",
+                  "Accept": "application/json;odata.metadata=none",
+                  "Content-Type": "application/json; charset=utf-8",
+                  "If-Match": "*"
+                },
+                "body": {
+                  "mj_AnalysisLastRun": "@{outputs('Compose_-_AnalysisLastRun_UK')}"
+                },
+                "authentication": {
+                  "type": "ActiveDirectoryOAuth",
+                  "tenant": "@{parameters('dataverseTenantId')}",
+                  "audience": "@{parameters('dataverseBaseUrl')}",
+                  "clientId": "@{parameters('dataverseClientId')}",
+                  "secret": "@{parameters('dataverseClientSecret')}"
+                }
+              },
+              "runAfter": {
+                "Update_Contact_-_Set_AnalysisLastRun": [
+                  "Failed"
+                ]
+              }
+            },
+            "Return_HTTP_200_OK": {
+              "type": "Response",
+              "kind": "Http",
+              "inputs": {
+                "statusCode": 200,
+                "headers": {
+                  "Content-Type": "application/json"
+                },
+                "body": {
+                  "status": "success",
+                  "contactId": "@{variables('ContactId')}",
+                  "processedAt": "@{utcNow()}"
+                }
+              },
+              "runAfter": {
+                "Update_Contact_-_Set_AnalysisLastRun": [
+                  "Succeeded"
+                ]
+              }
+            },
+            "Return_HTTP_200_OK_Alt": {
+              "type": "Response",
+              "kind": "Http",
+              "inputs": {
+                "statusCode": 200,
+                "headers": {
+                  "Content-Type": "application/json"
+                },
+                "body": {
+                  "status": "success",
+                  "contactId": "@{variables('ContactId')}",
+                  "processedAt": "@{utcNow()}"
+                }
+              },
+              "runAfter": {
+                "Update_Contact_-_Set_AnalysisLastRun_Alt": [
+                  "Succeeded"
+                ]
+              }
+            }
+          },
+          "outputs": {}
+        },
+        "parameters": {
+          "$connections": {
+            "value": {
+              "commondataservice": {
+                "connectionId": "[resourceId('Microsoft.Web/connections', variables('analyseCustomerVersion2DataverseConnectionName'))]",
+                "connectionName": "[variables('analyseCustomerVersion2DataverseConnectionName')]",
+                "id": "[variables('dataverseManagedApiId')]"
+              }
+            }
+          },
+          "dataverseBaseUrl": {
+            "value": "[parameters('dataverseBaseUrl')]"
+          },
+          "dataverseTenantId": {
+            "value": "[parameters('dataverseTenantId')]"
+          },
+          "dataverseClientId": {
+            "value": "[parameters('dataverseClientId')]"
+          },
+          "dataverseClientSecret": {
+            "value": "[parameters('dataverseClientSecret')]"
+          },
+          "openAiEndpoint": {
+            "value": "[parameters('openAiEndpoint')]"
+          },
+          "openAiDeployment": {
+            "value": "[parameters('openAiDeployment')]"
+          },
+          "openAiApiVersion": {
+            "value": "[parameters('openAiApiVersion')]"
+          },
+          "openAiApiKey": {
+            "value": "[parameters('openAiApiKey')]"
+          }
+        }
+      }
+    }
+  ],
+  "outputs": {
+    "logicAppUrl": {
+      "type": "string",
+      "value": "[listCallbackURL(concat(resourceId('Microsoft.Logic/workflows', parameters('logicAppName')), '/triggers/manual'), '2019-05-01').value]"
+    },
+    "analyseCustomerVersion2Url": {
+      "type": "string",
+      "value": "[listCallbackURL(concat(resourceId('Microsoft.Logic/workflows', parameters('analyseCustomerVersion2LogicAppName')), '/triggers/When_an_HTTP_request_is_received'), '2019-05-01').value]"
+    }
+  }
+}

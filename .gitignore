@@ -1,0 +1,43 @@
+# Azure Logic Apps Development - .gitignore
+
+# Azure Functions artifacts
+bin/
+obj/
+
+# VS Code
+.vscode/settings.json
+.vscode/launch.json
+
+# Azure credentials and local settings
+local.settings.json
+*.user
+*.suo
+
+# Environment variables
+.env
+.env.local
+
+# Local ARM/Logic App secret parameters (do not commit)
+parameters/*.secrets.parameters.json
+
+# Node modules (if using custom connectors)
+node_modules/
+
+# Logs
+*.log
+logs/
+
+# OS specific
+.DS_Store
+Thumbs.db
+
+# IDE
+*.swp
+*.swo
+*~
+.idea/
+
+# Temporary files
+tmp/
+temp/
+*.tmp

@@ -1,0 +1,610 @@
+{
+  "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "dataverseBaseUrl": {
+      "type": "String",
+      "defaultValue": ""
+    },
+    "dataverseTenantId": {
+      "type": "String",
+      "defaultValue": ""
+    },
+    "dataverseClientId": {
+      "type": "String",
+      "defaultValue": ""
+    },
+    "dataverseClientSecret": {
+      "type": "SecureString",
+      "defaultValue": ""
+    },
+    "openAiEndpoint": {
+      "type": "String",
+      "defaultValue": ""
+    },
+    "openAiDeployment": {
+      "type": "String",
+      "defaultValue": "gpt-4o"
+    },
+    "openAiApiVersion": {
+      "type": "String",
+      "defaultValue": "2024-10-21"
+    },
+    "openAiApiKey": {
+      "type": "SecureString",
+      "defaultValue": ""
+    },
+    "$connections": {
+      "defaultValue": {},
+      "type": "Object"
+    }
+  },
+  "triggers": {
+    "When_MJ_RefreshAnalysis_file_changes": {
+      "type": "ApiConnectionWebhook",
+      "inputs": {
+        "host": {
+          "connection": {
+            "name": "@parameters('$connections')['commondataservice']['connectionId']"
+          }
+        },
+        "body": {
+          "entityname": "contact",
+          "message": 3,
+          "scope": 4,
+          "filterexpression": "mj_refreshanalysis eq true",
+          "version": 1,
+          "url": "@listCallbackUrl()",
+          "filteringattributes": "mj_refreshanalysis"
+        },
+        "headers": {
+          "organization": "@{parameters('dataverseBaseUrl')}",
+          "Consistency": "Strong",
+          "catalog": "all",
+          "category": "all"
+        },
+        "path": "/api/data/v9.1/callbackregistrations"
+      }
+    }
+  },
+  "actions": {
+    "Initialize_variable_-_ReceivedDataverseChange": {
+      "type": "InitializeVariable",
+      "inputs": {
+        "variables": [
+          {
+            "name": "ReceivedDataverseChange",
+            "type": "Object",
+            "value": "@triggerBody()"
+          },
+          {
+            "name": "ContactId",
+            "type": "String",
+            "value": "@string(coalesce(triggerBody()?['contactid'], triggerBody()?['ContactId'], triggerBody()?['id'], triggerBody()?['Id'], triggerBody()?['ItemInternalId'], triggerBody()?['body']?['contactid'], triggerBody()?['body']?['ContactId'], triggerBody()?['body']?['id'], triggerBody()?['body']?['Id'], triggerBody()?['body']?['recordId'], triggerBody()?['body']?['recordid'], triggerBody()?['body']?['primaryKey'], triggerBody()?['body']?['RowId'], triggerBody()?['body']?['rowId'], triggerBody()?['body']?['entity']?['contactid'], triggerBody()?['body']?['entity']?['ContactId']))"
+          }
+        ]
+      },
+      "runAfter": {}
+    },
+    "If_ContactId_Is_Empty": {
+      "type": "If",
+      "expression": "@empty(variables('ContactId'))",
+      "actions": {
+        "Compose_-_MissingContactId": {
+          "type": "Compose",
+          "inputs": {
+            "message": "ContactId could not be extracted from the Dataverse change payload.",
+            "triggerBody": "@triggerBody()"
+          },
+          "runAfter": {}
+        },
+        "Terminate_-_MissingContactId": {
+          "type": "Terminate",
+          "inputs": {
+            "runStatus": "Failed",
+            "code": "MissingContactId",
+            "message": "ContactId could not be extracted from the Dataverse change payload."
+          },
+          "runAfter": {
+            "Compose_-_MissingContactId": [
+              "Succeeded"
+            ]
+          }
+        }
+      },
+      "else": {
+        "actions": {}
+      },
+      "runAfter": {
+        "Initialize_variable_-_ReceivedDataverseChange": [
+          "Succeeded"
+        ]
+      }
+    },
+    "Initialize_variable_-_RefreshCheckAttempt": {
+      "type": "InitializeVariable",
+      "inputs": {
+        "variables": [
+          {
+            "name": "RefreshCheckAttempt",
+            "type": "Integer",
+            "value": 0
+          }
+        ]
+      },
+      "runAfter": {
+        "If_ContactId_Is_Empty": [
+          "Succeeded"
+        ]
+      }
+    },
+    "Initialize_variable_-_RefreshCheckIsTrue": {
+      "type": "InitializeVariable",
+      "inputs": {
+        "variables": [
+          {
+            "name": "RefreshCheckIsTrue",
+            "type": "Boolean",
+            "value": false
+          }
+        ]
+      },
+      "runAfter": {
+        "Initialize_variable_-_RefreshCheckAttempt": [
+          "Succeeded"
+        ]
+      }
+    },
+    "Until_-_RefreshAnalysis_Visible": {
+      "type": "Until",
+      "expression": "@or(equals(variables('RefreshCheckIsTrue'), true), greaterOrEquals(variables('RefreshCheckAttempt'), 6))",
+      "limit": {
+        "count": 6,
+        "timeout": "PT45S"
+      },
+      "actions": {
+        "Increment_variable_-_RefreshCheckAttempt": {
+          "type": "IncrementVariable",
+          "inputs": {
+            "name": "RefreshCheckAttempt",
+            "value": 1
+          },
+          "runAfter": {}
+        },
+        "Get_Contact_-_RefreshOnly": {
+          "type": "Http",
+          "inputs": {
+            "uri": "@{concat(parameters('dataverseBaseUrl'), '/api/data/v9.2/contacts(', variables('ContactId'), ')?$select=mj_refreshanalysis,modifiedon')}",
+            "method": "GET",
+            "headers": {
+              "OData-MaxVersion": "4.0",
+              "OData-Version": "4.0",
+              "Accept": "application/json;odata.metadata=none",
+              "Content-Type": "application/json; charset=utf-8",
+              "Prefer": "odata.include-annotations=\"OData.Community.Display.V1.FormattedValue\""
+            },
+            "authentication": {
+              "type": "ActiveDirectoryOAuth",
+              "tenant": "@{parameters('dataverseTenantId')}",
+              "audience": "@{parameters('dataverseBaseUrl')}",
+              "clientId": "@{parameters('dataverseClientId')}",
+              "secret": "@{parameters('dataverseClientSecret')}"
+            }
+          },
+          "runAfter": {
+            "Increment_variable_-_RefreshCheckAttempt": [
+              "Succeeded"
+            ]
+          }
+        },
+        "Set_variable_-_RefreshCheckIsTrue": {
+          "type": "SetVariable",
+          "inputs": {
+            "name": "RefreshCheckIsTrue",
+            "value": "@or(equals(body('Get_Contact_-_RefreshOnly')?['mj_refreshanalysis'], true), equals(body('Get_Contact_-_RefreshOnly')?['mj_refreshanalysis@OData.Community.Display.V1.FormattedValue'], 'Yes'), equals(toLower(string(body('Get_Contact_-_RefreshOnly')?['mj_refreshanalysis'])), 'true'))"
+          },
+          "runAfter": {
+            "Get_Contact_-_RefreshOnly": [
+              "Succeeded"
+            ]
+          }
+        },
+        "If_-_RefreshStillNotTrue": {
+          "type": "If",
+          "expression": "@not(equals(variables('RefreshCheckIsTrue'), true))",
+          "actions": {
+            "Delay_-_Between_RefreshChecks": {
+              "type": "Wait",
+              "inputs": {
+                "interval": {
+                  "count": 2,
+                  "unit": "Second"
+                }
+              },
+              "runAfter": {}
+            }
+          },
+          "else": {
+            "actions": {}
+          },
+          "runAfter": {
+            "Set_variable_-_RefreshCheckIsTrue": [
+              "Succeeded"
+            ]
+          }
+        }
+      },
+      "runAfter": {
+        "Initialize_variable_-_RefreshCheckIsTrue": [
+          "Succeeded"
+        ]
+      }
+    },
+    "If_-_RefreshAnalysis_Not_Visible_After_Retries": {
+      "type": "If",
+      "expression": "@not(equals(variables('RefreshCheckIsTrue'), true))",
+      "actions": {
+        "Terminate_-_RefreshAnalysis_Not_Visible": {
+          "type": "Terminate",
+          "inputs": {
+            "runStatus": "Succeeded",
+            "code": "RefreshAnalysisNotVisible",
+            "message": "mj_refreshanalysis was not readable as true/Yes after retries; run ignored to avoid false negatives."
+          },
+          "runAfter": {}
+        }
+      },
+      "else": {
+        "actions": {}
+      },
+      "runAfter": {
+        "Until_-_RefreshAnalysis_Visible": [
+          "Succeeded"
+        ]
+      }
+    },
+    "Get_Contact": {
+      "type": "Http",
+      "inputs": {
+        "uri": "@{concat(parameters('dataverseBaseUrl'), '/api/data/v9.2/contacts(', variables('ContactId'), ')?$select=fullname,firstname,lastname,emailaddress1,telephone1,mobilephone,address1_line1,address1_line2,address1_line3,address1_city,address1_postalcode,address1_country,address1_composite,address1_latitude,address1_longitude,birthdate,familystatuscode,gendercode,governmentid,jobtitle,lastonholdtime,lastusedincampaign,leadsourcecode,preferredcontactmethodcode,_mj_primarystore_value,mj_refreshanalysis,mj_boilermake,mj_boilermodel,mj_installationdate,mj_repairedrecently,mj_homecarecover,mj_homecaretypeofcover,mj_energytariff,mj_smartmeter,mj_doyouhaveasmartmeter,mj_utility_ev_owner,mj_homeevcharger,mj_doyouhaveahivethermostat,mj_doyouhavesmartradiatorvalves,mj_conversationpoints,mj_conversationlogic,mj_initiateoutboundcall,mj_priorityregister')}",
+        "method": "GET",
+        "headers": {
+          "OData-MaxVersion": "4.0",
+          "OData-Version": "4.0",
+          "Accept": "application/json;odata.metadata=none",
+          "Content-Type": "application/json; charset=utf-8",
+          "Prefer": "odata.include-annotations=\"OData.Community.Display.V1.FormattedValue\""
+        },
+        "authentication": {
+          "type": "ActiveDirectoryOAuth",
+          "tenant": "@{parameters('dataverseTenantId')}",
+          "audience": "@{parameters('dataverseBaseUrl')}",
+          "clientId": "@{parameters('dataverseClientId')}",
+          "secret": "@{parameters('dataverseClientSecret')}"
+        }
+      },
+      "runAfter": {
+        "If_-_RefreshAnalysis_Not_Visible_After_Retries": [
+          "Succeeded"
+        ]
+      }
+    },
+    "If_MJ_RefreshAnalysis_Is_Not_True_After_Get": {
+      "type": "If",
+      "expression": "@not(or(equals(body('Get_Contact')?['mj_refreshanalysis'], true), equals(body('Get_Contact')?['mj_refreshanalysis@OData.Community.Display.V1.FormattedValue'], 'Yes'), equals(toLower(string(body('Get_Contact')?['mj_refreshanalysis'])), 'true')))",
+      "actions": {
+        "Terminate_-_RefreshAnalysis_Not_True": {
+          "type": "Terminate",
+          "inputs": {
+            "runStatus": "Succeeded",
+            "code": "RefreshAnalysisNotTrue",
+            "message": "mj_refreshanalysis is not true/Yes on the Contact record; run ignored."
+          },
+          "runAfter": {}
+        }
+      },
+      "else": {
+        "actions": {}
+      },
+      "runAfter": {
+        "Get_Contact": [
+          "Succeeded"
+        ]
+      }
+    },
+    "Compose_-_CustomerData": {
+      "type": "Compose",
+      "inputs": {
+        "dataverseFields": {
+          "address1_city": "@{coalesce(body('Get_Contact')?['address1_city'], triggerBody()?['address1_city'], '')}",
+          "address1_composite": "@{coalesce(body('Get_Contact')?['address1_composite'], triggerBody()?['address1_composite'], '')}",
+          "address1_country": "@{coalesce(body('Get_Contact')?['address1_country'], triggerBody()?['address1_country'], '')}",
+          "address1_latitude": "@{coalesce(body('Get_Contact')?['address1_latitude'], triggerBody()?['address1_latitude'], null)}",
+          "address1_line1": "@{coalesce(body('Get_Contact')?['address1_line1'], triggerBody()?['address1_line1'], '')}",
+          "address1_longitude": "@{coalesce(body('Get_Contact')?['address1_longitude'], triggerBody()?['address1_longitude'], null)}",
+          "address1_postalcode": "@{coalesce(body('Get_Contact')?['address1_postalcode'], triggerBody()?['address1_postalcode'], '')}",
+          "birthdate": "@{coalesce(body('Get_Contact')?['birthdate@OData.Community.Display.V1.FormattedValue'], string(body('Get_Contact')?['birthdate']), triggerBody()?['birthdate@OData.Community.Display.V1.FormattedValue'], string(triggerBody()?['birthdate']), '')}",
+          "emailaddress1": "@{coalesce(body('Get_Contact')?['emailaddress1'], triggerBody()?['emailaddress1'], '')}",
+          "familystatuscode": "@{coalesce(body('Get_Contact')?['familystatuscode@OData.Community.Display.V1.FormattedValue'], string(body('Get_Contact')?['familystatuscode']), triggerBody()?['familystatuscode@OData.Community.Display.V1.FormattedValue'], string(triggerBody()?['familystatuscode']), '')}",
+          "firstname": "@{coalesce(body('Get_Contact')?['firstname'], triggerBody()?['firstname'], '')}",
+          "fullname": "@{coalesce(body('Get_Contact')?['fullname'], triggerBody()?['fullname'], '')}",
+          "gendercode": "@{coalesce(body('Get_Contact')?['gendercode@OData.Community.Display.V1.FormattedValue'], string(body('Get_Contact')?['gendercode']), triggerBody()?['gendercode@OData.Community.Display.V1.FormattedValue'], string(triggerBody()?['gendercode']), '')}",
+          "governmentid": "@{coalesce(body('Get_Contact')?['governmentid'], triggerBody()?['governmentid'], null)}",
+          "jobtitle": "@{coalesce(body('Get_Contact')?['jobtitle'], triggerBody()?['jobtitle'], '')}",
+          "lastname": "@{coalesce(body('Get_Contact')?['lastname'], triggerBody()?['lastname'], '')}",
+          "mj_primarystore": "@{coalesce(body('Get_Contact')?['_mj_primarystore_value@OData.Community.Display.V1.FormattedValue'], string(body('Get_Contact')?['_mj_primarystore_value']), triggerBody()?['_mj_primarystore_value@OData.Community.Display.V1.FormattedValue'], string(triggerBody()?['_mj_primarystore_value']), '')}",
+          "lastonholdtime": "@{coalesce(body('Get_Contact')?['lastonholdtime@OData.Community.Display.V1.FormattedValue'], string(body('Get_Contact')?['lastonholdtime']), triggerBody()?['lastonholdtime@OData.Community.Display.V1.FormattedValue'], string(triggerBody()?['lastonholdtime']), '')}",
+          "lastusedincampaign": "@{coalesce(body('Get_Contact')?['lastusedincampaign@OData.Community.Display.V1.FormattedValue'], string(body('Get_Contact')?['lastusedincampaign']), triggerBody()?['lastusedincampaign@OData.Community.Display.V1.FormattedValue'], string(triggerBody()?['lastusedincampaign']), '')}",
+          "leadsourcecode": "@{coalesce(body('Get_Contact')?['leadsourcecode@OData.Community.Display.V1.FormattedValue'], string(body('Get_Contact')?['leadsourcecode']), triggerBody()?['leadsourcecode@OData.Community.Display.V1.FormattedValue'], string(triggerBody()?['leadsourcecode']), '')}",
+          "mj_boilermake": "@{coalesce(body('Get_Contact')?['mj_boilermake@OData.Community.Display.V1.FormattedValue'], string(body('Get_Contact')?['mj_boilermake']), triggerBody()?['mj_boilermake@OData.Community.Display.V1.FormattedValue'], string(triggerBody()?['mj_boilermake']), '')}",
+          "mj_boilermodel": "@{coalesce(body('Get_Contact')?['mj_boilermodel'], triggerBody()?['mj_boilermodel'], '')}",
+          "mj_doyouhaveahivethermostat": "@{coalesce(body('Get_Contact')?['mj_doyouhaveahivethermostat@OData.Community.Display.V1.FormattedValue'], string(body('Get_Contact')?['mj_doyouhaveahivethermostat']), triggerBody()?['mj_doyouhaveahivethermostat@OData.Community.Display.V1.FormattedValue'], string(triggerBody()?['mj_doyouhaveahivethermostat']), '')}",
+          "mj_doyouhaveasmartmeter": "@{coalesce(body('Get_Contact')?['mj_doyouhaveasmartmeter@OData.Community.Display.V1.FormattedValue'], string(body('Get_Contact')?['mj_doyouhaveasmartmeter']), triggerBody()?['mj_doyouhaveasmartmeter@OData.Community.Display.V1.FormattedValue'], string(triggerBody()?['mj_doyouhaveasmartmeter']), '')}",
+          "mj_doyouhavesmartradiatorvalves": "@{coalesce(body('Get_Contact')?['mj_doyouhavesmartradiatorvalves@OData.Community.Display.V1.FormattedValue'], string(body('Get_Contact')?['mj_doyouhavesmartradiatorvalves']), triggerBody()?['mj_doyouhavesmartradiatorvalves@OData.Community.Display.V1.FormattedValue'], string(triggerBody()?['mj_doyouhavesmartradiatorvalves']), '')}",
+          "mj_energytariff": "@{coalesce(body('Get_Contact')?['mj_energytariff@OData.Community.Display.V1.FormattedValue'], string(body('Get_Contact')?['mj_energytariff']), triggerBody()?['mj_energytariff@OData.Community.Display.V1.FormattedValue'], string(triggerBody()?['mj_energytariff']), '')}",
+          "mj_homecarecover": "@{coalesce(body('Get_Contact')?['mj_homecarecover@OData.Community.Display.V1.FormattedValue'], string(body('Get_Contact')?['mj_homecarecover']), triggerBody()?['mj_homecarecover@OData.Community.Display.V1.FormattedValue'], string(triggerBody()?['mj_homecarecover']), '')}",
+          "mj_homecaretypeofcover": "@{coalesce(body('Get_Contact')?['mj_homecaretypeofcover@OData.Community.Display.V1.FormattedValue'], string(body('Get_Contact')?['mj_homecaretypeofcover']), triggerBody()?['mj_homecaretypeofcover@OData.Community.Display.V1.FormattedValue'], triggerBody()?['mj_homecaretypeofcover'], '')}",
+          "mj_homeevcharger": "@{coalesce(body('Get_Contact')?['mj_homeevcharger@OData.Community.Display.V1.FormattedValue'], string(body('Get_Contact')?['mj_homeevcharger']), triggerBody()?['mj_homeevcharger@OData.Community.Display.V1.FormattedValue'], string(triggerBody()?['mj_homeevcharger']), '')}",
+          "mj_initiateoutboundcall": "@{coalesce(body('Get_Contact')?['mj_initiateoutboundcall@OData.Community.Display.V1.FormattedValue'], string(body('Get_Contact')?['mj_initiateoutboundcall']), triggerBody()?['mj_initiateoutboundcall@OData.Community.Display.V1.FormattedValue'], string(triggerBody()?['mj_initiateoutboundcall']), '')}",
+          "mj_installationdate": "@{coalesce(body('Get_Contact')?['mj_installationdate@OData.Community.Display.V1.FormattedValue'], string(body('Get_Contact')?['mj_installationdate']), triggerBody()?['mj_installationdate@OData.Community.Display.V1.FormattedValue'], string(triggerBody()?['mj_installationdate']), '')}",
+          "mj_priorityregister": "@{coalesce(body('Get_Contact')?['mj_priorityregister@OData.Community.Display.V1.FormattedValue'], string(body('Get_Contact')?['mj_priorityregister']), triggerBody()?['mj_priorityregister@OData.Community.Display.V1.FormattedValue'], string(triggerBody()?['mj_priorityregister']), '')}",
+          "mj_refreshanalysis": "@{coalesce(body('Get_Contact')?['mj_refreshanalysis@OData.Community.Display.V1.FormattedValue'], string(body('Get_Contact')?['mj_refreshanalysis']), triggerBody()?['mj_refreshanalysis@OData.Community.Display.V1.FormattedValue'], string(triggerBody()?['mj_refreshanalysis']), '')}",
+          "mj_repairedrecently": "@{coalesce(body('Get_Contact')?['mj_repairedrecently@OData.Community.Display.V1.FormattedValue'], string(body('Get_Contact')?['mj_repairedrecently']), triggerBody()?['mj_repairedrecently@OData.Community.Display.V1.FormattedValue'], string(triggerBody()?['mj_repairedrecently']), '')}",
+          "mj_smartmeter": "@{coalesce(body('Get_Contact')?['mj_smartmeter@OData.Community.Display.V1.FormattedValue'], string(body('Get_Contact')?['mj_smartmeter']), triggerBody()?['mj_smartmeter@OData.Community.Display.V1.FormattedValue'], string(triggerBody()?['mj_smartmeter']), '')}",
+          "mj_utility_ev_owner": "@{coalesce(body('Get_Contact')?['mj_utility_ev_owner@OData.Community.Display.V1.FormattedValue'], string(body('Get_Contact')?['mj_utility_ev_owner']), triggerBody()?['mj_utility_ev_owner@OData.Community.Display.V1.FormattedValue'], string(triggerBody()?['mj_utility_ev_owner']), '')}",
+          "preferredcontactmethodcode": "@{coalesce(body('Get_Contact')?['preferredcontactmethodcode@OData.Community.Display.V1.FormattedValue'], string(body('Get_Contact')?['preferredcontactmethodcode']), triggerBody()?['preferredcontactmethodcode@OData.Community.Display.V1.FormattedValue'], string(triggerBody()?['preferredcontactmethodcode']), '')}",
+          "telephone1": "@{coalesce(body('Get_Contact')?['telephone1'], triggerBody()?['telephone1'], '')}",
+          "mobilephone": "@{coalesce(body('Get_Contact')?['mobilephone'], triggerBody()?['mobilephone'], '')}"
+        },
+        "contact": {
+          "contactId": "@{variables('ContactId')}",
+          "fullName": "@{coalesce(body('Get_Contact')?['fullname'], '')}",
+          "firstName": "@{coalesce(body('Get_Contact')?['firstname'], '')}",
+          "lastName": "@{coalesce(body('Get_Contact')?['lastname'], '')}",
+          "email": "@{coalesce(body('Get_Contact')?['emailaddress1'], '')}",
+          "phone": "@{coalesce(body('Get_Contact')?['telephone1'], '')}",
+          "mobile": "@{coalesce(body('Get_Contact')?['mobilephone'], '')}",
+          "address": {
+            "composite": "@{coalesce(body('Get_Contact')?['address1_composite'], '')}",
+            "line1": "@{coalesce(body('Get_Contact')?['address1_line1'], '')}",
+            "line2": "@{coalesce(body('Get_Contact')?['address1_line2'], '')}",
+            "line3": "@{coalesce(body('Get_Contact')?['address1_line3'], '')}",
+            "city": "@{coalesce(body('Get_Contact')?['address1_city'], '')}",
+            "postcode": "@{coalesce(body('Get_Contact')?['address1_postalcode'], '')}",
+            "country": "@{coalesce(body('Get_Contact')?['address1_country'], '')}",
+            "latitude": "@{coalesce(body('Get_Contact')?['address1_latitude'], null)}",
+            "longitude": "@{coalesce(body('Get_Contact')?['address1_longitude'], null)}"
+          }
+        },
+        "productsAndServices": {
+          "refreshAnalysis": "@{coalesce(body('Get_Contact')?['mj_refreshanalysis@OData.Community.Display.V1.FormattedValue'], string(body('Get_Contact')?['mj_refreshanalysis']), '')}",
+          "boiler": {
+            "make": "@{coalesce(body('Get_Contact')?['mj_boilermake@OData.Community.Display.V1.FormattedValue'], string(body('Get_Contact')?['mj_boilermake']), '')}",
+            "model": "@{coalesce(body('Get_Contact')?['mj_boilermodel'], '')}",
+            "installationDate": "@{coalesce(body('Get_Contact')?['mj_installationdate@OData.Community.Display.V1.FormattedValue'], string(body('Get_Contact')?['mj_installationdate']), '')}",
+            "repairedRecently": "@{coalesce(body('Get_Contact')?['mj_repairedrecently@OData.Community.Display.V1.FormattedValue'], string(body('Get_Contact')?['mj_repairedrecently']), '')}"
+          },
+          "heatingAndCover": {
+            "homeCareCover": "@{coalesce(body('Get_Contact')?['mj_homecarecover@OData.Community.Display.V1.FormattedValue'], string(body('Get_Contact')?['mj_homecarecover']), '')}",
+            "typeOfCover": "@{coalesce(body('Get_Contact')?['mj_homecaretypeofcover@OData.Community.Display.V1.FormattedValue'], string(body('Get_Contact')?['mj_homecaretypeofcover']), triggerBody()?['mj_homecaretypeofcover@OData.Community.Display.V1.FormattedValue'], triggerBody()?['mj_homecaretypeofcover'], '')}"
+          },
+          "energySupply": {
+            "energyTariff": "@{coalesce(body('Get_Contact')?['mj_energytariff@OData.Community.Display.V1.FormattedValue'], string(body('Get_Contact')?['mj_energytariff']), '')}",
+            "smartMeter": "@{coalesce(body('Get_Contact')?['mj_smartmeter@OData.Community.Display.V1.FormattedValue'], string(body('Get_Contact')?['mj_smartmeter']), '')}",
+            "doYouHaveASmartMeter": "@{coalesce(body('Get_Contact')?['mj_doyouhaveasmartmeter@OData.Community.Display.V1.FormattedValue'], string(body('Get_Contact')?['mj_doyouhaveasmartmeter']), triggerBody()?['mj_doyouhaveasmartmeter@OData.Community.Display.V1.FormattedValue'], string(triggerBody()?['mj_doyouhaveasmartmeter']), '')}"
+          },
+          "electricVehicle": {
+            "evOwner": "@{coalesce(body('Get_Contact')?['mj_utility_ev_owner@OData.Community.Display.V1.FormattedValue'], string(body('Get_Contact')?['mj_utility_ev_owner']), '')}",
+            "homeEvCharger": "@{coalesce(body('Get_Contact')?['mj_homeevcharger@OData.Community.Display.V1.FormattedValue'], string(body('Get_Contact')?['mj_homeevcharger']), '')}"
+          },
+          "smartHome": {
+            "hiveThermostat": "@{coalesce(body('Get_Contact')?['mj_doyouhaveahivethermostat@OData.Community.Display.V1.FormattedValue'], string(body('Get_Contact')?['mj_doyouhaveahivethermostat']), '')}",
+            "smartRadiatorValves": "@{coalesce(body('Get_Contact')?['mj_doyouhavesmartradiatorvalves@OData.Community.Display.V1.FormattedValue'], string(body('Get_Contact')?['mj_doyouhavesmartradiatorvalves']), '')}"
+          },
+          "serviceFlags": {
+            "initiateOutboundCall": "@{coalesce(body('Get_Contact')?['mj_initiateoutboundcall@OData.Community.Display.V1.FormattedValue'], string(body('Get_Contact')?['mj_initiateoutboundcall']), '')}",
+            "priorityRegister": "@{coalesce(body('Get_Contact')?['mj_priorityregister@OData.Community.Display.V1.FormattedValue'], string(body('Get_Contact')?['mj_priorityregister']), '')}",
+            "preferredContactMethod": "@{coalesce(body('Get_Contact')?['preferredcontactmethodcode@OData.Community.Display.V1.FormattedValue'], string(body('Get_Contact')?['preferredcontactmethodcode']), '')}"
+          },
+          "analysis": {
+            "conversationPoints": "@{coalesce(body('Get_Contact')?['mj_conversationpoints'], '')}",
+            "conversationLogic": "@{coalesce(body('Get_Contact')?['mj_conversationlogic'], '')}"
+          }
+        }
+      },
+      "runAfter": {
+        "If_MJ_RefreshAnalysis_Is_Not_True_After_Get": [
+          "Succeeded"
+        ]
+      }
+    },
+    "OpenAI_-_Summarise_Customer": {
+      "type": "Http",
+      "inputs": {
+        "uri": "@{concat(if(endsWith(parameters('openAiEndpoint'), '/'), parameters('openAiEndpoint'), concat(parameters('openAiEndpoint'), '/')), 'openai/deployments/', parameters('openAiDeployment'), '/chat/completions?api-version=', parameters('openAiApiVersion'))}",
+        "method": "POST",
+        "headers": {
+          "Content-Type": "application/json",
+          "api-key": "@{parameters('openAiApiKey')}"
+        },
+        "body": {
+          "messages": [
+            {
+              "role": "system",
+              "content": "You generate next-best conversation recommendations for an agent speaking with a customer."
+            },
+            {
+              "role": "user",
+              "content": "Make next best conversation recommendations based ONLY on the provided fields (do not invent or assume missing data).\n\nOutput MUST be plain text in this structure (repeat sections as needed):\n\nRecommended Next Conversations\n\n<HomeCare Boiler Cover>\nPosition: ...\nExample:\n\"...\"\n\n<Boiler Replacement>\nPosition: ...\nExample:\n\"...\"\n\n<Hive Smart Thermostat>\nPosition: ...\nExample:\n\"...\"\n\n<Home EV Charger>\nPosition: ...\nExample:\n\"...\"\n\n<EV Tariff>\nPosition: ...\nExample:\n\"...\"\n\nRules to apply (use best-effort based on provided fields):\n- If boiler repaired recently AND no HomeCare cover => recommend HomeCare Boiler Cover.\n- If EV Owner is Yes AND Home EV Charger is No => recommend Home EV Charger.\n- If EV Owner is Yes AND energy tariff is NOT an EV tariff => recommend EV Tariff. (Heuristic: if the energy tariff label/value does not contain 'EV', treat as not an EV tariff.)\n- If Hive Thermostat is No => recommend Hive Smart Thermostat (energy savings + convenience).\n- If boiler installation date indicates an older boiler (>8 years) => recommend Boiler Replacement AND HomeCare Boiler Cover.\n\nInclude 3-6 sections; omit any that do not apply.\n\nCustomer data (JSON):\n@{string(outputs('Compose_-_CustomerData'))}"
+            }
+          ],
+          "temperature": 0.2,
+          "max_tokens": 700
+        }
+      },
+      "runAfter": {
+        "Compose_-_CustomerData": [
+          "Succeeded"
+        ]
+      }
+    },
+    "Compose_-_OpenAiSummary": {
+      "type": "Compose",
+      "inputs": "@coalesce(body('OpenAI_-_Summarise_Customer')?['choices']?[0]?['message']?['content'], string(body('OpenAI_-_Summarise_Customer')))",
+      "runAfter": {
+        "OpenAI_-_Summarise_Customer": [
+          "Succeeded"
+        ]
+      }
+    },
+    "Compose_-_ConversationPoints_Truncated": {
+      "type": "Compose",
+      "inputs": "@if(greater(length(string(outputs('Compose_-_OpenAiSummary'))), 1048576), substring(string(outputs('Compose_-_OpenAiSummary')), 0, 1048576), string(outputs('Compose_-_OpenAiSummary'))) ",
+      "runAfter": {
+        "Compose_-_OpenAiSummary": [
+          "Succeeded"
+        ]
+      }
+    },
+    "Update_Contact_-_Set_mj_conversationpoints": {
+      "type": "Http",
+      "inputs": {
+        "uri": "@{concat(parameters('dataverseBaseUrl'), '/api/data/v9.2/contacts(', variables('ContactId'), ')')}",
+        "method": "PATCH",
+        "headers": {
+          "OData-MaxVersion": "4.0",
+          "OData-Version": "4.0",
+          "Accept": "application/json;odata.metadata=none",
+          "Content-Type": "application/json; charset=utf-8",
+          "If-Match": "*"
+        },
+        "body": {
+          "mj_conversationpoints": "@{outputs('Compose_-_ConversationPoints_Truncated')}"
+        },
+        "authentication": {
+          "type": "ActiveDirectoryOAuth",
+          "tenant": "@{parameters('dataverseTenantId')}",
+          "audience": "@{parameters('dataverseBaseUrl')}",
+          "clientId": "@{parameters('dataverseClientId')}",
+          "secret": "@{parameters('dataverseClientSecret')}"
+        }
+      },
+      "runAfter": {
+        "Compose_-_ConversationPoints_Truncated": [
+          "Succeeded"
+        ]
+      }
+    },
+    "Compose_-_Debug_View": {
+      "type": "Compose",
+      "inputs": "@variables('ReceivedDataverseChange')",
+      "runAfter": {
+        "Update_Contact_-_Set_mj_conversationpoints": [
+          "Succeeded"
+        ]
+      }
+    },
+    "Compose_-_AnalysisLastRun_UK": {
+      "type": "Compose",
+      "inputs": "@{concat(formatDateTime(convertTimeZone(utcNow(), 'UTC', 'GMT Standard Time'), 'dddd '), string(dayOfMonth(convertTimeZone(utcNow(), 'UTC', 'GMT Standard Time'))), if(or(equals(dayOfMonth(convertTimeZone(utcNow(), 'UTC', 'GMT Standard Time')), 11), equals(dayOfMonth(convertTimeZone(utcNow(), 'UTC', 'GMT Standard Time')), 12), equals(dayOfMonth(convertTimeZone(utcNow(), 'UTC', 'GMT Standard Time')), 13)), 'th', if(equals(mod(dayOfMonth(convertTimeZone(utcNow(), 'UTC', 'GMT Standard Time')), 10), 1), 'st', if(equals(mod(dayOfMonth(convertTimeZone(utcNow(), 'UTC', 'GMT Standard Time')), 10), 2), 'nd', if(equals(mod(dayOfMonth(convertTimeZone(utcNow(), 'UTC', 'GMT Standard Time')), 10), 3), 'rd', 'th')))), ' ', formatDateTime(convertTimeZone(utcNow(), 'UTC', 'GMT Standard Time'), 'MMMM'), ', ', formatDateTime(convertTimeZone(utcNow(), 'UTC', 'GMT Standard Time'), 'HH:mm'))} ",
+      "runAfter": {
+        "Compose_-_Debug_View": [
+          "Succeeded"
+        ]
+      }
+    },
+    "Update_Contact_-_Set_AnalysisLastRun": {
+      "type": "Http",
+      "inputs": {
+        "uri": "@{concat(parameters('dataverseBaseUrl'), '/api/data/v9.2/contacts(', variables('ContactId'), ')')}",
+        "method": "PATCH",
+        "headers": {
+          "OData-MaxVersion": "4.0",
+          "OData-Version": "4.0",
+          "Accept": "application/json;odata.metadata=none",
+          "Content-Type": "application/json; charset=utf-8",
+          "If-Match": "*"
+        },
+        "body": {
+          "mj_analysislastrun": "@{outputs('Compose_-_AnalysisLastRun_UK')}"
+        },
+        "authentication": {
+          "type": "ActiveDirectoryOAuth",
+          "tenant": "@{parameters('dataverseTenantId')}",
+          "audience": "@{parameters('dataverseBaseUrl')}",
+          "clientId": "@{parameters('dataverseClientId')}",
+          "secret": "@{parameters('dataverseClientSecret')}"
+        }
+      },
+      "runAfter": {
+        "Compose_-_AnalysisLastRun_UK": [
+          "Succeeded"
+        ]
+      }
+    },
+    "Update_Contact_-_Set_AnalysisLastRun_Alt": {
+      "type": "Http",
+      "inputs": {
+        "uri": "@{concat(parameters('dataverseBaseUrl'), '/api/data/v9.2/contacts(', variables('ContactId'), ')')}",
+        "method": "PATCH",
+        "headers": {
+          "OData-MaxVersion": "4.0",
+          "OData-Version": "4.0",
+          "Accept": "application/json;odata.metadata=none",
+          "Content-Type": "application/json; charset=utf-8",
+          "If-Match": "*"
+        },
+        "body": {
+          "mj_AnalysisLastRun": "@{outputs('Compose_-_AnalysisLastRun_UK')}"
+        },
+        "authentication": {
+          "type": "ActiveDirectoryOAuth",
+          "tenant": "@{parameters('dataverseTenantId')}",
+          "audience": "@{parameters('dataverseBaseUrl')}",
+          "clientId": "@{parameters('dataverseClientId')}",
+          "secret": "@{parameters('dataverseClientSecret')}"
+        }
+      },
+      "runAfter": {
+        "Update_Contact_-_Set_AnalysisLastRun": [
+          "Failed"
+        ]
+      }
+    },
+    "Update_Contact_-_Reset_MJ_RefreshAnalysis": {
+      "type": "Http",
+      "inputs": {
+        "uri": "@{concat(parameters('dataverseBaseUrl'), '/api/data/v9.2/contacts(', variables('ContactId'), ')')}",
+        "method": "PATCH",
+        "headers": {
+          "OData-MaxVersion": "4.0",
+          "OData-Version": "4.0",
+          "Accept": "application/json;odata.metadata=none",
+          "Content-Type": "application/json; charset=utf-8",
+          "If-Match": "*"
+        },
+        "body": {
+          "mj_refreshanalysis": false
+        },
+        "authentication": {
+          "type": "ActiveDirectoryOAuth",
+          "tenant": "@{parameters('dataverseTenantId')}",
+          "audience": "@{parameters('dataverseBaseUrl')}",
+          "clientId": "@{parameters('dataverseClientId')}",
+          "secret": "@{parameters('dataverseClientSecret')}"
+        }
+      },
+      "runAfter": {
+        "Update_Contact_-_Set_AnalysisLastRun": [
+          "Succeeded"
+        ],
+        "Update_Contact_-_Set_AnalysisLastRun_Alt": [
+          "Succeeded",
+          "Failed",
+          "Skipped"
+        ]
+      }
+    }
+  },
+  "outputs": {}
+}

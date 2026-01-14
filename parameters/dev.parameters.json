@@ -1,0 +1,36 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "logicAppName": {
+      "value": "CCASGetConversation"
+    },
+    "analyseCustomerLogicAppName": {
+      "value": "AnalyseCustomer"
+    },
+    "analyseCustomerVersion2LogicAppName": {
+      "value": "AnalyseCustomerVersion2"
+    },
+    "location": {
+      "value": "westeurope"
+    },
+    "dataverseBaseUrl": {
+      "value": "https://org6cb3e9fb.crm4.dynamics.com"
+    },
+    "dataverseTenantId": {
+      "value": "996f568a-cc69-450a-b684-ae784069e679"
+    },
+    "dataverseClientId": {
+      "value": "beb6cb7d-3328-4c2f-be9a-aab746be614a"
+    },
+    "openAiEndpoint": {
+      "value": "https://mjopenai2.openai.azure.com/"
+    },
+    "openAiDeployment": {
+      "value": "gpt-4o"
+    },
+    "openAiApiVersion": {
+      "value": "2024-10-21"
+    }
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Validate Logic App ARM Template",
+      "type": "shell",
+      "command": "az deployment group validate --resource-group ${input:resourceGroup} --template-file templates/azuredeploy.json --parameters @parameters/dev.parameters.json --parameters @parameters/dev.secrets.parameters.json",
+      "problemMatcher": []
+    },
+    {
+      "label": "Deploy Logic App to Azure",
+      "type": "shell",
+      "command": "az deployment group create --resource-group ${input:resourceGroup} --template-file templates/azuredeploy.json --parameters @parameters/dev.parameters.json --parameters @parameters/dev.secrets.parameters.json",
+      "problemMatcher": []
+    }
+  ],
+  "inputs": [
+    {
+      "id": "resourceGroup",
+      "type": "promptString",
+      "description": "Enter the Azure Resource Group name"
+    }
+  ]
+}

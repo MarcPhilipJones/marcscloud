@@ -1,0 +1,855 @@
+{
+  "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "dataverseBaseUrl": {
+      "type": "String",
+      "metadata": {
+        "description": "Base URL of the Dataverse environment, e.g. https://<org>.crm4.dynamics.com"
+      }
+    },
+    "dataverseTenantId": {
+      "type": "String",
+      "metadata": {
+        "description": "Azure AD Tenant ID"
+      }
+    },
+    "dataverseClientId": {
+      "type": "String",
+      "metadata": {
+        "description": "Application (client) ID"
+      }
+    },
+    "dataverseClientSecret": {
+      "type": "SecureString",
+      "metadata": {
+        "description": "Client secret for the app registration"
+      }
+    },
+    "$connections": {
+      "type": "Object",
+      "defaultValue": {}
+    }
+  },
+  "triggers": {
+    "manual": {
+      "type": "Request",
+      "kind": "Http",
+      "inputs": {
+        "schema": {
+          "type": "object",
+          "properties": {}
+        }
+      }
+    }
+  },
+  "actions": {
+    "Initialize_variable_-_ConversationTranscript": {
+      "runAfter": {},
+      "type": "InitializeVariable",
+      "inputs": {
+        "variables": [
+          {
+            "name": "ConversationTranscript",
+            "type": "string",
+            "value": ""
+          },
+          {
+            "name": "ConversationTranscriptRaw",
+            "type": "string",
+            "value": ""
+          },
+          {
+            "name": "ConversationTranscriptSource",
+            "type": "string",
+            "value": ""
+          },
+          {
+            "name": "DataverseTranscriptCount",
+            "type": "integer",
+            "value": 0
+          },
+          {
+            "name": "DataverseTranscriptId",
+            "type": "string",
+            "value": ""
+          },
+          {
+            "name": "DataverseTranscriptUri",
+            "type": "string",
+            "value": ""
+          },
+          {
+            "name": "DataverseTranscriptAnnotationCount",
+            "type": "integer",
+            "value": 0
+          },
+          {
+            "name": "ConversationMessages",
+            "type": "array",
+            "value": []
+          },
+          {
+            "name": "ConversationTranscriptText",
+            "type": "string",
+            "value": ""
+          }
+        ]
+      }
+    },
+    "Get_Case": {
+      "runAfter": {
+        "Initialize_variable_-_ConversationTranscript": [
+          "Succeeded"
+        ]
+      },
+      "type": "Http",
+      "inputs": {
+        "uri": "@{concat(parameters('dataverseBaseUrl'), '/api/data/v9.1/incidents(f64da835-b7dc-f011-8407-7c1e5221088b)?$select=incidentid,ticketnumber,title,description,createdon')}",
+        "method": "GET",
+        "headers": {
+          "OData-MaxVersion": "4.0",
+          "OData-Version": "4.0",
+          "Accept": "application/json;odata.metadata=none",
+          "Content-Type": "application/json; charset=utf-8",
+          "Prefer": "return=representation"
+        },
+        "authentication": {
+          "type": "ActiveDirectoryOAuth",
+          "tenant": "@{parameters('dataverseTenantId')}",
+          "audience": "@{parameters('dataverseBaseUrl')}",
+          "clientId": "@{parameters('dataverseClientId')}",
+          "secret": "@{parameters('dataverseClientSecret')}"
+        }
+      }
+    },
+    "Get_LiveWorkItem": {
+      "runAfter": {
+        "Get_Case": [
+          "Succeeded"
+        ]
+      },
+      "type": "Http",
+      "inputs": {
+        "uri": "@{concat(parameters('dataverseBaseUrl'), '/api/data/v9.2/msdyn_ocliveworkitems(08d1ec57-7fa4-4405-9780-da640e0b1357)?$select=activityid,activitytypecode,subject,msdyn_title,createdon,modifiedon,msdyn_transcriptcontrol,description,msdyn_conversationsummaryfield,_msdyn_lastsessionid_value,_regardingobjectid_value')}",
+        "method": "GET",
+        "headers": {
+          "OData-MaxVersion": "4.0",
+          "OData-Version": "4.0",
+          "Accept": "application/json;odata.metadata=none",
+          "Content-Type": "application/json; charset=utf-8",
+          "Prefer": "return=representation"
+        },
+        "authentication": {
+          "type": "ActiveDirectoryOAuth",
+          "tenant": "@{parameters('dataverseTenantId')}",
+          "audience": "@{parameters('dataverseBaseUrl')}",
+          "clientId": "@{parameters('dataverseClientId')}",
+          "secret": "@{parameters('dataverseClientSecret')}"
+        }
+      }
+    },
+    "Set_variable_-_ConversationTranscriptRaw": {
+      "runAfter": {
+        "Get_LiveWorkItem": [
+          "Succeeded"
+        ]
+      },
+      "type": "SetVariable",
+      "inputs": {
+        "name": "ConversationTranscriptRaw",
+        "value": "@coalesce(body('Get_LiveWorkItem')?['msdyn_transcriptcontrol'], body('Get_LiveWorkItem')?['description'], body('Get_LiveWorkItem')?['msdyn_conversationsummaryfield'], '')"
+      }
+    },
+    "If_TranscriptRaw_Looks_Base64": {
+      "runAfter": {
+        "Set_variable_-_ConversationTranscriptRaw": [
+          "Succeeded"
+        ]
+      },
+      "type": "If",
+      "expression": "@and(greater(length(variables('ConversationTranscriptRaw')), 0), equals(mod(length(variables('ConversationTranscriptRaw')), 4), 0), matches(variables('ConversationTranscriptRaw'), '^[A-Za-z0-9+/=\\r\\n]+$'))",
+      "actions": {
+        "Set_variable_-_ConversationTranscript_Decoded": {
+          "runAfter": {},
+          "type": "SetVariable",
+          "inputs": {
+            "name": "ConversationTranscript",
+            "value": "@base64ToString(variables('ConversationTranscriptRaw'))"
+          }
+        },
+        "Set_variable_-_ConversationTranscriptSource_Base64": {
+          "runAfter": {
+            "Set_variable_-_ConversationTranscript_Decoded": [
+              "Succeeded"
+            ]
+          },
+          "type": "SetVariable",
+          "inputs": {
+            "name": "ConversationTranscriptSource",
+            "value": "msdyn_ocliveworkitem (base64 decoded)"
+          }
+        }
+      },
+      "else": {
+        "actions": {
+          "Set_variable_-_ConversationTranscript_Raw": {
+            "runAfter": {},
+            "type": "SetVariable",
+            "inputs": {
+              "name": "ConversationTranscript",
+              "value": "@variables('ConversationTranscriptRaw')"
+            }
+          },
+          "Set_variable_-_ConversationTranscriptSource_Raw": {
+            "runAfter": {
+              "Set_variable_-_ConversationTranscript_Raw": [
+                "Succeeded"
+              ]
+            },
+            "type": "SetVariable",
+            "inputs": {
+              "name": "ConversationTranscriptSource",
+              "value": "msdyn_ocliveworkitem (raw)"
+            }
+          }
+        }
+      }
+    },
+    "List_Transcripts_For_LiveWorkItem": {
+      "runAfter": {
+        "If_TranscriptRaw_Looks_Base64": [
+          "Succeeded",
+          "Failed",
+          "Skipped",
+          "TimedOut"
+        ]
+      },
+      "type": "Http",
+      "inputs": {
+        "uri": "@{concat(parameters('dataverseBaseUrl'), '/api/data/v9.2/msdyn_transcripts?$select=msdyn_transcriptid,msdyn_transcripturi,createdon&$filter=_msdyn_liveworkitemidid_value eq ', body('Get_LiveWorkItem')?['activityid'], '&$orderby=createdon desc&$top=1')}",
+        "method": "GET",
+        "headers": {
+          "OData-MaxVersion": "4.0",
+          "OData-Version": "4.0",
+          "Accept": "application/json;odata.metadata=none",
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "authentication": {
+          "type": "ActiveDirectoryOAuth",
+          "tenant": "@{parameters('dataverseTenantId')}",
+          "audience": "@{parameters('dataverseBaseUrl')}",
+          "clientId": "@{parameters('dataverseClientId')}",
+          "secret": "@{parameters('dataverseClientSecret')}"
+        }
+      }
+    },
+    "Set_variable_-_DataverseTranscriptCount": {
+      "runAfter": {
+        "List_Transcripts_For_LiveWorkItem": [
+          "Succeeded",
+          "Failed",
+          "Skipped",
+          "TimedOut"
+        ]
+      },
+      "type": "SetVariable",
+      "inputs": {
+        "name": "DataverseTranscriptCount",
+        "value": "@length(body('List_Transcripts_For_LiveWorkItem')?['value'])"
+      }
+    },
+    "If_Transcript_Empty_Try_Dataverse_Transcript": {
+      "runAfter": {
+        "Set_variable_-_DataverseTranscriptCount": [
+          "Succeeded",
+          "Failed",
+          "Skipped",
+          "TimedOut"
+        ]
+      },
+      "type": "If",
+      "expression": "@and(equals(variables('ConversationTranscript'), ''), greater(variables('DataverseTranscriptCount'), 0))",
+      "actions": {
+        "Set_variable_-_ConversationTranscriptSource_DataverseTranscript": {
+          "runAfter": {},
+          "type": "SetVariable",
+          "inputs": {
+            "name": "ConversationTranscriptSource",
+            "value": "msdyn_transcripts (linked to live work item)"
+          }
+        },
+        "Set_variable_-_DataverseTranscriptId": {
+          "runAfter": {
+            "Set_variable_-_ConversationTranscriptSource_DataverseTranscript": [
+              "Succeeded"
+            ]
+          },
+          "type": "SetVariable",
+          "inputs": {
+            "name": "DataverseTranscriptId",
+            "value": "@string(first(body('List_Transcripts_For_LiveWorkItem')?['value'])?['msdyn_transcriptid'])"
+          }
+        },
+        "Set_variable_-_DataverseTranscriptUri": {
+          "runAfter": {
+            "Set_variable_-_DataverseTranscriptId": [
+              "Succeeded"
+            ]
+          },
+          "type": "SetVariable",
+          "inputs": {
+            "name": "DataverseTranscriptUri",
+            "value": "@coalesce(string(first(body('List_Transcripts_For_LiveWorkItem')?['value'])?['msdyn_transcripturi']), '')"
+          }
+        },
+        "List_Transcript_Annotations": {
+          "runAfter": {
+            "Set_variable_-_DataverseTranscriptUri": [
+              "Succeeded"
+            ]
+          },
+          "type": "Http",
+          "inputs": {
+            "uri": "@{concat(parameters('dataverseBaseUrl'), '/api/data/v9.2/msdyn_transcripts(', variables('DataverseTranscriptId'), ')/msdyn_transcript_Annotations?$select=annotationid,subject,createdon,isdocument,filename,mimetype,notetext&$orderby=createdon desc&$top=1')}",
+            "method": "GET",
+            "headers": {
+              "OData-MaxVersion": "4.0",
+              "OData-Version": "4.0",
+              "Accept": "application/json;odata.metadata=none",
+              "Content-Type": "application/json; charset=utf-8"
+            },
+            "authentication": {
+              "type": "ActiveDirectoryOAuth",
+              "tenant": "@{parameters('dataverseTenantId')}",
+              "audience": "@{parameters('dataverseBaseUrl')}",
+              "clientId": "@{parameters('dataverseClientId')}",
+              "secret": "@{parameters('dataverseClientSecret')}"
+            }
+          }
+        },
+        "Set_variable_-_DataverseTranscriptAnnotationCount": {
+          "runAfter": {
+            "List_Transcript_Annotations": [
+              "Succeeded",
+              "Failed",
+              "Skipped",
+              "TimedOut"
+            ]
+          },
+          "type": "SetVariable",
+          "inputs": {
+            "name": "DataverseTranscriptAnnotationCount",
+            "value": "@length(body('List_Transcript_Annotations')?['value'])"
+          }
+        },
+        "If_Transcript_Annotation_Found": {
+          "runAfter": {
+            "Set_variable_-_DataverseTranscriptAnnotationCount": [
+              "Succeeded",
+              "Failed",
+              "Skipped",
+              "TimedOut"
+            ]
+          },
+          "type": "If",
+          "expression": "@greater(length(body('List_Transcript_Annotations')?['value']), 0)",
+          "actions": {
+            "Set_variable_-_ConversationTranscript_FromTranscriptAnnotation": {
+              "runAfter": {},
+              "type": "SetVariable",
+              "inputs": {
+                "name": "ConversationTranscript",
+                "value": "@coalesce(first(body('List_Transcript_Annotations')?['value'])?['notetext'], '')"
+              }
+            },
+            "Set_variable_-_ConversationTranscriptSource_TranscriptAnnotation": {
+              "runAfter": {
+                "Set_variable_-_ConversationTranscript_FromTranscriptAnnotation": [
+                  "Succeeded"
+                ]
+              },
+              "type": "SetVariable",
+              "inputs": {
+                "name": "ConversationTranscriptSource",
+                "value": "msdyn_transcript -> annotations"
+              }
+            },
+            "If_Transcript_Still_Empty_And_IsDocument": {
+              "runAfter": {
+                "Set_variable_-_ConversationTranscriptSource_TranscriptAnnotation": [
+                  "Succeeded"
+                ]
+              },
+              "type": "If",
+              "expression": "@and(equals(variables('ConversationTranscript'), ''), equals(first(body('List_Transcript_Annotations')?['value'])?['isdocument'], true))",
+              "actions": {
+                "Get_Transcript_Annotation_DocumentBody": {
+                  "runAfter": {},
+                  "type": "Http",
+                  "inputs": {
+                    "uri": "@{concat(parameters('dataverseBaseUrl'), '/api/data/v9.2/annotations(', first(body('List_Transcript_Annotations')?['value'])?['annotationid'], ')?$select=documentbody')}",
+                    "method": "GET",
+                    "headers": {
+                      "OData-MaxVersion": "4.0",
+                      "OData-Version": "4.0",
+                      "Accept": "application/json;odata.metadata=none",
+                      "Content-Type": "application/json; charset=utf-8"
+                    },
+                    "authentication": {
+                      "type": "ActiveDirectoryOAuth",
+                      "tenant": "@{parameters('dataverseTenantId')}",
+                      "audience": "@{parameters('dataverseBaseUrl')}",
+                      "clientId": "@{parameters('dataverseClientId')}",
+                      "secret": "@{parameters('dataverseClientSecret')}"
+                    }
+                  }
+                },
+                "Set_variable_-_ConversationTranscript_FromDocumentBody": {
+                  "runAfter": {
+                    "Get_Transcript_Annotation_DocumentBody": [
+                      "Succeeded"
+                    ]
+                  },
+                  "type": "SetVariable",
+                  "inputs": {
+                    "name": "ConversationTranscript",
+                    "value": "@if(equals(body('Get_Transcript_Annotation_DocumentBody')?['documentbody'], null), '', base64ToString(body('Get_Transcript_Annotation_DocumentBody')?['documentbody']))"
+                  }
+                },
+                "Set_variable_-_ConversationTranscriptSource_TranscriptAnnotationDocument": {
+                  "runAfter": {
+                    "Set_variable_-_ConversationTranscript_FromDocumentBody": [
+                      "Succeeded"
+                    ]
+                  },
+                  "type": "SetVariable",
+                  "inputs": {
+                    "name": "ConversationTranscriptSource",
+                    "value": "msdyn_transcript -> annotation documentbody"
+                  }
+                },
+                "If_Transcript_Is_MessagesJson": {
+                  "runAfter": {
+                    "Set_variable_-_ConversationTranscriptSource_TranscriptAnnotationDocument": [
+                      "Succeeded"
+                    ]
+                  },
+                  "type": "If",
+                  "expression": "@and(startsWith(trim(variables('ConversationTranscript')), '['), contains(variables('ConversationTranscript'), 'Content'))",
+                  "actions": {
+                    "Set_variable_-_ConversationMessages_FromTranscript": {
+                      "runAfter": {},
+                      "type": "SetVariable",
+                      "inputs": {
+                        "name": "ConversationMessages",
+                        "value": "@json(first(json(variables('ConversationTranscript')))?['Content'])"
+                      }
+                    },
+                    "For_each_-_ConversationMessages": {
+                      "runAfter": {
+                        "Set_variable_-_ConversationMessages_FromTranscript": [
+                          "Succeeded"
+                        ]
+                      },
+                      "foreach": "@variables('ConversationMessages')",
+                      "type": "Foreach",
+                      "actions": {
+                        "If_Is_NonControl_Message": {
+                          "runAfter": {},
+                          "type": "If",
+                          "expression": "@and(equals(item()?['isControlMessage'], false), greater(length(coalesce(item()?['content'], '')), 0))",
+                          "actions": {
+                            "Append_to_string_variable_-_ConversationTranscriptText": {
+                              "runAfter": {},
+                              "type": "AppendToStringVariable",
+                              "inputs": {
+                                "name": "ConversationTranscriptText",
+                                "value": "@{concat(coalesce(item()?['from']?['user']?['displayName'], item()?['from']?['application']?['displayName'], 'Unknown'), ': ', coalesce(item()?['content'], ''), '\n')}"
+                              }
+                            }
+                          },
+                          "else": {
+                            "actions": {}
+                          }
+                        }
+                      }
+                    },
+                    "Set_variable_-_ConversationTranscript_FromParsedText": {
+                      "runAfter": {
+                        "For_each_-_ConversationMessages": [
+                          "Succeeded"
+                        ]
+                      },
+                      "type": "SetVariable",
+                      "inputs": {
+                        "name": "ConversationTranscript",
+                        "value": "@trim(variables('ConversationTranscriptText'))"
+                      }
+                    },
+                    "Set_variable_-_ConversationTranscriptSource_TranscriptParsed": {
+                      "runAfter": {
+                        "Set_variable_-_ConversationTranscript_FromParsedText": [
+                          "Succeeded"
+                        ]
+                      },
+                      "type": "SetVariable",
+                      "inputs": {
+                        "name": "ConversationTranscriptSource",
+                        "value": "msdyn_transcript - parsed messages"
+                      }
+                    }
+                  },
+                  "else": {
+                    "actions": {}
+                  }
+                }
+              },
+              "else": {
+                "actions": {}
+              }
+            }
+          },
+          "else": {
+            "actions": {
+              "If_TranscriptUri_Present": {
+                "runAfter": {},
+                "type": "If",
+                "expression": "@not(equals(variables('DataverseTranscriptUri'), ''))",
+                "actions": {
+                  "Set_variable_-_ConversationTranscript_FromTranscriptUri": {
+                    "runAfter": {},
+                    "type": "SetVariable",
+                    "inputs": {
+                      "name": "ConversationTranscript",
+                      "value": "@variables('DataverseTranscriptUri')"
+                    }
+                  },
+                  "Set_variable_-_ConversationTranscriptSource_TranscriptUri": {
+                    "runAfter": {
+                      "Set_variable_-_ConversationTranscript_FromTranscriptUri": [
+                        "Succeeded"
+                      ]
+                    },
+                    "type": "SetVariable",
+                    "inputs": {
+                      "name": "ConversationTranscriptSource",
+                      "value": "msdyn_transcripturi"
+                    }
+                  }
+                },
+                "else": {
+                  "actions": {}
+                }
+              }
+            }
+          }
+        }
+      },
+      "else": {
+        "actions": {}
+      }
+    },
+    "If_Transcript_Empty_Try_Omnichannel_Session": {
+      "runAfter": {
+        "If_Transcript_Empty_Try_Dataverse_Transcript": [
+          "Succeeded",
+          "Failed",
+          "Skipped",
+          "TimedOut"
+        ]
+      },
+      "type": "If",
+      "expression": "@and(equals(variables('ConversationTranscript'), ''), not(equals(body('Get_LiveWorkItem')?['_msdyn_lastsessionid_value'], null)))",
+      "actions": {
+        "Set_variable_-_ConversationTranscriptSource_Omnichannel": {
+          "runAfter": {},
+          "type": "SetVariable",
+          "inputs": {
+            "name": "ConversationTranscriptSource",
+            "value": "msdyn_conversationmessageblock via msdyn_ocsessions(lastSessionId)"
+          }
+        },
+        "List_CustomerMessageBlocks": {
+          "runAfter": {
+            "Set_variable_-_ConversationTranscriptSource_Omnichannel": [
+              "Succeeded"
+            ]
+          },
+          "type": "Http",
+          "inputs": {
+            "uri": "@{concat(parameters('dataverseBaseUrl'), '/api/data/v9.2/msdyn_ocsessions(', body('Get_LiveWorkItem')?['_msdyn_lastsessionid_value'], ')/msdyn_ocsession_msdyn_conversationmessageblock_msdyn_customermessagesessionid?$orderby=createdon asc&$top=20')}",
+            "method": "GET",
+            "headers": {
+              "OData-MaxVersion": "4.0",
+              "OData-Version": "4.0",
+              "Accept": "application/json;odata.metadata=none",
+              "Content-Type": "application/json; charset=utf-8"
+            },
+            "authentication": {
+              "type": "ActiveDirectoryOAuth",
+              "tenant": "@{parameters('dataverseTenantId')}",
+              "audience": "@{parameters('dataverseBaseUrl')}",
+              "clientId": "@{parameters('dataverseClientId')}",
+              "secret": "@{parameters('dataverseClientSecret')}"
+            }
+          }
+        },
+        "List_AgentMessageBlocks": {
+          "runAfter": {
+            "List_CustomerMessageBlocks": [
+              "Succeeded",
+              "Failed",
+              "Skipped",
+              "TimedOut"
+            ]
+          },
+          "type": "Http",
+          "inputs": {
+            "uri": "@{concat(parameters('dataverseBaseUrl'), '/api/data/v9.2/msdyn_ocsessions(', body('Get_LiveWorkItem')?['_msdyn_lastsessionid_value'], ')/msdyn_ocsession_msdyn_conversationmessageblock_msdyn_agentresponsesessionid?$orderby=createdon asc&$top=20')}",
+            "method": "GET",
+            "headers": {
+              "OData-MaxVersion": "4.0",
+              "OData-Version": "4.0",
+              "Accept": "application/json;odata.metadata=none",
+              "Content-Type": "application/json; charset=utf-8"
+            },
+            "authentication": {
+              "type": "ActiveDirectoryOAuth",
+              "tenant": "@{parameters('dataverseTenantId')}",
+              "audience": "@{parameters('dataverseBaseUrl')}",
+              "clientId": "@{parameters('dataverseClientId')}",
+              "secret": "@{parameters('dataverseClientSecret')}"
+            }
+          }
+        },
+        "If_CustomerMessageBlocks_Found": {
+          "runAfter": {
+            "List_AgentMessageBlocks": [
+              "Succeeded",
+              "Failed",
+              "Skipped",
+              "TimedOut"
+            ]
+          },
+          "type": "If",
+          "expression": "@greater(length(body('List_CustomerMessageBlocks')?['value']), 0)",
+          "actions": {
+            "For_each_-_CustomerMessageBlocks": {
+              "foreach": "@body('List_CustomerMessageBlocks')?['value']",
+              "runAfter": {},
+              "type": "Foreach",
+              "actions": {
+                "Append_to_string_variable_-_ConversationTranscript_Customer": {
+                  "runAfter": {},
+                  "type": "AppendToStringVariable",
+                  "inputs": {
+                    "name": "ConversationTranscript",
+                    "value": "@{concat(coalesce(item()?['msdyn_plaintext'], item()?['msdyn_text'], item()?['msdyn_message'], item()?['msdyn_messagetext'], item()?['msdyn_content'], item()?['text'], item()?['message'], ''), '\n')}"
+                  }
+                }
+              }
+            }
+          },
+          "else": {
+            "actions": {
+              "For_each_-_AgentMessageBlocks": {
+                "foreach": "@body('List_AgentMessageBlocks')?['value']",
+                "runAfter": {},
+                "type": "Foreach",
+                "actions": {
+                  "Append_to_string_variable_-_ConversationTranscript_Agent": {
+                    "runAfter": {},
+                    "type": "AppendToStringVariable",
+                    "inputs": {
+                      "name": "ConversationTranscript",
+                      "value": "@{concat(coalesce(item()?['msdyn_plaintext'], item()?['msdyn_text'], item()?['msdyn_message'], item()?['msdyn_messagetext'], item()?['msdyn_content'], item()?['text'], item()?['message'], ''), '\n')}"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "else": {
+        "actions": {}
+      }
+    },
+    "Get_Latest_Text_Transcript_Note": {
+      "runAfter": {
+        "If_Transcript_Empty_Try_Omnichannel_Session": [
+          "Succeeded",
+          "Failed",
+          "Skipped",
+          "TimedOut"
+        ]
+      },
+      "type": "Http",
+      "inputs": {
+        "uri": "@{concat(parameters('dataverseBaseUrl'), '/api/data/v9.1/annotations?$select=notetext,subject,createdon&$filter=_objectid_value eq f64da835-b7dc-f011-8407-7c1e5221088b and isdocument eq false and notetext ne null&$orderby=createdon desc&$top=1')}",
+        "method": "GET",
+        "headers": {
+          "OData-MaxVersion": "4.0",
+          "OData-Version": "4.0",
+          "Accept": "application/json;odata.metadata=none",
+          "Content-Type": "application/json; charset=utf-8",
+          "Prefer": "return=representation"
+        },
+        "authentication": {
+          "type": "ActiveDirectoryOAuth",
+          "tenant": "@{parameters('dataverseTenantId')}",
+          "audience": "@{parameters('dataverseBaseUrl')}",
+          "clientId": "@{parameters('dataverseClientId')}",
+          "secret": "@{parameters('dataverseClientSecret')}"
+        }
+      }
+    },
+    "Get_Latest_Transcript_Attachment": {
+      "runAfter": {
+        "Get_Latest_Text_Transcript_Note": [
+          "Succeeded"
+        ]
+      },
+      "type": "Http",
+      "inputs": {
+        "uri": "@{concat(parameters('dataverseBaseUrl'), '/api/data/v9.1/annotations?$select=documentbody,filename,mimetype,subject,createdon&$filter=_objectid_value eq f64da835-b7dc-f011-8407-7c1e5221088b and isdocument eq true&$orderby=createdon desc&$top=1')}",
+        "method": "GET",
+        "headers": {
+          "OData-MaxVersion": "4.0",
+          "OData-Version": "4.0",
+          "Accept": "application/json;odata.metadata=none",
+          "Content-Type": "application/json; charset=utf-8",
+          "Prefer": "return=representation"
+        },
+        "authentication": {
+          "type": "ActiveDirectoryOAuth",
+          "tenant": "@{parameters('dataverseTenantId')}",
+          "audience": "@{parameters('dataverseBaseUrl')}",
+          "clientId": "@{parameters('dataverseClientId')}",
+          "secret": "@{parameters('dataverseClientSecret')}"
+        }
+      }
+    },
+    "Get_Recent_Annotations_Debug": {
+      "runAfter": {
+        "Get_Latest_Transcript_Attachment": [
+          "Succeeded"
+        ]
+      },
+      "type": "Http",
+      "inputs": {
+        "uri": "@{concat(parameters('dataverseBaseUrl'), '/api/data/v9.1/annotations?$select=annotationid,subject,createdon,isdocument,filename,mimetype,notetext&$filter=_objectid_value eq f64da835-b7dc-f011-8407-7c1e5221088b&$orderby=createdon desc&$top=5')}",
+        "method": "GET",
+        "headers": {
+          "OData-MaxVersion": "4.0",
+          "OData-Version": "4.0",
+          "Accept": "application/json;odata.metadata=none",
+          "Content-Type": "application/json; charset=utf-8",
+          "Prefer": "return=representation"
+        },
+        "authentication": {
+          "type": "ActiveDirectoryOAuth",
+          "tenant": "@{parameters('dataverseTenantId')}",
+          "audience": "@{parameters('dataverseBaseUrl')}",
+          "clientId": "@{parameters('dataverseClientId')}",
+          "secret": "@{parameters('dataverseClientSecret')}"
+        }
+      }
+    },
+    "If_Transcript_Found": {
+      "runAfter": {
+        "Get_Recent_Annotations_Debug": [
+          "Succeeded"
+        ]
+      },
+      "type": "If",
+      "expression": "@or(greater(length(coalesce(body('Get_Latest_Text_Transcript_Note')?['value'], json('[]'))), 0), greater(length(coalesce(body('Get_Latest_Transcript_Attachment')?['value'], json('[]'))), 0))",
+      "actions": {
+        "Set_variable_-_ConversationTranscript": {
+          "runAfter": {},
+          "type": "SetVariable",
+          "inputs": {
+            "name": "ConversationTranscript",
+            "value": "@if(greater(length(coalesce(body('Get_Latest_Text_Transcript_Note')?['value'], json('[]'))), 0), string(first(coalesce(body('Get_Latest_Text_Transcript_Note')?['value'], json('[]')))?['notetext']), if(greater(length(coalesce(body('Get_Latest_Transcript_Attachment')?['value'], json('[]'))), 0), base64ToString(first(coalesce(body('Get_Latest_Transcript_Attachment')?['value'], json('[]')))?['documentbody']), ''))"
+          }
+        }
+      },
+      "else": {
+        "actions": {}
+      },
+      "description": "Fallback-only: this block populates ConversationTranscript from annotations if present; msdyn_ocliveworkitem transcript is handled earlier."
+    },
+    "Return_Response": {
+      "runAfter": {
+        "If_Transcript_Found": [
+          "Succeeded",
+          "Failed",
+          "Skipped",
+          "TimedOut"
+        ]
+      },
+      "type": "Response",
+      "inputs": {
+        "statusCode": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "case": {
+            "incidentid": "@{body('Get_Case')?['incidentid']}",
+            "ticketnumber": "@{body('Get_Case')?['ticketnumber']}",
+            "title": "@{body('Get_Case')?['title']}",
+            "description": "@{body('Get_Case')?['description']}",
+            "createdon": "@{body('Get_Case')?['createdon']}"
+          },
+          "conversationTranscript": "@{variables('ConversationTranscript')}",
+          "debug": {
+            "inputs": {
+              "caseGuid": "f64da835-b7dc-f011-8407-7c1e5221088b",
+              "liveWorkItemId": "08d1ec57-7fa4-4405-9780-da640e0b1357"
+            },
+            "liveWorkItem": {
+              "subject": "@{body('Get_LiveWorkItem')?['subject']}",
+              "msdyn_title": "@{body('Get_LiveWorkItem')?['msdyn_title']}",
+              "activitytypecode": "@{body('Get_LiveWorkItem')?['activitytypecode']}",
+              "regardingObjectId": "@{body('Get_LiveWorkItem')?['_regardingobjectid_value']}",
+              "lastSessionId": "@{body('Get_LiveWorkItem')?['_msdyn_lastsessionid_value']}",
+              "msdyn_transcriptcontrol_present": "@{not(equals(body('Get_LiveWorkItem')?['msdyn_transcriptcontrol'], null))}",
+              "description_present": "@{not(equals(body('Get_LiveWorkItem')?['description'], null))}",
+              "msdyn_conversationsummaryfield_present": "@{not(equals(body('Get_LiveWorkItem')?['msdyn_conversationsummaryfield'], null))}"
+            },
+            "transcript": {
+              "source": "@{variables('ConversationTranscriptSource')}",
+              "rawLength": "@{length(variables('ConversationTranscriptRaw'))}",
+              "decodedLength": "@{length(variables('ConversationTranscript'))}",
+              "rawLooksBase64": "@{and(greater(length(variables('ConversationTranscriptRaw')), 0), equals(mod(length(variables('ConversationTranscriptRaw')), 4), 0), matches(variables('ConversationTranscriptRaw'), '^[A-Za-z0-9+/=\\r\\n]+$'))}",
+              "dataverseTranscriptCount": "@{variables('DataverseTranscriptCount')}",
+              "dataverseTranscriptId": "@{variables('DataverseTranscriptId')}",
+              "dataverseTranscriptUri": "@{variables('DataverseTranscriptUri')}",
+              "dataverseTranscriptAnnotationCount": "@{variables('DataverseTranscriptAnnotationCount')}"
+            },
+            "omnichannel": {
+              "customerBlocks": {
+                "status": "@{actions('List_CustomerMessageBlocks')?['status']}",
+                "statusCode": "@{actions('List_CustomerMessageBlocks')?['outputs']?['statusCode']}",
+                "count": "@{length(coalesce(body('List_CustomerMessageBlocks')?['value'], json('[]')))}",
+                "first": null
+              },
+              "agentBlocks": {
+                "status": "@{actions('List_AgentMessageBlocks')?['status']}",
+                "statusCode": "@{actions('List_AgentMessageBlocks')?['outputs']?['statusCode']}",
+                "count": "@{length(coalesce(body('List_AgentMessageBlocks')?['value'], json('[]')))}",
+                "first": null
+              }
+            },
+            "textNoteQueryCount": "@{length(coalesce(body('Get_Latest_Text_Transcript_Note')?['value'], json('[]')))}",
+            "attachmentQueryCount": "@{length(coalesce(body('Get_Latest_Transcript_Attachment')?['value'], json('[]')))}",
+            "recentAnnotations": "@{body('Get_Recent_Annotations_Debug')?['value']}"
+          }
+        }
+      }
+    }
+  },
+  "outputs": {}
+}
