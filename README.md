@@ -119,6 +119,10 @@ Environment-specific parameters are stored in the `parameters/` folder:
 - `dev.parameters.json` - Development environment
 - `prod.parameters.json` - Production environment
 
+Secrets are kept out of source control:
+- Create `parameters/dev.secrets.parameters.json` locally (see `parameters/dev.secrets.parameters.example.json`)
+- Do not commit `*.secrets.parameters.json` files (they are ignored by `.gitignore`)
+
 Update these files with your specific values before deployment.
 
 ### Connections
