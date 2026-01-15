@@ -6,6 +6,7 @@ __pycache__/
 .ruff_cache/
 .venv/
 *.log
+state/
 dist/
 build/
 *.egg-info/

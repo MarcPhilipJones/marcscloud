@@ -67,3 +67,27 @@ If you want a minimal shared-secret check, set `MCP_AUTH_TOKEN` in `.env` and se
   - `PATCH /api/data/v9.2/contacts(<guid>)`
 - This scaffold keeps **writes** behind `DATAVERSE_ALLOW_WRITES=true`.
 
+## Field Service demo (Boiler repair availability + booking)
+
+This MCP server also includes two presales-demo tools that integrate with **Dynamics 365 Field Service**:
+
+- `get_boiler_repair_availability(when="today_or_tomorrow")`
+- `book_boiler_repair(slot_id)`
+
+The demo uses **hardcoded** boiler issue details and sets **priority = High**.
+
+### Typical flow
+
+1) Ask for availability (today/tomorrow):
+
+Call `get_boiler_repair_availability` and pick one of the returned `options[*].slot_id`.
+
+2) Book the chosen slot:
+
+Call `book_boiler_repair(slot_id=...)`.
+
+### Important
+
+- Booking creates records in Dataverse and is blocked unless `DATAVERSE_ALLOW_WRITES=true`.
+- Availability search prefers the Field Service Schedule Assistant action (`msdyn_SearchResourceAvailability`). If your environment doesn’t expose it, the tool returns an error payload describing the failure.
+

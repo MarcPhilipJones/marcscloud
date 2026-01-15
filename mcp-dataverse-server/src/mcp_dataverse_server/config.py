@@ -24,7 +24,10 @@ def _require(name: str) -> str:
 
 
 def load_settings() -> Settings:
-    load_dotenv(override=False)
+    # For local dev/demo, prefer values from a .env file when present.
+    # This allows toggling behavior (e.g., DATAVERSE_ALLOW_WRITES) without
+    # modifying the shell environment.
+    load_dotenv(override=True)
 
     base_url = _require("DATAVERSE_BASE_URL").rstrip("/")
     tenant_id = _require("DATAVERSE_TENANT_ID")
