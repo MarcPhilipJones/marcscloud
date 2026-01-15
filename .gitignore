@@ -20,6 +20,9 @@ local.settings.json
 # Local ARM/Logic App secret parameters (do not commit)
 parameters/*.secrets.parameters.json
 
+# Local notes may contain sensitive values
+parameters/Notes.txt
+
 # Node modules (if using custom connectors)
 node_modules/
 

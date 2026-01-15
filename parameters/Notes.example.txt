@@ -1,0 +1,15 @@
+Example notes file (safe to commit)
+
+This project uses an Entra ID (Azure AD) app registration for Dataverse auth.
+Store real secrets OUTSIDE source control (Key Vault recommended).
+
+App Registration
+- Display name: <APP_DISPLAY_NAME>
+- Application (client) ID: <CLIENT_ID>
+- Object ID: <OBJECT_ID>
+- Directory (tenant) ID: <TENANT_ID>
+
+Client Secrets
+- Description: <SECRET_DESCRIPTION>
+- Value: <DO_NOT_COMMIT_SECRETS>
+- Secret ID: <SECRET_ID>
