@@ -8,6 +8,7 @@ from pathlib import Path
 from typing import Any
 
 from .dataverse import DataverseClient, _parse_iso_datetime, _iso, _normalize_guid
+from .config import DEFAULT_DEMO_JOB_NAME
 
 
 @dataclass(frozen=True)
@@ -210,7 +211,7 @@ class FieldServiceSchedulingService:
         if create_case and not case_id:
             case_id = self._dv.create_case_for_contact(
                 contact_id=contact_id,
-                title="Boiler repair request (demo)",
+                title=DEFAULT_DEMO_JOB_NAME,
                 description="Customer boiler repair request (presales demo).",
                 priority=priority,
                 origin="web",

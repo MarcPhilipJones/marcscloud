@@ -91,3 +91,15 @@ Call `book_boiler_repair(slot_id=...)`.
 - Booking creates records in Dataverse and is blocked unless `DATAVERSE_ALLOW_WRITES=true`.
 - Availability search prefers the Field Service Schedule Assistant action (`msdyn_SearchResourceAvailability`). If your environment doesn’t expose it, the tool returns an error payload describing the failure.
 
+### Demo-only: constrain availability to a single engineer
+
+For presales demos, you can force all availability results to come from one specific **Bookable Resource** by setting:
+
+- `MCP_DEMO_BOOKABLE_RESOURCE_ID=<bookableresource-guid>`
+
+Example:
+
+```powershell
+$env:MCP_DEMO_BOOKABLE_RESOURCE_ID = "b8dddd9c-3b61-ef11-bfe2-002248a36d0e"
+```
+

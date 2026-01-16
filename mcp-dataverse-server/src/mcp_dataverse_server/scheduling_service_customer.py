@@ -9,6 +9,7 @@ from typing import Any
 
 from zoneinfo import ZoneInfo
 
+from .config import DEFAULT_DEMO_JOB_NAME, DEFAULT_DEMO_RESOURCE_NAME
 from .dataverse import DataverseClient, _iso, _normalize_guid, _parse_iso_datetime
 
 
@@ -36,7 +37,7 @@ def _state_dir() -> Path:
 
 
 class _IdempotencyStore:
-    def __init__(self, filename: str = "idempotency.customer-self-service.json") -> None:
+    def __init__(self, filename: str = "idempotency.customer-self-service.v2.json") -> None:
         self._path = _state_dir() / filename
         self._path.parent.mkdir(parents=True, exist_ok=True)
         self._lock = threading.Lock()
@@ -55,6 +56,15 @@ class _IdempotencyStore:
             tmp.write_text(json.dumps(data, indent=2, ensure_ascii=False), encoding="utf-8")
             tmp.replace(self._path)
 
+    def clear(self) -> None:
+        with self._lock:
+            try:
+                if self._path.exists():
+                    self._path.unlink()
+            except Exception:
+                # Best-effort: cache clearing should never block startup.
+                pass
+
     def _read_all_unlocked(self) -> dict[str, Any]:
         if not self._path.exists():
             return {}
@@ -66,6 +76,7 @@ class _IdempotencyStore:
 
 def _compute_idempotency_key(
     *,
+    environment_id: str,
     contact_id: str,
     window_start_utc: datetime,
     window_end_utc: datetime,
@@ -76,6 +87,7 @@ def _compute_idempotency_key(
     # Stable, human-debuggable idempotency key.
     return "|".join(
         [
+            (environment_id or "").strip().lower(),
             (scenario or "field_service").strip().lower(),
             _normalize_guid(contact_id),
             _iso(window_start_utc),
@@ -99,10 +111,37 @@ class CustomerSelfServiceSchedulingService:
     - Engineers/resources are not returned for availability, but booking confirmation may include the assigned resource.
     """
 
-    def __init__(self, dv: DataverseClient) -> None:
+    def __init__(
+        self,
+        dv: DataverseClient,
+        demo_bookable_resource_id: str | None = None,
+        *,
+        demo_resource_name: str = DEFAULT_DEMO_RESOURCE_NAME,
+        demo_job_name: str = DEFAULT_DEMO_JOB_NAME,
+        demo_fast: bool = True,
+        clear_demo_caches_on_start: bool = True,
+    ) -> None:
         self._dv = dv
         self._idempotency = _IdempotencyStore()
         self._caps: SchedulingCapabilities | None = None
+
+        self._demo_bookable_resource_id = (
+            _normalize_guid(demo_bookable_resource_id) if isinstance(demo_bookable_resource_id, str) and demo_bookable_resource_id.strip() else None
+        )
+
+        self._demo_resource_name = (demo_resource_name or DEFAULT_DEMO_RESOURCE_NAME).strip() or DEFAULT_DEMO_RESOURCE_NAME
+        self._demo_job_name = (demo_job_name or DEFAULT_DEMO_JOB_NAME).strip() or DEFAULT_DEMO_JOB_NAME
+        self._demo_fast = bool(demo_fast)
+
+        if self._demo_fast and bool(clear_demo_caches_on_start):
+            # Clear file-backed booking idempotency cache on each server start.
+            # This keeps demos from "replaying" older bookings across sessions.
+            self._idempotency.clear()
+
+        # Presales demo optimization: cache availability for a short period.
+        # Single-user flows often re-ask the same question (“earliest slot”, “today/tomorrow”, etc.).
+        self._availability_cache: dict[tuple[str, str, str, int, int], tuple[float, dict[str, Any]]] = {}
+        self._availability_cache_lock = threading.Lock()
 
         # Default characteristic (skill) applied to boiler repair requirements when present in the org.
         self._boiler_characteristic_name = "Boiler Heating Household Specialist"
@@ -143,7 +182,7 @@ class CustomerSelfServiceSchedulingService:
 
         # If duplicates exist (e.g. older MCP-created requirement + platform-created requirement),
         # prefer the non-demo name and otherwise prefer the oldest.
-        demo_name = "Boiler repair requirement (demo)"
+        demo_name = self._demo_job_name
 
         def _created_on(it: dict[str, Any]) -> datetime:
             v = it.get("createdon")
@@ -176,18 +215,41 @@ class CustomerSelfServiceSchedulingService:
         duration_minutes: int,
         max_slots: int = 8,
     ) -> dict[str, Any]:
+        effective_requirement_id = None if self._demo_fast else requirement_id
+
+        cache_key = (
+            str(effective_requirement_id or ""),
+            _iso(window_start_utc),
+            _iso(window_end_utc),
+            int(duration_minutes),
+            int(max_slots),
+        )
+
+        if self._demo_fast:
+            now_ts = datetime.now(timezone.utc).timestamp()
+            with self._availability_cache_lock:
+                cached = self._availability_cache.get(cache_key)
+                if cached is not None:
+                    expires_ts, value = cached
+                    if expires_ts > now_ts:
+                        return dict(value)
+                    self._availability_cache.pop(cache_key, None)
+
+        max_time_slots = int(max_slots) if self._demo_fast else int(max_slots) * 3
+
         raw = self._dv.search_field_service_availability(
             start_utc=window_start_utc,
             end_utc=window_end_utc,
             duration_minutes=int(duration_minutes),
-            requirement_id=requirement_id,
-            max_time_slots=int(max_slots) * 3,
+            requirement_id=effective_requirement_id,
+            max_time_slots=max_time_slots,
+            only_bookable_resource_id=self._demo_bookable_resource_id,
         )
 
         # Some orgs return zero slots for requirement-based availability even when the
         # broader scheduling model can find valid slots. Provide a pragmatic fallback
         # for slot suggestions while retaining diagnostics for troubleshooting.
-        if requirement_id and not list(raw.get("slots", []) or []):
+        if (not self._demo_fast) and requirement_id and not list(raw.get("slots", []) or []):
             try:
                 generic = self._dv.search_field_service_availability(
                     start_utc=window_start_utc,
@@ -195,6 +257,7 @@ class CustomerSelfServiceSchedulingService:
                     duration_minutes=int(duration_minutes),
                     requirement_id=None,
                     max_time_slots=int(max_slots) * 3,
+                    only_bookable_resource_id=self._demo_bookable_resource_id,
                 )
                 if list(generic.get("slots", []) or []):
                     raw = {
@@ -333,7 +396,7 @@ class CustomerSelfServiceSchedulingService:
             if 0 < int(max_slots) <= len(slots):
                 break
 
-        return {
+        out = {
             "status": raw.get("status", "ok"),
             "action": raw.get("action"),
             "count": len(slots),
@@ -342,6 +405,14 @@ class CustomerSelfServiceSchedulingService:
             "details": raw.get("details"),
             "raw": raw.get("raw"),
         }
+
+        if self._demo_fast:
+            ttl_seconds = 180.0
+            expires_ts = datetime.now(timezone.utc).timestamp() + ttl_seconds
+            with self._availability_cache_lock:
+                self._availability_cache[cache_key] = (expires_ts, dict(out))
+
+        return out
 
     def book_requirement(
         self,
@@ -359,6 +430,38 @@ class CustomerSelfServiceSchedulingService:
                 "requested": {"start": _iso(schedule_start_utc), "end": _iso(schedule_end_utc)},
             }
 
+        target_start = _iso(schedule_start_utc)
+        target_end = _iso(schedule_end_utc)
+
+        # Presales demo: lock booking to a single known resource and avoid additional
+        # availability calls (single-user flows, speed > completeness).
+        if self._demo_fast and self._demo_bookable_resource_id:
+            chosen_slot_id = f"{self._demo_bookable_resource_id}|{target_start}|{target_end}"
+            try:
+                booking_created = self._dv.create_booking_for_requirement(
+                    slot_id=chosen_slot_id,
+                    requirement_id=requirement_id,
+                    work_order_id=work_order_id,
+                    booking_status_name="Scheduled",
+                    name=self._demo_job_name,
+                )
+                booking = booking_created.get("booking") if isinstance(booking_created, dict) else None
+                if not isinstance(booking, dict):
+                    booking = {}
+                booking.update({"start": target_start, "end": target_end})
+                return {
+                    "status": "ok",
+                    "booking": booking,
+                    "selected_slot": booking_created.get("selected_slot"),
+                    "raw": booking_created,
+                }
+            except Exception as e:
+                return {
+                    "status": "error",
+                    "message": "Failed to create Bookable Resource Booking record.",
+                    "details": str(e),
+                }
+
         # Resolve a concrete resource slot_id for this requirement and window.
         # We do not require Schedule Assistant pipeline capabilities for this flow.
         availability = self._dv.search_field_service_availability(
@@ -368,10 +471,8 @@ class CustomerSelfServiceSchedulingService:
             requirement_id=requirement_id,
             max_time_slots=25,
             max_resources=5,
+            only_bookable_resource_id=self._demo_bookable_resource_id,
         )
-
-        target_start = _iso(schedule_start_utc)
-        target_end = _iso(schedule_end_utc)
 
         chosen_slot_id: str | None = None
         used_generic_fallback = False
@@ -412,6 +513,7 @@ class CustomerSelfServiceSchedulingService:
                     requirement_id=None,
                     max_time_slots=5,
                     max_resources=3,
+                    only_bookable_resource_id=self._demo_bookable_resource_id,
                 )
             except Exception:
                 generic_preview = None
@@ -486,7 +588,7 @@ class CustomerSelfServiceSchedulingService:
                 requirement_id=requirement_id,
                 work_order_id=work_order_id,
                 booking_status_name="Scheduled",
-                name="Customer booking (MCP)",
+                name=self._demo_job_name,
             )
             booking = booking_created.get("booking") if isinstance(booking_created, dict) else None
             if not isinstance(booking, dict):
@@ -546,7 +648,10 @@ class CustomerSelfServiceSchedulingService:
                 "requested": {"start": _iso(preferred_start_utc), "end": _iso(preferred_end_utc)},
             }
 
+        env_id = f"{(self._dv.base_url or '').rstrip('/').lower()}|{(getattr(self._dv, 'api_version', '') or '').strip().lower()}"
+
         key = _compute_idempotency_key(
+            environment_id=env_id,
             contact_id=contact_id,
             window_start_utc=window_start_utc,
             window_end_utc=window_end_utc,
@@ -555,15 +660,27 @@ class CustomerSelfServiceSchedulingService:
             scenario=scenario,
         )
         existing = self._idempotency.get(key)
+
         if existing and existing.get("booking", {}).get("id"):
-            return {"status": "ok", "idempotent_replay": True, **existing}
+            booking_id = str((existing.get("booking") or {}).get("id") or "").strip()
+            if booking_id:
+                # Guard against stale replays (e.g., switching Dataverse orgs or manual cleanup).
+                try:
+                    self._dv._get(
+                        f"bookableresourcebookings({booking_id})?$select=bookableresourcebookingid",
+                        include_annotations=False,
+                    )
+                    return {"status": "ok", "idempotent_replay": True, **existing}
+                except Exception:
+                    # Treat as cache miss; proceed to create fresh records.
+                    existing = None
 
         case_id: str | None = None
         if create_case:
             case_id = self._dv.create_case_for_contact(
                 contact_id=contact_id,
-                title="Boiler repair request (demo)",
-                description="Customer boiler repair request (presales demo).",
+                title=self._demo_job_name,
+                description=f"{self._demo_job_name} request (presales demo).",
                 priority=priority,
                 origin="web",
             )
@@ -604,7 +721,7 @@ class CustomerSelfServiceSchedulingService:
         # Optional validation: only meaningful when the selected window is wider than the appointment.
         # For slot-based booking (window == appointment), this check can produce false negatives.
         window_minutes = int((window_end_utc - window_start_utc).total_seconds() // 60)
-        if window_minutes > (duration_minutes + 5):
+        if (not self._demo_fast) and window_minutes > (duration_minutes + 5):
             try:
                 availability = self._dv.search_field_service_availability(
                     start_utc=window_start_utc,
@@ -612,6 +729,7 @@ class CustomerSelfServiceSchedulingService:
                     duration_minutes=duration_minutes,
                     requirement_id=requirement_id,
                     max_time_slots=50,
+                    only_bookable_resource_id=self._demo_bookable_resource_id,
                 )
                 matches = False
                 for s in list(availability.get("slots", [])):
@@ -669,6 +787,23 @@ class CustomerSelfServiceSchedulingService:
                 **out,
                 "details": booking_result.get("error") or booking_result.get("raw"),
             }
+
+        # Verify booking exists before persisting (prevents the model from replaying
+        # an ID that never actually made it into Dataverse).
+        booking_id = str((out.get("booking") or {}).get("id") or "").strip()
+        if booking_id:
+            try:
+                self._dv._get(
+                    f"bookableresourcebookings({booking_id})?$select=bookableresourcebookingid",
+                    include_annotations=False,
+                )
+            except Exception as e:
+                return {
+                    "status": "error",
+                    **out,
+                    "message": "Booking was returned by the booking flow but could not be confirmed in Dataverse.",
+                    "details": str(e),
+                }
 
         self._idempotency.put(key, {"status": "ok", **out})
         return {"status": "ok", **out}

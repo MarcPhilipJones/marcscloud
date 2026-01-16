@@ -10,6 +10,7 @@ import time
 from zoneinfo import ZoneInfo
 
 import httpx
+from .config import DEFAULT_DEMO_JOB_NAME
 
 from .auth import TokenProvider
 
@@ -329,6 +330,58 @@ class DataverseClient:
                 + "')/ManyToOneRelationships?$select=ReferencedEntity,ReferencingEntityNavigationPropertyName,ReferencingAttribute"
                 + "&$filter=ReferencedEntity eq '"
                 + refed
+                + "'"
+            )
+            resp = self._get(path, include_annotations=False)
+            items = list(resp.get("value", [])) if isinstance(resp, dict) else []
+            nav: str | None = None
+            for it in items:
+                if not isinstance(it, dict):
+                    continue
+                nav_name = it.get("ReferencingEntityNavigationPropertyName")
+                if isinstance(nav_name, str) and nav_name.strip():
+                    nav = nav_name.strip()
+                    break
+            nav = str(nav) if nav else None
+            self._relationship_nav_cache[cache_key] = nav
+            return nav
+        except Exception:
+            self._relationship_nav_cache[cache_key] = None
+            return None
+
+    def try_get_many_to_one_nav_property_for_attribute(
+        self,
+        *,
+        referencing_entity_logical_name: str,
+        referencing_attribute_logical_name: str,
+    ) -> str | None:
+        """Find the navigation property name for a specific lookup attribute.
+
+        Why this exists:
+        Some tables have multiple lookups to the same referenced entity.
+        Querying by referenced entity alone (try_get_many_to_one_nav_property)
+        can return the wrong relationship (e.g., a different lookup).
+
+        This method pins the relationship by ReferencingAttribute, which is what
+        we need when creating records via @odata.bind.
+        """
+
+        refing = (referencing_entity_logical_name or "").strip().lower()
+        attr = (referencing_attribute_logical_name or "").strip().lower()
+        if not refing or not attr:
+            return None
+
+        cache_key = f"{refing}.attr:{attr}"
+        if cache_key in self._relationship_nav_cache:
+            return self._relationship_nav_cache[cache_key]
+
+        try:
+            path = (
+                "EntityDefinitions(LogicalName='"
+                + refing
+                + "')/ManyToOneRelationships?$select=ReferencingEntityNavigationPropertyName,ReferencingAttribute"
+                + "&$filter=ReferencingAttribute eq '"
+                + attr
                 + "'"
             )
             resp = self._get(path, include_annotations=False)
@@ -673,7 +726,7 @@ class DataverseClient:
         duration_minutes = int(duration_minutes)
 
         base_payload: dict[str, Any] = {
-            "msdyn_name": "Boiler repair requirement (demo)",
+            "msdyn_name": DEFAULT_DEMO_JOB_NAME,
             "msdyn_fromdate": _iso(window_start_utc),
             "msdyn_todate": _iso(window_end_utc),
             "msdyn_duration": duration_minutes,
@@ -1017,6 +1070,23 @@ class DataverseClient:
         This helper retries across common schema variants.
         """
 
+        booking_keys = [
+            "BookingStatus@odata.bind",
+            "BookingStatusId@odata.bind",
+            "bookingstatus@odata.bind",
+            "bookingStatus@odata.bind",
+            "bookingstatusid@odata.bind",
+            "bookingStatusId@odata.bind",
+        ]
+
+        resource_keys = [
+            "Resource@odata.bind",
+            "ResourceId@odata.bind",
+            "resource@odata.bind",
+            "resourceId@odata.bind",
+            "resourceid@odata.bind",
+        ]
+
         def _extract_bind_value(p: dict[str, Any], keys: list[str]) -> str | None:
             for k in keys:
                 v = p.get(k)
@@ -1034,44 +1104,23 @@ class DataverseClient:
 
             booking_bind = _extract_bind_value(
                 p,
-                [
-                    "BookingStatus@odata.bind",
-                    "bookingstatus@odata.bind",
-                    "bookingstatusid@odata.bind",
-                ],
+                booking_keys,
             )
             if booking_bind is not None:
-                p.pop("BookingStatus@odata.bind", None)
-                p.pop("bookingstatus@odata.bind", None)
-                p.pop("bookingstatusid@odata.bind", None)
+                for k in booking_keys:
+                    p.pop(k, None)
                 p[bookingstatus_key] = booking_bind
 
             resource_bind = _extract_bind_value(
                 p,
-                [
-                    "Resource@odata.bind",
-                    "resource@odata.bind",
-                    "resourceid@odata.bind",
-                ],
+                resource_keys,
             )
             if resource_bind is not None:
-                p.pop("Resource@odata.bind", None)
-                p.pop("resource@odata.bind", None)
-                p.pop("resourceid@odata.bind", None)
+                for k in resource_keys:
+                    p.pop(k, None)
                 p[resource_key] = resource_bind
 
             return p
-
-        booking_keys = [
-            "BookingStatus@odata.bind",
-            "bookingstatus@odata.bind",
-            "bookingstatusid@odata.bind",
-        ]
-        resource_keys = [
-            "Resource@odata.bind",
-            "resource@odata.bind",
-            "resourceid@odata.bind",
-        ]
 
         attempted: list[dict[str, Any]] = []
         errors: list[dict[str, Any]] = []
@@ -1132,13 +1181,16 @@ class DataverseClient:
             raise RuntimeError("Invalid start/end in slot_id; duration must be > 0 minutes")
 
         # Use metadata-backed navigation-property names when possible.
-        discovered_bookingstatus_nav = self.try_get_many_to_one_nav_property(
+        # IMPORTANT: discover the nav properties for the specific lookup attributes.
+        # This table has multiple relationships to bookableresource; discovering by
+        # referenced entity alone can return the wrong relationship (e.g. msdyn_resourcegroup).
+        discovered_bookingstatus_nav = self.try_get_many_to_one_nav_property_for_attribute(
             referencing_entity_logical_name="bookableresourcebooking",
-            referenced_entity_logical_name="bookingstatus",
+            referencing_attribute_logical_name="bookingstatus",
         )
-        discovered_resource_nav = self.try_get_many_to_one_nav_property(
+        discovered_resource_nav = self.try_get_many_to_one_nav_property_for_attribute(
             referencing_entity_logical_name="bookableresourcebooking",
-            referenced_entity_logical_name="bookableresource",
+            referencing_attribute_logical_name="resource",
         )
 
         payload: dict[str, Any] = {
@@ -1156,17 +1208,17 @@ class DataverseClient:
 
         # Link to Work Order when caller has it (best-effort; orgs can differ).
         if work_order_id:
-            discovered_wo_nav = self.try_get_many_to_one_nav_property(
+            discovered_wo_nav = self.try_get_many_to_one_nav_property_for_attribute(
                 referencing_entity_logical_name="bookableresourcebooking",
-                referenced_entity_logical_name="msdyn_workorder",
+                referencing_attribute_logical_name="msdyn_workorder",
             )
             if discovered_wo_nav:
                 payload[f"{discovered_wo_nav}@odata.bind"] = f"/msdyn_workorders({work_order_id})"
 
         # Environments can differ in the navigation-property name for the requirement lookup.
-        discovered_req_nav = self.try_get_many_to_one_nav_property(
+        discovered_req_nav = self.try_get_many_to_one_nav_property_for_attribute(
             referencing_entity_logical_name="bookableresourcebooking",
-            referenced_entity_logical_name="msdyn_resourcerequirement",
+            referencing_attribute_logical_name="msdyn_resourcerequirement",
         )
         requirement_bind = f"/msdyn_resourcerequirements({requirement_id})"
 
@@ -1210,6 +1262,7 @@ class DataverseClient:
         requirement_id: str | None = None,
         max_time_slots: int = 8,
         max_resources: int = 5,
+        only_bookable_resource_id: str | None = None,
         latitude: float = 52.41882,
         longitude: float = -1.78605,
         work_location: int = 690970000,
@@ -1234,6 +1287,13 @@ class DataverseClient:
         duration_minutes = int(duration_minutes)
         max_time_slots = int(max_time_slots)
         max_resources = int(max_resources)
+
+        only_resource_norm: str | None = None
+        if isinstance(only_bookable_resource_id, str) and only_bookable_resource_id.strip():
+            try:
+                only_resource_norm = _normalize_guid(only_bookable_resource_id)
+            except Exception:
+                only_resource_norm = only_bookable_resource_id.strip()
 
         action_errors: dict[str, Any] = {}
 
@@ -1281,6 +1341,16 @@ class DataverseClient:
 
                 # Some shapes include top-level ResourceId.
                 resource_id = resource_id or ts.get("ResourceId") or ts.get("resourceId")
+
+                if only_resource_norm:
+                    if not resource_id:
+                        continue
+                    try:
+                        if _normalize_guid(str(resource_id)) != only_resource_norm:
+                            continue
+                    except Exception:
+                        if str(resource_id).strip().lower() != str(only_resource_norm).strip().lower():
+                            continue
 
                 if not start or not end:
                     continue
@@ -1466,12 +1536,18 @@ class DataverseClient:
             if not self.probe_unbound_action_exists("msdyn_SearchResourceAvailabilityForRequirementGroup"):
                 raise RuntimeError("Action msdyn_SearchResourceAvailabilityForRequirementGroup not available")
 
+            effective_max_resources = max_resources
+            # When we intend to filter to a single known resource, ask the platform for more
+            # candidates to reduce the chance our target resource gets trimmed out upstream.
+            if only_resource_norm and effective_max_resources < 25:
+                effective_max_resources = 25
+
             settings_b: dict[str, Any] = {
                 "ConsiderTravelTime": True,
                 "ConsiderResourceCalendar": True,
                 "ConsiderBookings": True,
                 "ReturnBestSlots": True,
-                "MaxNumberOfResources": max_resources,
+                "MaxNumberOfResources": effective_max_resources,
                 "MaxNumberOfTimeSlots": max_time_slots,
             }
 
@@ -1765,6 +1841,14 @@ class DataverseClient:
             if not resource_id:
                 continue
 
+            if only_resource_norm:
+                try:
+                    if _normalize_guid(str(resource_id)) != only_resource_norm:
+                        continue
+                except Exception:
+                    if str(resource_id).strip().lower() != str(only_resource_norm).strip().lower():
+                        continue
+
             slot_id = f"{resource_id}|{start}|{end}"
             slots.append(
                 {
@@ -2030,7 +2114,7 @@ class DataverseClient:
             "bookingstatusid@odata.bind": f"/bookingstatuses({booking_status_id})",
             "resourceid@odata.bind": f"/bookableresources({resource_id})",
             "msdyn_workorder@odata.bind": f"/msdyn_workorders({work_order_id})",
-            "name": "Boiler repair booking (demo)",
+            "name": DEFAULT_DEMO_JOB_NAME,
         }
         booking = self.create_bookable_resource_booking(booking_payload)
 
@@ -2060,7 +2144,7 @@ class DataverseClient:
         # caseorigincode: default option set values are typically 1=Phone, 2=Email, 3=Web.
         # prioritycode: default option set values are typically 1=High, 2=Normal, 3=Low.
         case_payload: dict[str, Any] = {
-            "title": "Boiler repair request (demo)",
+            "title": DEFAULT_DEMO_JOB_NAME,
             "description": (
                 "Customer reported no heating/hot water. "
                 + ("High priority requested. " if priority == "high" else "")
@@ -2138,7 +2222,7 @@ class DataverseClient:
             "bookingstatusid@odata.bind": f"/bookingstatuses({booking_status_id})",
             "resourceid@odata.bind": f"/bookableresources({resource_id})",
             "msdyn_workorder@odata.bind": f"/msdyn_workorders({work_order_id})",
-            "name": "Boiler repair booking (demo)",
+            "name": DEFAULT_DEMO_JOB_NAME,
         }
 
         try:
@@ -2205,7 +2289,7 @@ class DataverseClient:
             "bookingstatusid@odata.bind": f"/bookingstatuses({booking_status_id})",
             "resourceid@odata.bind": f"/bookableresources({resource_id})",
             "msdyn_workorder@odata.bind": f"/msdyn_workorders({work_order_id})",
-            "name": "Boiler repair booking (demo)",
+            "name": DEFAULT_DEMO_JOB_NAME,
         }
         booking = self.create_bookable_resource_booking(payload)
         return {

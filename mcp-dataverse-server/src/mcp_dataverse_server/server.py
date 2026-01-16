@@ -85,6 +85,13 @@ class _McpMessageLoggingMiddleware:
         path = scope.get("path") or ""
         method = (scope.get("method") or "").upper()
 
+        # Compatibility shim: some MCP clients POST to /sse/messages even when the
+        # server is mounted at /messages. Rewrite so the request hits the MCP app.
+        downstream_scope = scope
+        if method == "POST" and path == "/sse/messages":
+            downstream_scope = dict(scope)
+            downstream_scope["path"] = "/messages"
+
         is_message_post = method == "POST" and path.endswith("/messages")
         if not is_message_post:
             await self.app(scope, receive, send)
@@ -149,7 +156,7 @@ class _McpMessageLoggingMiddleware:
                         resp_body_bytes += min(len(chunk), remaining)
                 await send(message)
 
-            await self.app(scope, replay_receive, send_wrapper)
+            await self.app(downstream_scope, replay_receive, send_wrapper)
             dur_ms = int((time.perf_counter() - start) * 1000)
             _wire_logger.info("MCP message handled: path=%s status=%s duration_ms=%s", path, status_code, dur_ms)
 
@@ -366,7 +373,14 @@ def build_mcp() -> FastMCP:
         api_version=settings.dataverse_api_version,
         token_provider=token_provider,
     )
-    fs = CustomerSelfServiceSchedulingService(dv)
+    fs = CustomerSelfServiceSchedulingService(
+        dv,
+        demo_bookable_resource_id=settings.demo_bookable_resource_id,
+        demo_resource_name=settings.demo_resource_name,
+        demo_job_name=settings.demo_job_name,
+        demo_fast=settings.demo_fast,
+        clear_demo_caches_on_start=settings.clear_demo_caches_on_start,
+    )
     # NOTE: Avoid Dataverse network calls during server startup.
     # Capability probing is done lazily during tool execution.
 
@@ -786,7 +800,7 @@ def build_mcp() -> FastMCP:
                 }
 
             # Pick first non-demo requirement if present.
-            demo_name = "Boiler repair requirement (demo)"
+            demo_name = settings.demo_job_name
             chosen = None
             for it in candidates:
                 if not isinstance(it, dict):
@@ -1186,7 +1200,7 @@ def build_mcp() -> FastMCP:
                     "work_order": {"id": work_order_id},
                 }
 
-            demo_name = "Boiler repair requirement (demo)"
+            demo_name = settings.demo_job_name
             chosen = None
             for it in candidates:
                 if not isinstance(it, dict):
