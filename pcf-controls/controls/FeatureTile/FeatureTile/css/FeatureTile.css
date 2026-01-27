@@ -1,0 +1,137 @@
+/* FeatureTile PCF Control Styles */
+
+.mjpcf-featureTile {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 12px;
+  border-radius: 12px;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+  user-select: none;
+  box-sizing: border-box;
+}
+
+/* Size variants */
+.mjpcf-featureTile--small {
+  width: 64px;
+  min-height: 64px;
+}
+
+.mjpcf-featureTile--medium {
+  width: 80px;
+  min-height: 80px;
+}
+
+.mjpcf-featureTile--large {
+  width: 100px;
+  min-height: 100px;
+}
+
+/* State: Yes (Green) */
+.mjpcf-featureTile--yes {
+  background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+  border-color: #28a745;
+  color: #155724;
+}
+
+.mjpcf-featureTile--yes:hover:not(.mjpcf-featureTile--disabled) {
+  background: linear-gradient(135deg, #c3e6cb 0%, #b1dfbb 100%);
+  box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+  transform: translateY(-2px);
+}
+
+/* State: No (Pink/Red) */
+.mjpcf-featureTile--no {
+  background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
+  border-color: #dc3545;
+  color: #721c24;
+}
+
+.mjpcf-featureTile--no:hover:not(.mjpcf-featureTile--disabled) {
+  background: linear-gradient(135deg, #f5c6cb 0%, #f1b0b7 100%);
+  box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+  transform: translateY(-2px);
+}
+
+/* State: Unknown/Null (Grey) */
+.mjpcf-featureTile--unknown {
+  background: linear-gradient(135deg, #e9ecef 0%, #dee2e6 100%);
+  border-color: #6c757d;
+  color: #495057;
+}
+
+.mjpcf-featureTile--unknown:hover:not(.mjpcf-featureTile--disabled) {
+  background: linear-gradient(135deg, #dee2e6 0%, #ced4da 100%);
+  box-shadow: 0 4px 12px rgba(108, 117, 125, 0.3);
+  transform: translateY(-2px);
+}
+
+/* Disabled state */
+.mjpcf-featureTile--disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.mjpcf-featureTile--disabled:hover {
+  transform: none;
+  box-shadow: none;
+}
+
+/* Icon container */
+.mjpcf-featureTile__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mjpcf-featureTile--small .mjpcf-featureTile__icon svg {
+  width: 24px;
+  height: 24px;
+}
+
+.mjpcf-featureTile--medium .mjpcf-featureTile__icon svg {
+  width: 32px;
+  height: 32px;
+}
+
+.mjpcf-featureTile--large .mjpcf-featureTile__icon svg {
+  width: 40px;
+  height: 40px;
+}
+
+/* Label */
+.mjpcf-featureTile__label {
+  font-size: 11px;
+  font-weight: 600;
+  text-align: center;
+  line-height: 1.2;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mjpcf-featureTile--large .mjpcf-featureTile__label {
+  font-size: 12px;
+}
+
+/* Focus styles */
+.mjpcf-featureTile:focus {
+  outline: none;
+}
+
+.mjpcf-featureTile:focus-visible {
+  outline: 3px solid #0078d4;
+  outline-offset: 2px;
+}
+
+/* Active/pressed state */
+.mjpcf-featureTile:active:not(.mjpcf-featureTile--disabled) {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}

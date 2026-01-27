@@ -1,0 +1,28 @@
+# Node
+node_modules/
+
+# PCF build artifacts (varies by template/tooling)
+**/out/
+**/dist/
+**/build/
+**/coverage/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+*.log
+
+# OS / Editor
+.DS_Store
+Thumbs.db
+.vscode/settings.json
+
+# MSBuild / VS / dotnet
+**/bin/
+**/obj/
+*.user
+*.suo
+
+# Misc
+*.tsbuildinfo

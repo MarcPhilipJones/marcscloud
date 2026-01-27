@@ -1,0 +1,60 @@
+.mjpcf-yesNoTickCross {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  border: 1px solid transparent;
+  background: transparent;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+}
+
+.mjpcf-yesNoTickCross:focus {
+  outline: none;
+}
+
+.mjpcf-yesNoTickCross:focus-visible {
+  outline: 2px solid #605e5c;
+  outline-offset: 2px;
+}
+
+.mjpcf-yesNoTickCross--disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.mjpcf-yesNoTickCross__icon {
+  font-size: 18px;
+  line-height: 1;
+  font-weight: 700;
+}
+
+.mjpcf-yesNoTickCross--yes {
+  border-color: rgba(16, 124, 16, 0.25);
+  background: rgba(16, 124, 16, 0.08);
+}
+
+.mjpcf-yesNoTickCross--yes .mjpcf-yesNoTickCross__icon {
+  color: #107c10;
+}
+
+.mjpcf-yesNoTickCross--no {
+  border-color: rgba(196, 43, 28, 0.25);
+  background: rgba(196, 43, 28, 0.08);
+}
+
+.mjpcf-yesNoTickCross--no .mjpcf-yesNoTickCross__icon {
+  color: #c42b1c;
+}
+
+.mjpcf-yesNoTickCross--unknown {
+  border-color: rgba(96, 94, 92, 0.25);
+  background: rgba(96, 94, 92, 0.06);
+}
+
+.mjpcf-yesNoTickCross--unknown .mjpcf-yesNoTickCross__icon {
+  color: #605e5c;
+}

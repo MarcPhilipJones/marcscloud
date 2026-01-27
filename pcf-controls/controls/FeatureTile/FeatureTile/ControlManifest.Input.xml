@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<manifest>
+  <control namespace="MarcJonesPCF" constructor="FeatureTile" version="0.0.1" display-name-key="FeatureTile" description-key="A visually appealing tile control for Yes/No fields with configurable Fluent UI icons and labels" control-type="standard">
+    <external-service-usage enabled="false">
+    </external-service-usage>
+
+    <!-- Bound Two Options value -->
+    <property name="value" display-name-key="Value" description-key="The bound Yes/No (Two Options) field" of-type="TwoOptions" usage="bound" required="false" />
+
+    <!-- Icon configuration -->
+    <property name="iconYes" display-name-key="Icon (Yes)" description-key="Fluent icon name for Yes state (e.g., Checkmark, Home, Car, Lightbulb, Wrench, Fire, Gauge)" of-type="SingleLine.Text" usage="input" required="false" />
+    <property name="iconNo" display-name-key="Icon (No)" description-key="Fluent icon name for No state (e.g., Dismiss, Warning, DismissCircle)" of-type="SingleLine.Text" usage="input" required="false" />
+
+    <!-- Label configuration -->
+    <property name="labelText" display-name-key="Label" description-key="Text label to display below the tile (leave empty to hide)" of-type="SingleLine.Text" usage="input" required="false" />
+
+    <!-- Size configuration -->
+    <property name="tileSize" display-name-key="Tile Size" description-key="Tile size: Small (48px), Medium (64px), Large (80px)" of-type="SingleLine.Text" usage="input" required="false" />
+
+    <resources>
+      <code path="index.ts" order="1"/>
+      <css path="css/FeatureTile.css" order="1" />
+    </resources>
+  </control>
+</manifest>
