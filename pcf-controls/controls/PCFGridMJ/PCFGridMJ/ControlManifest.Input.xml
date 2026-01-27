@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<manifest>
+  <control namespace="MarcJonesPCF" constructor="PCFGridMJ" version="0.0.1" display-name-key="PCFGridMJ" description-key="Customer Features Dashboard - 8 feature tiles in a 2x4 grid" control-type="standard" >
+    <external-service-usage enabled="false">
+    </external-service-usage>
+    
+    <!-- Primary bound field (required) - bind to any one of the 8 fields -->
+    <property name="primaryField" display-name-key="Primary Field" description-key="Primary bound field (bind to any of the 8 feature fields)" of-type="TwoOptions" usage="bound" required="true" />
+    
+    <!-- Row 1: Repaired, HomeCare, Smart Meter, EV Owner -->
+    <property name="repairedRecently" display-name-key="Repaired Recently" description-key="mj_repairedrecently" of-type="TwoOptions" usage="bound" required="false" />
+    <property name="homeCareCover" display-name-key="HomeCare Cover" description-key="mj_homecarecover" of-type="TwoOptions" usage="bound" required="false" />
+    <property name="smartMeter" display-name-key="Smart Meter" description-key="mj_doyouhaveasmartmeter" of-type="TwoOptions" usage="bound" required="false" />
+    <property name="evOwner" display-name-key="EV Owner" description-key="mj_utility_ev_owner" of-type="TwoOptions" usage="bound" required="false" />
+    
+    <!-- Row 2: Home EV Charger, Hive Thermostat, Smart Radiator Valves, Priority Register -->
+    <property name="homeEvCharger" display-name-key="Home EV Charger" description-key="mj_homeevcharger" of-type="TwoOptions" usage="bound" required="false" />
+    <property name="hiveThermostat" display-name-key="Hive Thermostat" description-key="mj_doyouhaveahivethermostat" of-type="TwoOptions" usage="bound" required="false" />
+    <property name="smartRadiatorValves" display-name-key="Smart Radiator Valves" description-key="mj_doyouhavesmartradiatorvalves" of-type="TwoOptions" usage="bound" required="false" />
+    <property name="priorityRegister" display-name-key="Priority Register" description-key="mj_PrioirtyRegister" of-type="TwoOptions" usage="bound" required="false" />
+    
+    <resources>
+      <code path="index.ts" order="1"/>
+      <css path="css/PCFGridMJ.css" order="1" />
+    </resources>
+  </control>
+</manifest>

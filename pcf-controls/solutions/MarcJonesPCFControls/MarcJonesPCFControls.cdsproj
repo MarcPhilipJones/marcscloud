@@ -51,6 +51,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\controls\YesNoTickCross\YesNoTickCross.pcfproj" />
     <ProjectReference Include="..\..\controls\FeatureTile\FeatureTile.pcfproj" />
+    <ProjectReference Include="..\..\controls\PCFGridMJ\PCFGridMJ.pcfproj" />
   </ItemGroup>
 
   <Import Project="$(MSBuildToolsPath)\Microsoft.Common.targets" />

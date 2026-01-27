@@ -1,0 +1,117 @@
+/* PCFGridMJ - Customer Features Dashboard */
+/* 2x4 grid of feature tiles */
+
+.mjpcf-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-template-rows: repeat(2, 1fr);
+    gap: 8px;
+    padding: 8px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* Individual tile */
+.mjpcf-grid__tile {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 8px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    min-height: 80px;
+    font-family: "Segoe UI", system-ui, sans-serif;
+    position: relative;
+    overflow: hidden;
+}
+
+.mjpcf-grid__tile:focus {
+    outline: 2px solid #0078d4;
+    outline-offset: 2px;
+}
+
+.mjpcf-grid__tile:hover:not(.mjpcf-grid__tile--disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.mjpcf-grid__tile:active:not(.mjpcf-grid__tile--disabled) {
+    transform: translateY(0);
+}
+
+/* State: Yes */
+.mjpcf-grid__tile--yes {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    color: white;
+}
+
+/* State: No */
+.mjpcf-grid__tile--no {
+    background: linear-gradient(135deg, #dc3545 0%, #e91e63 100%);
+    color: white;
+}
+
+/* State: Unknown/null */
+.mjpcf-grid__tile--unknown {
+    background: linear-gradient(135deg, #6c757d 0%, #868e96 100%);
+    color: white;
+}
+
+/* State: Disabled */
+.mjpcf-grid__tile--disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* Icon container */
+.mjpcf-grid__icon {
+    width: 28px;
+    height: 28px;
+    margin-bottom: 6px;
+}
+
+.mjpcf-grid__icon svg {
+    width: 100%;
+    height: 100%;
+}
+
+/* Label */
+.mjpcf-grid__label {
+    font-size: 11px;
+    font-weight: 500;
+    text-align: center;
+    line-height: 1.2;
+    max-width: 100%;
+    word-wrap: break-word;
+}
+
+/* Responsive: Stack 2x4 on narrow screens */
+@media (max-width: 400px) {
+    .mjpcf-grid {
+        grid-template-columns: repeat(2, 1fr);
+        grid-template-rows: repeat(4, 1fr);
+    }
+}
+
+/* Indicator badge for quick visual */
+.mjpcf-grid__tile::after {
+    content: "";
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.4);
+}
+
+.mjpcf-grid__tile--yes::after {
+    background: rgba(255, 255, 255, 0.6);
+}
+
+.mjpcf-grid__tile--no::after {
+    background: rgba(0, 0, 0, 0.2);
+}
