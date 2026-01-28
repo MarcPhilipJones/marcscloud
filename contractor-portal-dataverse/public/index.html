@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contractor Portal - Contoso Field Services</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">
+                <div class="logo-icon">⚡</div>
+                <div class="logo-text">
+                    <span class="logo-company">CONTOSO</span>
+                    <span class="logo-subtitle">Contractor Portal</span>
+                </div>
+            </div>
+            <div class="contractor-info" id="contractor-info">
+                <span class="contractor-label">Logged in as:</span>
+                <span class="contractor-name" id="contractor-name">Loading...</span>
+            </div>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <!-- Left Panel: Bookings List -->
+        <aside class="bookings-panel">
+            <div class="panel-header">
+                <h2>My Bookings</h2>
+                <div class="filter-tabs">
+                    <button class="filter-tab active" data-view="all">All</button>
+                    <button class="filter-tab" data-view="upcoming">Upcoming</button>
+                    <button class="filter-tab" data-view="past">Past</button>
+                </div>
+            </div>
+            
+            <div class="bookings-list" id="bookings-list">
+                <div class="loading-state">
+                    <div class="spinner"></div>
+                    <p>Loading bookings...</p>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Right Panel: Work Order Detail -->
+        <section class="workorder-panel" id="workorder-panel">
+            <div class="empty-state" id="empty-state">
+                <div class="empty-icon">📋</div>
+                <h3>Select a Booking</h3>
+                <p>Choose a booking from the list to view work order details</p>
+            </div>
+
+            <div class="workorder-content" id="workorder-content" style="display: none;">
+                <!-- Work Order Header -->
+                <div class="wo-header">
+                    <div class="wo-title-section">
+                        <h2 id="wo-name">Work Order</h2>
+                        <div class="wo-meta">
+                            <span class="wo-status" id="wo-status-badge">Status</span>
+                            <span class="wo-priority" id="wo-priority"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Work Order Details Grid -->
+                <div class="wo-details-grid">
+                    <div class="wo-detail-card">
+                        <h4>Service Account</h4>
+                        <p id="wo-service-account">-</p>
+                    </div>
+                    <div class="wo-detail-card">
+                        <h4>Address</h4>
+                        <p id="wo-address">-</p>
+                    </div>
+                    <div class="wo-detail-card">
+                        <h4>Incident Type</h4>
+                        <p id="wo-incident-type">-</p>
+                    </div>
+                    <div class="wo-detail-card">
+                        <h4>Created</h4>
+                        <p id="wo-created">-</p>
+                    </div>
+                </div>
+
+                <!-- Incident Description -->
+                <div class="wo-section" id="incident-section" style="display: none;">
+                    <h3>Incident Description</h3>
+                    <div class="wo-text-content" id="wo-incident-description"></div>
+                </div>
+
+                <!-- Instructions (Read-only) -->
+                <div class="wo-section" id="instructions-section" style="display: none;">
+                    <h3>Instructions</h3>
+                    <div class="wo-text-content" id="wo-instructions"></div>
+                </div>
+
+                <!-- Related Bookings -->
+                <div class="wo-section" id="bookings-section">
+                    <h3>Related Bookings</h3>
+                    <div class="related-bookings" id="wo-bookings"></div>
+                </div>
+
+                <!-- EDITABLE: System Status -->
+                <div class="wo-section editable-section">
+                    <h3>
+                        <span class="edit-icon">✏️</span>
+                        System Status
+                    </h3>
+                    <div class="edit-form">
+                        <select id="wo-system-status" class="form-select">
+                            <!-- Options populated dynamically -->
+                        </select>
+                        <button class="btn btn-primary" id="save-status-btn">
+                            <span class="btn-text">Save Status</span>
+                            <span class="btn-loading" style="display: none;">
+                                <span class="spinner-small"></span>
+                            </span>
+                        </button>
+                    </div>
+                    <div class="save-message" id="status-message"></div>
+                </div>
+
+                <!-- EDITABLE: Summary -->
+                <div class="wo-section editable-section">
+                    <h3>
+                        <span class="edit-icon">✏️</span>
+                        Summary
+                    </h3>
+                    <div class="edit-form">
+                        <textarea id="wo-summary" class="form-textarea" rows="4" placeholder="Enter work order summary..."></textarea>
+                        <button class="btn btn-primary" id="save-summary-btn">
+                            <span class="btn-text">Save Summary</span>
+                            <span class="btn-loading" style="display: none;">
+                                <span class="spinner-small"></span>
+                            </span>
+                        </button>
+                    </div>
+                    <div class="save-message" id="summary-message"></div>
+                </div>
+
+                <!-- EDITABLE: Account Instructions -->
+                <div class="wo-section editable-section" id="account-instructions-section">
+                    <h3>
+                        <span class="edit-icon">✏️</span>
+                        Account Instructions
+                    </h3>
+                    <div class="edit-form">
+                        <textarea id="wo-account-instructions" class="form-textarea" rows="4" placeholder="Enter account instructions..."></textarea>
+                        <button class="btn btn-primary" id="save-instructions-btn">
+                            <span class="btn-text">Save Instructions</span>
+                            <span class="btn-loading" style="display: none;">
+                                <span class="spinner-small"></span>
+                            </span>
+                        </button>
+                    </div>
+                    <div class="save-message" id="instructions-message"></div>
+                </div>
+
+                <!-- Photo Upload -->
+                <div class="wo-section editable-section">
+                    <h3>
+                        <span class="edit-icon">📷</span>
+                        Photo Attachments
+                    </h3>
+                    
+                    <!-- Existing Photos -->
+                    <div class="photos-grid" id="photos-grid"></div>
+                    
+                    <!-- Upload Form -->
+                    <div class="photo-upload-form">
+                        <div class="upload-area" id="upload-area">
+                            <input type="file" id="photo-input" accept="image/jpeg,image/jpg,image/png" style="display: none;">
+                            <div class="upload-content">
+                                <span class="upload-icon">📁</span>
+                                <p>Click or drag to upload a photo</p>
+                                <p class="upload-hint">JPG, JPEG, PNG • Max 10MB</p>
+                            </div>
+                        </div>
+                        
+                        <!-- Preview -->
+                        <div class="photo-preview" id="photo-preview" style="display: none;">
+                            <img id="preview-image" src="" alt="Preview">
+                            <div class="preview-info">
+                                <span id="preview-filename"></span>
+                                <button class="btn btn-small btn-danger" id="remove-photo-btn">Remove</button>
+                            </div>
+                        </div>
+                        
+                        <div class="upload-options" id="upload-options" style="display: none;">
+                            <input type="text" id="photo-subject" class="form-input" placeholder="Photo subject (optional)">
+                            <button class="btn btn-primary" id="upload-photo-btn">
+                                <span class="btn-text">Upload Photo</span>
+                                <span class="btn-loading" style="display: none;">
+                                    <span class="spinner-small"></span>
+                                </span>
+                            </button>
+                        </div>
+                        <div class="save-message" id="upload-message"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Loading State for Work Order -->
+            <div class="loading-overlay" id="wo-loading" style="display: none;">
+                <div class="spinner"></div>
+                <p>Loading work order details...</p>
+            </div>
+        </section>
+    </main>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toast-container"></div>
+
+    <script src="app.js"></script>
+</body>
+</html>
