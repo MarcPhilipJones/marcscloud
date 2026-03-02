@@ -1,0 +1,359 @@
+HomeScreen As screen:
+    Fill: =McLarenBlack
+
+    BackgroundImage As image:
+        Height: =Parent.Height
+        Image: ="https://www.contosodemos.co.uk/mclaren-570s-spider-home.jpg"
+        ImagePosition: =ImagePosition.Fill
+        Transparency: =0.82
+        Width: =Parent.Width
+        X: =0
+        Y: =0
+        ZIndex: =0
+
+    AppTitle As label:
+        Align: =Align.Center
+        Color: =McLarenOrange
+        Font: =Font.'Segoe UI'
+        FontWeight: =FontWeight.Bold
+        Height: =40
+        Size: =28
+        Text: ="McLAREN"
+        Width: =Parent.Width
+        X: =0
+        Y: =15
+        ZIndex: =1
+
+    AppSubtitle As label:
+        Align: =Align.Center
+        Color: =McLarenWhite
+        Font: =Font.'Segoe UI'
+        FontWeight: =FontWeight.Semibold
+        Height: =20
+        Size: =12
+        Text: ="PERSONALISATION SUITE"
+        Width: =Parent.Width
+        X: =0
+        Y: =55
+        ZIndex: =2
+
+    CustomerNameLabel As label:
+        Align: =Align.Center
+        Color: =McLarenWhite
+        Font: =Font.'Segoe UI'
+        FontWeight: =FontWeight.Bold
+        Height: =30
+        Size: =18
+        Text: =CurrentCustomer.Name
+        Width: =Parent.Width
+        X: =0
+        Y: =85
+        ZIndex: =3
+
+    VehicleLabel As label:
+        Align: =Align.Center
+        Color: =McLarenOrange
+        Font: =Font.'Segoe UI'
+        FontWeight: =FontWeight.Semibold
+        Height: =20
+        Size: =12
+        Text: =CurrentCustomer.Vehicle & " - " & CurrentCustomer.VehicleSpec
+        Width: =Parent.Width
+        X: =0
+        Y: =115
+        ZIndex: =4
+
+    NavDivider1 As label:
+        Fill: =McLarenDarkGrey
+        Height: =1
+        Text: =""
+        Width: =1100
+        X: =133
+        Y: =150
+        ZIndex: =5
+
+    NavLabel As label:
+        Align: =Align.Center
+        Color: =McLarenSilver
+        Font: =Font.'Segoe UI'
+        Height: =20
+        Size: =10
+        Text: ="SELECT A CATEGORY"
+        Width: =Parent.Width
+        X: =0
+        Y: =160
+        ZIndex: =6
+
+    ClimateTile As button:
+        BorderColor: =McLarenOrange
+        BorderThickness: =2
+        Color: =McLarenWhite
+        Fill: =McLarenDarkGrey
+        Font: =Font.'Segoe UI'
+        FontWeight: =FontWeight.Bold
+        Height: =55
+        OnSelect: =Navigate(ClimateScreen, ScreenTransition.Fade)
+        Size: =11
+        Text: ="CLIMATE"
+        Width: =200
+        X: =133
+        Y: =190
+        ZIndex: =7
+
+    SeatingTile As button:
+        BorderColor: =McLarenOrange
+        BorderThickness: =2
+        Color: =McLarenWhite
+        Fill: =McLarenDarkGrey
+        Font: =Font.'Segoe UI'
+        FontWeight: =FontWeight.Bold
+        Height: =55
+        OnSelect: =Navigate(SeatingScreen, ScreenTransition.Fade)
+        Size: =11
+        Text: ="SEATING"
+        Width: =200
+        X: =358
+        Y: =190
+        ZIndex: =8
+
+    AudioTile As button:
+        BorderColor: =McLarenOrange
+        BorderThickness: =2
+        Color: =McLarenWhite
+        Fill: =McLarenDarkGrey
+        Font: =Font.'Segoe UI'
+        FontWeight: =FontWeight.Bold
+        Height: =55
+        OnSelect: =Navigate(AudioScreen, ScreenTransition.Fade)
+        Size: =11
+        Text: ="AUDIO"
+        Width: =200
+        X: =583
+        Y: =190
+        ZIndex: =9
+
+    DrivingTile As button:
+        BorderColor: =McLarenOrange
+        BorderThickness: =2
+        Color: =McLarenWhite
+        Fill: =McLarenDarkGrey
+        Font: =Font.'Segoe UI'
+        FontWeight: =FontWeight.Bold
+        Height: =55
+        OnSelect: =Navigate(DrivingScreen, ScreenTransition.Fade)
+        Size: =11
+        Text: ="DRIVING"
+        Width: =200
+        X: =808
+        Y: =190
+        ZIndex: =10
+
+    DisplayTile As button:
+        BorderColor: =McLarenOrange
+        BorderThickness: =2
+        Color: =McLarenWhite
+        Fill: =McLarenDarkGrey
+        Font: =Font.'Segoe UI'
+        FontWeight: =FontWeight.Bold
+        Height: =55
+        OnSelect: =Navigate(DisplayScreen, ScreenTransition.Fade)
+        Size: =11
+        Text: ="DISPLAY"
+        Width: =200
+        X: =1033
+        Y: =190
+        ZIndex: =11
+
+    NavDivider2 As label:
+        Fill: =McLarenDarkGrey
+        Height: =1
+        Text: =""
+        Width: =1100
+        X: =133
+        Y: =265
+        ZIndex: =12
+
+    SummaryLabel As label:
+        Align: =Align.Center
+        Color: =McLarenSilver
+        Font: =Font.'Segoe UI'
+        Height: =20
+        Size: =10
+        Text: ="YOUR CURRENT SETTINGS"
+        Width: =Parent.Width
+        X: =0
+        Y: =275
+        ZIndex: =13
+
+    ClimateCardBg As label:
+        Fill: =McLarenDarkGrey
+        Height: =130
+        Text: =""
+        Width: =350
+        X: =133
+        Y: =305
+        ZIndex: =14
+
+    ClimateCardTitle As label:
+        Color: =McLarenOrange
+        Font: =Font.'Segoe UI'
+        FontWeight: =FontWeight.Bold
+        Height: =25
+        Size: =12
+        Text: ="CLIMATE"
+        Width: =330
+        X: =143
+        Y: =315
+        ZIndex: =15
+
+    ClimateCardContent As label:
+        Color: =McLarenSilver
+        Font: =Font.'Segoe UI'
+        Height: =85
+        Size: =11
+        Text: ="Temperature: " & Text(varTemperature, "0") & "C" & Char(10) & "Heated Seats: " & varHeatedSeats & Char(10) & "Heated Wheel: " & If(varHeatedSteeringWheel, "On", "Off")
+        Width: =330
+        X: =143
+        Y: =340
+        ZIndex: =16
+
+    SeatingCardBg As label:
+        Fill: =McLarenDarkGrey
+        Height: =130
+        Text: =""
+        Width: =350
+        X: =508
+        Y: =305
+        ZIndex: =17
+
+    SeatingCardTitle As label:
+        Color: =McLarenOrange
+        Font: =Font.'Segoe UI'
+        FontWeight: =FontWeight.Bold
+        Height: =25
+        Size: =12
+        Text: ="SEATING"
+        Width: =330
+        X: =518
+        Y: =315
+        ZIndex: =18
+
+    SeatingCardContent As label:
+        Color: =McLarenSilver
+        Font: =Font.'Segoe UI'
+        Height: =85
+        Size: =11
+        Text: ="Height: " & varDriverHeight & Char(10) & "Position: " & Text(varSeatPosition, "0") & "%" & Char(10) & "Lumbar: " & Text(varLumbarSupport, "0") & "%"
+        Width: =330
+        X: =518
+        Y: =340
+        ZIndex: =19
+
+    AudioCardBg As label:
+        Fill: =McLarenDarkGrey
+        Height: =130
+        Text: =""
+        Width: =350
+        X: =883
+        Y: =305
+        ZIndex: =20
+
+    AudioCardTitle As label:
+        Color: =McLarenOrange
+        Font: =Font.'Segoe UI'
+        FontWeight: =FontWeight.Bold
+        Height: =25
+        Size: =12
+        Text: ="AUDIO"
+        Width: =330
+        X: =893
+        Y: =315
+        ZIndex: =21
+
+    AudioCardContent As label:
+        Color: =McLarenSilver
+        Font: =Font.'Segoe UI'
+        Height: =85
+        Size: =11
+        Text: ="Station: " & varRadioStation1 & Char(10) & "Source: " & varAudioSource & Char(10) & "Bass: " & Text(varBassLevel, "0")
+        Width: =330
+        X: =893
+        Y: =340
+        ZIndex: =22
+
+    DrivingCardBg As label:
+        Fill: =McLarenDarkGrey
+        Height: =130
+        Text: =""
+        Width: =350
+        X: =133
+        Y: =455
+        ZIndex: =23
+
+    DrivingCardTitle As label:
+        Color: =McLarenOrange
+        Font: =Font.'Segoe UI'
+        FontWeight: =FontWeight.Bold
+        Height: =25
+        Size: =12
+        Text: ="DRIVING"
+        Width: =330
+        X: =143
+        Y: =465
+        ZIndex: =24
+
+    DrivingCardContent As label:
+        Color: =McLarenSilver
+        Font: =Font.'Segoe UI'
+        Height: =85
+        Size: =11
+        Text: ="Mode: " & varDriveMode & Char(10) & "ESC: " & varESC & Char(10) & "Launch Control: " & If(varLaunchControl, "On", "Off")
+        Width: =330
+        X: =143
+        Y: =490
+        ZIndex: =25
+
+    DisplayCardBg As label:
+        Fill: =McLarenDarkGrey
+        Height: =130
+        Text: =""
+        Width: =350
+        X: =508
+        Y: =455
+        ZIndex: =26
+
+    DisplayCardTitle As label:
+        Color: =McLarenOrange
+        Font: =Font.'Segoe UI'
+        FontWeight: =FontWeight.Bold
+        Height: =25
+        Size: =12
+        Text: ="DISPLAY"
+        Width: =330
+        X: =518
+        Y: =465
+        ZIndex: =27
+
+    DisplayCardContent As label:
+        Color: =McLarenSilver
+        Font: =Font.'Segoe UI'
+        Height: =85
+        Size: =11
+        Text: ="Theme: " & varClusterTheme & Char(10) & "Ambient: " & varAmbientColor & Char(10) & "HUD: " & If(varHUD, "On", "Off")
+        Width: =330
+        X: =518
+        Y: =490
+        ZIndex: =28
+
+    FooterLabel As label:
+        Align: =Align.Center
+        Color: =McLarenSilver
+        Font: =Font.'Segoe UI'
+        Height: =25
+        Size: =9
+        Text: ="Your preferences will sync to your vehicle at delivery"
+        Width: =Parent.Width
+        X: =0
+        Y: =Parent.Height - 35
+        ZIndex: =29
+

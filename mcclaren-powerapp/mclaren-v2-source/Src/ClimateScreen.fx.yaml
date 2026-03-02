@@ -1,0 +1,129 @@
+ClimateScreen As screen:
+    Fill: =McLarenBlack
+
+    ClimateBackgroundImage As image:
+        Height: =Parent.Height
+        Image: ="https://www.contosodemos.co.uk/mclaren-570s-spider-home.jpg"
+        ImagePosition: =ImagePosition.Fill
+        Transparency: =0.82
+        Width: =Parent.Width
+        X: =0
+        Y: =0
+        ZIndex: =0
+
+    ClimateBackBtn As button:
+        BorderColor: =McLarenOrange
+        BorderThickness: =2
+        Color: =McLarenWhite
+        Fill: =Color.Transparent
+        Font: =Font.'Segoe UI'
+        Height: =50
+        OnSelect: =Navigate(HomeScreen, ScreenTransition.Fade)
+        Text: ="< BACK"
+        Width: =120
+        X: =20
+        Y: =15
+        ZIndex: =1
+
+    ClimateTitle As label:
+        Align: =Align.Center
+        Color: =McLarenOrange
+        Font: =Font.'Segoe UI'
+        FontWeight: =FontWeight.Bold
+        Height: =40
+        Size: =24
+        Text: ="CLIMATE CONTROL"
+        Width: =400
+        X: =Parent.Width / 2 - Self.Width / 2
+        Y: =20
+        ZIndex: =2
+
+    ClimateSaveBtn As button:
+        Color: =McLarenBlack
+        Fill: =McLarenOrange
+        Font: =Font.'Segoe UI'
+        FontWeight: =FontWeight.Bold
+        Height: =50
+        OnSelect: =Notify("Climate settings saved!", NotificationType.Success)
+        Text: ="SAVE"
+        Width: =120
+        X: =Parent.Width - 140
+        Y: =15
+        ZIndex: =3
+
+    TempCard As label:
+        Color: =McLarenWhite
+        Fill: =McLarenDarkGrey
+        Font: =Font.'Segoe UI'
+        FontWeight: =FontWeight.Bold
+        Height: =180
+        Size: =16
+        Text: ="TEMPERATURE"
+        Width: =Parent.Width - 80
+        X: =40
+        Y: =100
+        ZIndex: =4
+
+    TempDisplay As label:
+        Align: =Align.Center
+        Color: =McLarenOrange
+        Font: =Font.'Segoe UI'
+        FontWeight: =FontWeight.Bold
+        Height: =60
+        Size: =42
+        Text: =Text(TempSlider.Value, "0") & " C"
+        Width: =200
+        X: =Parent.Width / 2 - Self.Width / 2
+        Y: =150
+        ZIndex: =5
+
+    TempSlider As slider:
+        Default: =varTemperature
+        HandleFill: =McLarenWhite
+        Height: =40
+        Max: =28
+        Min: =16
+        RailFill: =McLarenSilver
+        ShowValue: =false
+        ValueFill: =McLarenOrange
+        Width: =Parent.Width - 200
+        X: =100
+        Y: =220
+        ZIndex: =6
+
+    TempMinLabel As label:
+        Color: =McLarenSilver
+        Font: =Font.'Segoe UI'
+        Height: =25
+        Size: =12
+        Text: ="16 C"
+        Width: =50
+        X: =50
+        Y: =225
+        ZIndex: =7
+
+    TempMaxLabel As label:
+        Align: =Align.Right
+        Color: =McLarenSilver
+        Font: =Font.'Segoe UI'
+        Height: =25
+        Size: =12
+        Text: ="28 C"
+        Width: =50
+        X: =Parent.Width - 100
+        Y: =225
+        ZIndex: =8
+
+    SeatsInfoCard As label:
+        Color: =McLarenWhite
+        Fill: =McLarenDarkGrey
+        Font: =Font.'Segoe UI'
+        Height: =200
+        Size: =14
+        Text: ="Additional controls for Heated Seats, Ventilated Seats, and Heated Steering Wheel can be added using Power Apps Studio"
+        Width: =Parent.Width - 80
+        X: =40
+        Y: =320
+        ZIndex: =9
+
+

@@ -1,0 +1,32 @@
+{% assign created = request.params['created'] %}
+  {% if created %}
+  <div class='alert alert-block alert-success alert-case-created'><p>{% editable snippets 'CustomerService/Support/A_Case' type: 'text', default: resx['CustomerService_Support_A_Case'], escape: true %}{{ created | h  }}{% editable snippets 'CustomerService/Support/CaseCreated' type: 'text', default: resx['CustomerService_Support_Case_Created'], escape: true , tag: 'span' %}</p></div>
+  {% endif %}
+  <div class="case-deflection">
+   <div class="content-panel panel panel-default">
+     <div class="panel-heading">
+          {% editable snippets 'CustomerService/Support/HelpQuestion' type: 'html'%}
+    </div>
+    <div class="panel-body">
+     <div class="input-group">
+      <div class="input-group-btn search-clear-container">
+       <button type="button" class="btn btn-default search-clear" title="{{ snippets['CustomerService/Support/ClearButton'] | default: resx['CustomerService_Support_ClearButton'] | h }}">
+        <span aria-hidden="true" class="fa fa-times"></span>
+       </button>
+      </div>
+      <input aria-label="{{ snippets['CustomerService/Support/HelpQuestion'] | default: resx['CustomerService_Support_Help_Question'] | h }}" title="{{ snippets['CustomerService/Support/FailedLogin'] | default: resx['CustomerService_Support_FailedLogin'] | h }}" type="text" class="form-control subject case-deflection" data-container=".case-deflection" data-target="#case-deflection-topics" data-template="#case-deflection-results" data-itemtemplate="#case-deflection-results" data-case-deflection-pagesize="5" data-case-deflection-logicalnames="knowledgearticle,incident,adx_issue,adx_webpage,adx_communityforumthread,adx_communityforumpost,kbarticle" data-case-deflection-query="" data-case-deflection-filter="" data-noresultstext="{{ snippets['CustomerService/Support/NoResults'] | default: resx['CustomerService_Support_NoResults'] | h }}" placeholder="{{ snippets['CustomerService/Support/FailedLogin'] | default: resx['CustomerService_Support_FailedLogin'] | h }}" />
+      <div class="input-group-btn">
+       <button type="button" class="btn btn-deffault search-apply" aria-label="{{ snippets['CustomerService/Support/SearchButton'] | default: resx['CustomerService_Support_SearchButton'] | h }}" title="{{ snippets['CustomerService/Support/SearchButton'] | default: resx['CustomerService_Support_SearchButton'] | h }}">
+        <span aria-hidden="true" class="fa fa-search"></span>
+       </button>
+      </div>
+     </div>
+    </div> 
+      <ul class="list-group" id="case-deflection-topics"></ul>
+      <div class='panel-footer paging clearfix'>
+        <button type="button" class="btn btn-default search-more pull-right"><span class='fa fa-plus'></span>
+        {% editable snippets 'CustomerService/Support/ShowMore' type: 'text', default: resx['CustomerService_Support_ShowMore'], escape: true, tag: 'span' %}</button>
+      </div>
+   </div>
+  </div>
+   {% include 'Case Deflection Results'%}

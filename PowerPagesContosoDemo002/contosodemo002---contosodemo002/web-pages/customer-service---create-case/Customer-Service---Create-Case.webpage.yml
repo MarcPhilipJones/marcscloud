@@ -1,0 +1,14 @@
+adx_enablerating: false
+adx_enabletracking: false
+adx_excludefromsearch: true
+adx_feedbackpolicy: 756150000
+adx_hiddenfromsitemap: true
+adx_isroot: true
+adx_name: Customer Service - Create Case
+adx_pagetemplateid: d87c352a-1cfd-f011-8406-7c1e5277b875
+adx_parentpageid: 03162e30-1cfd-f011-8406-7c1e5277b875
+adx_partialurl: create-case
+adx_publishingstateid: eb7c352a-1cfd-f011-8406-7c1e5277b875
+adx_sharedpageconfiguration: false
+adx_title: Open a New Case
+adx_webpageid: db152e30-1cfd-f011-8406-7c1e5277b875

@@ -1,0 +1,63 @@
+App As appinfo:
+    BackEnabled: =true
+    OnStart: |-
+        =// McLaren Brand Colors
+        Set(McLarenOrange, RGBA(255, 128, 0, 1));
+        Set(McLarenBlack, RGBA(0, 0, 0, 1));
+        Set(McLarenDarkGrey, RGBA(26, 26, 26, 1));
+        Set(McLarenSilver, RGBA(192, 192, 192, 1));
+        Set(McLarenWhite, RGBA(255, 255, 255, 1));
+        
+        // Gradient colors for loading screen
+        Set(Primary, McLarenBlack);
+        Set(Secondary, McLarenDarkGrey);
+        Set(Accent, McLarenOrange);
+        
+        // Customer Demo Data
+        Set(CurrentCustomer, {
+            Name: "James Harrison",
+            CustomerId: "MCL-2026-0847",
+            Vehicle: "750S Spider",
+            VehicleSpec: "Volcanic Red"
+        });
+        
+        // Climate Settings
+        Set(varTemperature, 22);
+        Set(varHeatedSeats, "Medium");
+        Set(varVentilatedSeats, "Off");
+        Set(varHeatedSteeringWheel, true);
+        
+        // Seating Settings
+        Set(varDriverHeight, "Average");
+        Set(varSeatPosition, 45);
+        Set(varSeatHeight, 70);
+        Set(varBackrestAngle, 55);
+        Set(varLumbarSupport, "Medium");
+        
+        // Audio Settings
+        Set(varRadioStation1, "BBC Radio 2");
+        Set(varRadioStation2, "Classic FM");
+        Set(varRadioStation3, "Absolute Radio");
+        Set(varAudioSource, "Radio");
+        Set(varBassLevel, 4);
+        Set(varTrebleLevel, 6);
+        Set(varNavVolume, "Medium");
+        
+        // Driving Settings
+        Set(varDriveMode, "Sport");
+        Set(varSteeringWeight, 1);
+        Set(varSuspension, 1);
+        Set(varESC, "Dynamic");
+        Set(varLaunchControl, true);
+        Set(varActiveAero, "Auto");
+        
+        // Display Settings
+        Set(varClusterTheme, "Dark");
+        Set(varAmbientColor, "McLaren Orange");
+        Set(varAmbientIntensity, 50);
+        Set(varHUD, true);
+        Set(varHUDBrightness, 65);
+        Set(varWelcomeLighting, false);
+    StartScreen: =LoadingScreen
+
+

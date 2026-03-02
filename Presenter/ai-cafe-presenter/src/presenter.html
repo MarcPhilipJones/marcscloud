@@ -1,0 +1,1560 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI Café Presenter</title>
+    <style>
+      /* ============================================================
+   AI Café Presenter — All CSS inline (single-file app)
+   ============================================================ */
+
+      /* ---------- Reset & globals ---------- */
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      :root {
+        --bg-dark: #1e1e1e;
+        --bg-panel: #252526;
+        --bg-toolbar: #2d2d30;
+        --bg-input: #3c3c3c;
+        --border: #3e3e42;
+        --text: #cccccc;
+        --text-bright: #ffffff;
+        --accent: #0078d4;
+        --accent-hover: #1a8cff;
+        --success: #4ec94e;
+        --warning: #f0ad4e;
+        --danger: #e74c3c;
+        --radius: 6px;
+        --toolbar-h: 48px;
+        --font: "Segoe UI", -apple-system, BlinkMacSystemFont, sans-serif;
+      }
+      html,
+      body {
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        background: var(--bg-dark);
+        color: var(--text);
+        font-family: var(--font);
+        font-size: 13px;
+        user-select: none;
+      }
+
+      /* ---------- Top toolbar ---------- */
+      #toolbar {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        height: var(--toolbar-h);
+        padding: 0 10px;
+        background: var(--bg-toolbar);
+        border-bottom: 1px solid var(--border);
+        z-index: 600; /* above capture overlay (500) so toolbar stays accessible */
+        flex-shrink: 0;
+        position: relative;
+      }
+      #toolbar .sep {
+        width: 1px;
+        height: 24px;
+        background: var(--border);
+        margin: 0 4px;
+        flex-shrink: 0;
+      }
+
+      /* Toolbar buttons */
+      .tb-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 5px 12px;
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        background: var(--bg-input);
+        color: var(--text);
+        font-size: 12px;
+        font-family: var(--font);
+        cursor: pointer;
+        transition:
+          background 0.15s,
+          border-color 0.15s;
+        white-space: nowrap;
+        flex-shrink: 0;
+      }
+      .tb-btn:hover {
+        background: #505050;
+        border-color: #666;
+      }
+      .tb-btn.active {
+        background: var(--accent);
+        border-color: var(--accent);
+        color: var(--text-bright);
+      }
+      .tb-btn .dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #888;
+        flex-shrink: 0;
+      }
+      .tb-btn.active .dot {
+        background: var(--success);
+      }
+
+      /* Colour swatches */
+      .cswatch {
+        width: 22px;
+        height: 22px;
+        border-radius: 50%;
+        border: 2px solid transparent;
+        cursor: pointer;
+        transition:
+          border-color 0.15s,
+          transform 0.1s;
+        flex-shrink: 0;
+      }
+      .cswatch:hover {
+        transform: scale(1.15);
+      }
+      .cswatch.sel {
+        border-color: var(--text-bright);
+      }
+
+      /* Brush slider */
+      #brushSlider {
+        width: 80px;
+        accent-color: var(--accent);
+        cursor: pointer;
+      }
+      #brushLbl {
+        font-size: 11px;
+        color: #aaa;
+        min-width: 30px;
+        text-align: center;
+      }
+
+      /* ---------- Main layout ---------- */
+      #app {
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+        width: 100vw;
+      }
+      #main {
+        display: flex;
+        flex: 1;
+        overflow: hidden;
+      }
+
+      /* ---------- Content ---------- */
+      #content-area {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        min-width: 200px;
+      }
+
+      /* Welcome */
+      #welcome {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+        color: #666;
+        gap: 16px;
+        text-align: center;
+        padding: 40px;
+      }
+      #welcome h1 {
+        font-size: 32px;
+        color: #888;
+        font-weight: 300;
+      }
+      #welcome p {
+        font-size: 14px;
+        max-width: 520px;
+        line-height: 1.7;
+      }
+      #welcome .start-hint {
+        font-size: 16px;
+        color: #aaa;
+        margin-top: 8px;
+      }
+      .kbd {
+        display: inline-block;
+        padding: 2px 7px;
+        background: var(--bg-input);
+        border: 1px solid var(--border);
+        border-radius: 3px;
+        font-family: Consolas, monospace;
+        font-size: 11px;
+        color: var(--text-bright);
+      }
+
+      /* ---------- Drawing canvas overlay ---------- */
+      #draw-canvas {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        z-index: 9000;
+        pointer-events: none;
+        cursor: crosshair;
+        display: none;
+      }
+      #draw-canvas.on {
+        display: block;
+        pointer-events: auto;
+      }
+
+      #draw-banner {
+        display: none;
+        position: fixed;
+        top: 8px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 9500;
+        padding: 6px 18px;
+        background: rgba(255, 68, 68, 0.9);
+        color: #fff;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        pointer-events: none;
+      }
+      #draw-banner.on {
+        display: block;
+      }
+
+      /* Laser pointer dot */
+      #laser-dot {
+        position: fixed;
+        width: 14px;
+        height: 14px;
+        border-radius: 50%;
+        pointer-events: none;
+        z-index: 9100;
+        display: none;
+        transform: translate(-50%, -50%);
+      }
+      #laser-dot.on {
+        display: block;
+      }
+
+      /* ---------- Screen capture overlay ---------- */
+      #capture-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        z-index: 500;
+        display: none;
+        background: #000;
+      }
+      #capture-overlay.on {
+        display: block;
+      }
+      /* When toolbar is shown over capture, push video below toolbar */
+      #capture-overlay.with-toolbar {
+        top: var(--toolbar-h);
+        height: calc(100vh - var(--toolbar-h));
+      }
+      .capture-video {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        background: #000;
+        display: none;
+      }
+      .capture-video.active {
+        display: block;
+      }
+
+      /* Capture source indicator */
+      #capture-label {
+        position: fixed;
+        bottom: 32px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 550;
+        padding: 4px 14px;
+        background: rgba(0,0,0,0.7);
+        color: #fff;
+        border-radius: 12px;
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.3px;
+        pointer-events: none;
+        display: none;
+      }
+      #capture-label.on {
+        display: block;
+      }
+
+      /* ---------- PPT status ---------- */
+      #ppt-status {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        font-size: 11px;
+        padding: 4px 10px;
+        border-radius: var(--radius);
+        border: 1px solid var(--border);
+        background: var(--bg-input);
+      }
+      #ppt-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #e74c3c;
+      }
+      #ppt-dot.ok {
+        background: var(--success);
+      }
+
+      /* ---------- Toast notifications ---------- */
+      #toasts {
+        position: fixed;
+        bottom: 16px;
+        right: 16px;
+        z-index: 10000;
+        display: flex;
+        flex-direction: column-reverse;
+        gap: 8px;
+      }
+      .toast {
+        padding: 10px 16px;
+        border-radius: var(--radius);
+        font-size: 12px;
+        color: #fff;
+        background: #333;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+        animation: tin 0.25s ease-out;
+        max-width: 350px;
+      }
+      .toast.info {
+        background: var(--accent);
+      }
+      .toast.success {
+        background: #2d7a2d;
+      }
+      .toast.warn {
+        background: #a56b00;
+      }
+      .toast.error {
+        background: var(--danger);
+      }
+      @keyframes tin {
+        from {
+          opacity: 0;
+          transform: translateY(12px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      /* ---------- Help modal ---------- */
+      #help-modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: rgba(0, 0, 0, 0.6);
+        z-index: 10000;
+        align-items: center;
+        justify-content: center;
+      }
+      #help-modal.on {
+        display: flex;
+      }
+      #help-box {
+        background: var(--bg-panel);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 24px 32px;
+        max-width: 580px;
+        width: 90%;
+        max-height: 80vh;
+        overflow-y: auto;
+        color: var(--text);
+      }
+      #help-box h2 {
+        color: var(--text-bright);
+        margin-bottom: 16px;
+        font-size: 18px;
+      }
+      #help-box table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 12px;
+      }
+      #help-box th,
+      #help-box td {
+        text-align: left;
+        padding: 6px 10px;
+        border-bottom: 1px solid var(--border);
+        font-size: 12px;
+      }
+      #help-box th {
+        color: var(--accent);
+        font-weight: 600;
+      }
+      #help-close {
+        margin-top: 16px;
+        padding: 6px 20px;
+        background: var(--accent);
+        color: #fff;
+        border: none;
+        border-radius: var(--radius);
+        cursor: pointer;
+        font-size: 12px;
+      }
+
+      /* ---------- Status bar ---------- */
+      #statusbar {
+        height: 24px;
+        display: flex;
+        align-items: center;
+        padding: 0 12px;
+        background: var(--accent);
+        color: #fff;
+        font-size: 11px;
+        gap: 16px;
+        flex-shrink: 0;
+      }
+      #statusbar .right {
+        margin-left: auto;
+        display: flex;
+        gap: 14px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app">
+      <!-- ============ TOOLBAR ============ -->
+      <div id="toolbar">
+        <button
+          class="tb-btn"
+          id="btn-presenting"
+          title="Toggle fullscreen presenting mode (F11)"
+        >
+          <span class="dot"></span><span>Presenting</span>
+        </button>
+        <button class="tb-btn" id="btn-zoom" title="Cycle zoom level">
+          🔍 100%
+        </button>
+
+        <div class="sep"></div>
+
+        <button
+          class="tb-btn"
+          id="btn-draw"
+          title="Toggle freehand draw (or hold D)"
+        >
+          ✏️ Draw
+        </button>
+        <button class="tb-btn" id="btn-laser" title="Laser pointer (L)">
+          🔴 Laser
+        </button>
+        <button class="tb-btn" id="btn-arrow" title="Draw arrow line (A)">
+          ↗️ Arrow
+        </button>
+        <button class="tb-btn" id="btn-rect" title="Draw rectangle (R)">
+          ▭ Rect
+        </button>
+
+        <!-- Brush size -->
+        <span>—</span>
+        <input
+          type="range"
+          id="brushSlider"
+          min="1"
+          max="20"
+          value="3"
+          title="Brush size"
+        />
+        <span id="brushLbl">3px</span>
+        <span>+</span>
+
+        <!-- Colours -->
+        <div
+          class="cswatch sel"
+          data-color="#ff4444"
+          style="background: #ff4444"
+          title="Red"
+        ></div>
+        <div
+          class="cswatch"
+          data-color="#44aaff"
+          style="background: #44aaff"
+          title="Blue"
+        ></div>
+        <div
+          class="cswatch"
+          data-color="#44dd44"
+          style="background: #44dd44"
+          title="Green"
+        ></div>
+        <div
+          class="cswatch"
+          data-color="#ffcc00"
+          style="background: #ffcc00"
+          title="Yellow"
+        ></div>
+        <div
+          class="cswatch"
+          data-color="#ff66ff"
+          style="background: #ff66ff"
+          title="Pink"
+        ></div>
+        <div
+          class="cswatch"
+          data-color="#ffffff"
+          style="background: #ffffff"
+          title="White"
+        ></div>
+        <div
+          class="cswatch"
+          data-color="#000000"
+          style="background: #000000; border: 1px solid #666"
+          title="Black"
+        ></div>
+
+        <div class="sep"></div>
+
+        <button class="tb-btn" id="btn-clear" title="Clear all annotations (C)">
+          🗑️ Clear
+        </button>
+
+        <div class="sep"></div>
+
+        <!-- PPT controls -->
+        <span id="ppt-status"><span id="ppt-dot"></span> PPT</span>
+        <button
+          class="tb-btn"
+          id="btn-ppt-prev"
+          title="Previous slide (← / PageUp)"
+        >
+          ◀ Prev
+        </button>
+        <button
+          class="tb-btn"
+          id="btn-ppt-next"
+          title="Next slide (→ / PageDown)"
+        >
+          Next ▶
+        </button>
+
+        <div class="sep"></div>
+
+        <button
+          class="tb-btn"
+          id="btn-cap-ppt"
+          title="Capture PPT source"
+        >
+          <span class="dot"></span><span>📺 PPT</span>
+        </button>
+        <button
+          class="tb-btn"
+          id="btn-cap-demo"
+          title="Capture Demo source"
+        >
+          <span class="dot"></span><span>📺 Demo</span>
+        </button>
+        <button
+          class="tb-btn"
+          id="btn-swap"
+          title="Swap between PPT and Demo (S)"
+        >
+          🔀 Swap
+        </button>
+        <button
+          class="tb-btn active"
+          id="btn-capture-toolbar"
+          title="Keep toolbar visible during screen capture"
+        >
+          🔒 Toolbar
+        </button>
+        <button
+          class="tb-btn"
+          id="btn-mute"
+          title="Toggle captured audio"
+        >
+          🔇 Muted
+        </button>
+          🔒 Toolbar
+        </button>
+
+        <button class="tb-btn" id="btn-help" title="Keyboard shortcuts (?)">
+          ❓ Help
+        </button>
+      </div>
+
+      <!-- ============ MAIN ============ -->
+      <div id="main">
+        <!-- Content area -->
+        <div id="content-area">
+          <div id="welcome">
+            <h1>☕ AI Café Presenter</h1>
+            <p class="start-hint">Click <strong>📺 PPT</strong> to share your slideshow, <strong>📺 Demo</strong> for a second app</p>
+            <p class="start-hint">Press <strong>S</strong> to swap between them</p>
+            <p>
+              <span class="kbd">→</span> Next slide &nbsp;·&nbsp;
+              <span class="kbd">←</span> Prev slide &nbsp;·&nbsp;
+              <span class="kbd">D</span> Draw &nbsp;·&nbsp;
+              <span class="kbd">Esc</span> Exit &amp; clear
+            </p>
+            <p>
+              <span class="kbd">F11</span> Fullscreen &nbsp;·&nbsp;
+              <span class="kbd">?</span> Help
+            </p>
+          </div>
+        </div>
+      </div>
+      <!-- /main -->
+
+      <!-- Status bar -->
+      <div id="statusbar">
+        <span id="sb-mode">Ready</span>
+        <span id="sb-ppt">PPT: disconnected</span>
+        <div class="right">
+          <span id="sb-url">—</span>
+          <span id="sb-time"></span>
+        </div>
+      </div>
+    </div>
+    <!-- /app -->
+
+    <!-- ============ OVERLAYS ============ -->
+    <canvas id="draw-canvas"></canvas>
+    <div id="draw-banner">
+      ✏️ DRAW MODE — click &amp; drag to annotate · Esc to exit
+    </div>
+    <div id="laser-dot"></div>
+
+    <div id="capture-overlay">
+      <video id="capture-video-ppt" class="capture-video active" autoplay></video>
+      <video id="capture-video-demo" class="capture-video" autoplay></video>
+    </div>
+    <div id="capture-label"></div>
+
+    <div id="toasts"></div>
+
+    <!-- Help modal -->
+    <div id="help-modal">
+      <div id="help-box">
+        <h2>⌨️ Keyboard Shortcuts</h2>
+        <table>
+          <tr>
+            <th>Key</th>
+            <th>Action</th>
+          </tr>
+          <tr>
+            <td><span class="kbd">D</span> (hold)</td>
+            <td>Enter draw mode (release to exit)</td>
+          </tr>
+          <tr>
+            <td><span class="kbd">Esc</span></td>
+            <td>Exit draw + clear annotations / close help / stop capture</td>
+          </tr>
+          <tr>
+            <td><span class="kbd">C</span></td>
+            <td>Clear all annotations</td>
+          </tr>
+          <tr>
+            <td>
+              <span class="kbd">→</span> / <span class="kbd">PageDown</span>
+            </td>
+            <td>Next PPT slide</td>
+          </tr>
+          <tr>
+            <td>
+              <span class="kbd">←</span> / <span class="kbd">PageUp</span>
+            </td>
+            <td>Previous PPT slide</td>
+          </tr>
+          <tr>
+            <td><span class="kbd">F11</span></td>
+            <td>Toggle fullscreen</td>
+          </tr>
+          <tr>
+            <td><span class="kbd">?</span></td>
+            <td>Toggle this help</td>
+          </tr>
+          <tr>
+            <td><span class="kbd">1</span>–<span class="kbd">7</span></td>
+            <td>Select drawing colour</td>
+          </tr>
+          <tr>
+            <td><span class="kbd">[</span> / <span class="kbd">]</span></td>
+            <td>Brush size down / up</td>
+          </tr>
+          <tr>
+            <td><span class="kbd">F</span></td>
+            <td>Freehand draw tool (default)</td>
+          </tr>
+          <tr>
+            <td><span class="kbd">L</span></td>
+            <td>Laser pointer tool</td>
+          </tr>
+          <tr>
+            <td><span class="kbd">A</span></td>
+            <td>Arrow line tool</td>
+          </tr>
+          <tr>
+            <td><span class="kbd">R</span></td>
+            <td>Rectangle tool</td>
+          </tr>
+          <tr>
+            <td><span class="kbd">S</span></td>
+            <td>Swap between PPT and Demo capture</td>
+          </tr>
+          <tr>
+            <td><span class="kbd">M</span></td>
+            <td>Toggle captured audio mute</td>
+          </tr>
+        </table>
+        <h2 style="margin-top: 18px">🖱️ Features</h2>
+        <table>
+          <tr>
+            <th>Feature</th>
+            <th>Description</th>
+          </tr>
+          <tr>
+            <td>Draw Mode</td>
+            <td>Full-screen canvas overlay for freehand annotations</td>
+          </tr>
+          <tr>
+            <td>Laser Pointer</td>
+            <td>
+              Glowing dot that follows cursor — highlights without marking
+            </td>
+          </tr>
+          <tr>
+            <td>Arrow Tool</td>
+            <td>Click &amp; drag to draw a line with arrowhead</td>
+          </tr>
+          <tr>
+            <td>Rectangle Tool</td>
+            <td>Click &amp; drag to draw a rectangle outline</td>
+          </tr>
+          <tr>
+            <td>PPT Control</td>
+            <td>WebSocket to ppt-controller.ps1 for slide navigation</td>
+          </tr>
+          <tr>
+            <td>Screen Capture</td>
+            <td>Dual capture: PPT + Demo sources with swap (S key)</td>
+          </tr>
+          <tr>
+            <td>Audio</td>
+            <td>System audio passed through from captured source (M to mute)</td>
+          </tr>
+          <tr>
+            <td>Capture Toolbar</td>
+            <td>
+              🔒 button keeps toolbar visible during screen capture for draw/PPT
+              controls
+            </td>
+          </tr>
+        </table>
+        <button id="help-close">Close</button>
+      </div>
+    </div>
+
+    <!-- ============ JAVASCRIPT ============ -->
+    <script>
+      (function () {
+        "use strict";
+
+        /* ==================================================================
+       ELEMENT REFS
+       ================================================================== */
+        const $ = (id) => document.getElementById(id);
+
+        // Toolbar
+        const btnPresenting = $("btn-presenting");
+        const btnZoom = $("btn-zoom");
+        const btnDraw = $("btn-draw");
+        const btnClear = $("btn-clear");
+        const btnPptPrev = $("btn-ppt-prev");
+        const btnPptNext = $("btn-ppt-next");
+        const btnCapPpt = $("btn-cap-ppt");
+        const btnCapDemo = $("btn-cap-demo");
+        const btnSwap = $("btn-swap");
+        const btnCapToolbar = $("btn-capture-toolbar");
+        const btnMute = $("btn-mute");
+        const btnHelp = $("btn-help");
+        const brushSlider = $("brushSlider");
+        const brushLbl = $("brushLbl");
+        const pptDot = $("ppt-dot");
+        const swatches = document.querySelectorAll(".cswatch");
+
+        // Content
+        const welcome = $("welcome");
+
+        // Drawing
+        const drawCanvas = $("draw-canvas");
+        const drawBanner = $("draw-banner");
+        const laserDot = $("laser-dot");
+        const btnLaser = $("btn-laser");
+        const btnArrow = $("btn-arrow");
+        const btnRect = $("btn-rect");
+        const ctx = drawCanvas.getContext("2d");
+
+        // Capture
+        const captureOverlay = $("capture-overlay");
+        const captureLabel = $("capture-label");
+        const capVideoPpt = $("capture-video-ppt");
+        const capVideoDemo = $("capture-video-demo");
+
+        // Modals & toast
+        const toasts = $("toasts");
+        const helpModal = $("help-modal");
+        const helpClose = $("help-close");
+
+        // Status bar
+        const sbMode = $("sb-mode");
+        const sbPpt = $("sb-ppt");
+        const sbUrl = $("sb-url");
+        const sbTime = $("sb-time");
+
+        /* ==================================================================
+       STATE
+       ================================================================== */
+        let drawMode = false;
+        let drawHold = false;
+        let drawToggle = false;
+        let isDrawing = false;
+        let drawColor = "#ff4444";
+        let drawWidth = 3;
+        let drawTool = "freehand"; // 'freehand' | 'laser' | 'arrow' | 'rect'
+        let shapeStartX = 0;
+        let shapeStartY = 0;
+        let savedImageData = null;
+        let capStreamPpt = null;
+        let capStreamDemo = null;
+        let activeSource = 'ppt';  // 'ppt' | 'demo'
+        let captureActive = false;
+        let captureToolbar = true;
+        let captureMuted = true; // keep toolbar visible during capture (default: on)
+        let pptWs = null;
+        let pptConnected = false;
+        let pptRetry = null;
+        let isPresenting = false;
+        let zoomLevel = 100;
+
+        /* ==================================================================
+       HELPERS
+       ================================================================== */
+        function toast(msg, type = "info", ms = 3000) {
+          const el = document.createElement("div");
+          el.className = "toast " + type;
+          el.textContent = msg;
+          toasts.appendChild(el);
+          setTimeout(() => el.remove(), ms);
+        }
+
+        // Status bar clock
+        setInterval(() => {
+          sbTime.textContent = new Date().toLocaleTimeString();
+        }, 1000);
+        sbTime.textContent = new Date().toLocaleTimeString();
+
+        /* ==================================================================
+       CANVAS SIZING
+       ================================================================== */
+        function resizeCanvas() {
+          // Preserve existing drawing
+          const imgData = ctx.getImageData(
+            0,
+            0,
+            drawCanvas.width,
+            drawCanvas.height,
+          );
+          drawCanvas.width = window.innerWidth;
+          drawCanvas.height = window.innerHeight;
+          ctx.putImageData(imgData, 0, 0);
+        }
+        window.addEventListener("resize", resizeCanvas);
+        drawCanvas.width = window.innerWidth;
+        drawCanvas.height = window.innerHeight;
+
+        /* ==================================================================
+       DRAW MODE
+       ================================================================== */
+        const toolLabels = {
+          freehand: {
+            banner: "✏️ DRAW MODE — click & drag to annotate · Esc to exit",
+            status: "✏️ Draw Mode",
+            cursor: "crosshair",
+          },
+          laser: {
+            banner: "🔴 LASER POINTER — move to highlight · Esc to exit",
+            status: "🔴 Laser Pointer",
+            cursor: "none",
+          },
+          arrow: {
+            banner: "↗️ ARROW MODE — click & drag to draw arrow · Esc to exit",
+            status: "↗️ Arrow Mode",
+            cursor: "crosshair",
+          },
+          rect: {
+            banner:
+              "▭ RECTANGLE MODE — click & drag to draw rectangle · Esc to exit",
+            status: "▭ Rectangle Mode",
+            cursor: "crosshair",
+          },
+        };
+
+        function setDrawTool(tool) {
+          drawTool = tool;
+          btnDraw.classList.toggle("active", tool === "freehand");
+          btnLaser.classList.toggle("active", tool === "laser");
+          btnArrow.classList.toggle("active", tool === "arrow");
+          btnRect.classList.toggle("active", tool === "rect");
+          const info = toolLabels[tool];
+          drawBanner.textContent = info.banner;
+          sbMode.textContent = info.status;
+          drawCanvas.style.cursor = info.cursor;
+          if (tool !== "laser") laserDot.classList.remove("on");
+        }
+
+        function enterDraw(tool) {
+          drawMode = true;
+          drawCanvas.classList.add("on");
+          drawBanner.classList.add("on");
+          setDrawTool(tool || drawTool || "freehand");
+        }
+
+        function exitDraw() {
+          drawMode = false;
+          drawHold = false;
+          drawToggle = false;
+          isDrawing = false;
+          savedImageData = null;
+          drawCanvas.classList.remove("on");
+          drawBanner.classList.remove("on");
+          laserDot.classList.remove("on");
+          btnDraw.classList.remove("active");
+          btnLaser.classList.remove("active");
+          btnArrow.classList.remove("active");
+          btnRect.classList.remove("active");
+          drawCanvas.style.cursor = "crosshair";
+          sbMode.textContent = "Ready";
+        }
+
+        function clearAnnotations() {
+          ctx.clearRect(0, 0, drawCanvas.width, drawCanvas.height);
+          toast("Annotations cleared", "info", 1500);
+        }
+
+        // -- Shape drawing helpers --
+        function drawArrowShape(fromX, fromY, toX, toY) {
+          const dx = toX - fromX,
+            dy = toY - fromY;
+          const len = Math.sqrt(dx * dx + dy * dy);
+          if (len < 2) return;
+          const headLen = Math.max(12, drawWidth * 3);
+          const angle = Math.atan2(dy, dx);
+          ctx.lineWidth = drawWidth;
+          ctx.strokeStyle = drawColor;
+          ctx.fillStyle = drawColor;
+          ctx.lineCap = "round";
+          ctx.lineJoin = "round";
+          // Shaft
+          ctx.beginPath();
+          ctx.moveTo(fromX, fromY);
+          ctx.lineTo(toX, toY);
+          ctx.stroke();
+          // Arrowhead (filled)
+          ctx.beginPath();
+          ctx.moveTo(toX, toY);
+          ctx.lineTo(
+            toX - headLen * Math.cos(angle - Math.PI / 7),
+            toY - headLen * Math.sin(angle - Math.PI / 7),
+          );
+          ctx.lineTo(
+            toX - headLen * Math.cos(angle + Math.PI / 7),
+            toY - headLen * Math.sin(angle + Math.PI / 7),
+          );
+          ctx.closePath();
+          ctx.fill();
+        }
+
+        function drawRectShape(x1, y1, x2, y2) {
+          ctx.lineWidth = drawWidth;
+          ctx.strokeStyle = drawColor;
+          ctx.lineCap = "round";
+          ctx.lineJoin = "round";
+          ctx.beginPath();
+          ctx.rect(
+            Math.min(x1, x2),
+            Math.min(y1, y2),
+            Math.abs(x2 - x1),
+            Math.abs(y2 - y1),
+          );
+          ctx.stroke();
+        }
+
+        function updateLaserDot(x, y) {
+          laserDot.style.left = x + "px";
+          laserDot.style.top = y + "px";
+          laserDot.style.background = drawColor;
+          laserDot.style.boxShadow = `0 0 8px 4px ${drawColor}, 0 0 20px 8px ${drawColor}`;
+          laserDot.classList.add("on");
+        }
+
+        // -- Mouse drawing --
+        drawCanvas.addEventListener("mousedown", (e) => {
+          if (!drawMode) return;
+          if (drawTool === "laser") return;
+          isDrawing = true;
+          if (drawTool === "freehand") {
+            ctx.beginPath();
+            ctx.moveTo(e.clientX, e.clientY);
+          } else {
+            shapeStartX = e.clientX;
+            shapeStartY = e.clientY;
+            savedImageData = ctx.getImageData(
+              0,
+              0,
+              drawCanvas.width,
+              drawCanvas.height,
+            );
+          }
+        });
+        drawCanvas.addEventListener("mousemove", (e) => {
+          if (!drawMode) return;
+          if (drawTool === "laser") {
+            updateLaserDot(e.clientX, e.clientY);
+            return;
+          }
+          if (!isDrawing) return;
+          if (drawTool === "freehand") {
+            ctx.lineWidth = drawWidth;
+            ctx.lineCap = "round";
+            ctx.lineJoin = "round";
+            ctx.strokeStyle = drawColor;
+            ctx.lineTo(e.clientX, e.clientY);
+            ctx.stroke();
+          } else if (savedImageData) {
+            ctx.putImageData(savedImageData, 0, 0);
+            if (drawTool === "arrow")
+              drawArrowShape(shapeStartX, shapeStartY, e.clientX, e.clientY);
+            if (drawTool === "rect")
+              drawRectShape(shapeStartX, shapeStartY, e.clientX, e.clientY);
+          }
+        });
+        drawCanvas.addEventListener("mouseup", () => {
+          isDrawing = false;
+          savedImageData = null;
+          ctx.beginPath();
+        });
+        drawCanvas.addEventListener("mouseleave", () => {
+          isDrawing = false;
+          savedImageData = null;
+          ctx.beginPath();
+          if (drawTool === "laser") laserDot.classList.remove("on");
+        });
+
+        // -- Touch drawing --
+        drawCanvas.addEventListener(
+          "touchstart",
+          (e) => {
+            if (!drawMode) return;
+            e.preventDefault();
+            const t = e.touches[0];
+            if (drawTool === "laser") {
+              updateLaserDot(t.clientX, t.clientY);
+              return;
+            }
+            isDrawing = true;
+            if (drawTool === "freehand") {
+              ctx.beginPath();
+              ctx.moveTo(t.clientX, t.clientY);
+            } else {
+              shapeStartX = t.clientX;
+              shapeStartY = t.clientY;
+              savedImageData = ctx.getImageData(
+                0,
+                0,
+                drawCanvas.width,
+                drawCanvas.height,
+              );
+            }
+          },
+          { passive: false },
+        );
+        drawCanvas.addEventListener(
+          "touchmove",
+          (e) => {
+            if (!drawMode) return;
+            e.preventDefault();
+            const t = e.touches[0];
+            if (drawTool === "laser") {
+              updateLaserDot(t.clientX, t.clientY);
+              return;
+            }
+            if (!isDrawing) return;
+            if (drawTool === "freehand") {
+              ctx.lineWidth = drawWidth;
+              ctx.lineCap = "round";
+              ctx.lineJoin = "round";
+              ctx.strokeStyle = drawColor;
+              ctx.lineTo(t.clientX, t.clientY);
+              ctx.stroke();
+            } else if (savedImageData) {
+              ctx.putImageData(savedImageData, 0, 0);
+              if (drawTool === "arrow")
+                drawArrowShape(shapeStartX, shapeStartY, t.clientX, t.clientY);
+              if (drawTool === "rect")
+                drawRectShape(shapeStartX, shapeStartY, t.clientX, t.clientY);
+            }
+          },
+          { passive: false },
+        );
+        drawCanvas.addEventListener("touchend", () => {
+          if (drawTool === "laser") {
+            laserDot.classList.remove("on");
+            return;
+          }
+          isDrawing = false;
+          savedImageData = null;
+          ctx.beginPath();
+        });
+
+        // Brush slider
+        brushSlider.addEventListener("input", () => {
+          drawWidth = parseInt(brushSlider.value, 10);
+          brushLbl.textContent = drawWidth + "px";
+        });
+
+        // Colour swatches
+        swatches.forEach((sw) => {
+          sw.addEventListener("click", () => {
+            swatches.forEach((s) => s.classList.remove("sel"));
+            sw.classList.add("sel");
+            drawColor = sw.dataset.color;
+          });
+        });
+
+        // Toolbar buttons
+        function activateTool(tool) {
+          if (drawMode && drawTool === tool) {
+            drawToggle = false;
+            exitDraw();
+          } else {
+            drawToggle = true;
+            enterDraw(tool);
+          }
+        }
+
+        btnDraw.addEventListener("click", () => activateTool("freehand"));
+        btnLaser.addEventListener("click", () => activateTool("laser"));
+        btnArrow.addEventListener("click", () => activateTool("arrow"));
+        btnRect.addEventListener("click", () => activateTool("rect"));
+        btnClear.addEventListener("click", clearAnnotations);
+
+        /* ==================================================================
+       PRESENTING (FULLSCREEN)
+       ================================================================== */
+        btnPresenting.addEventListener("click", () => {
+          isPresenting = !isPresenting;
+          btnPresenting.classList.toggle("active", isPresenting);
+          if (isPresenting) {
+            document.documentElement
+              .requestFullscreen?.()
+              .catch(() => toast("Fullscreen blocked", "warn"));
+          } else {
+            document.exitFullscreen?.();
+          }
+        });
+        document.addEventListener("fullscreenchange", () => {
+          isPresenting = !!document.fullscreenElement;
+          btnPresenting.classList.toggle("active", isPresenting);
+        });
+
+        /* ==================================================================
+       ZOOM
+       ================================================================== */
+        const ZOOMS = [50, 75, 100, 125, 150];
+        btnZoom.addEventListener("click", () => {
+          let i = ZOOMS.indexOf(zoomLevel);
+          zoomLevel = ZOOMS[(i + 1) % ZOOMS.length];
+          if (zoomLevel === 100) {
+            contentFrame.style.transform = "";
+            contentFrame.style.transformOrigin = "";
+            contentFrame.style.width = "100%";
+            contentFrame.style.height = "100%";
+          } else {
+            const s = zoomLevel / 100;
+            contentFrame.style.transform = `scale(${s})`;
+            contentFrame.style.transformOrigin = "top left";
+            contentFrame.style.width = 100 / s + "%";
+            contentFrame.style.height = 100 / s + "%";
+          }
+          btnZoom.textContent = "🔍 " + zoomLevel + "%";
+        });
+
+        /* ==================================================================
+       SCREEN CAPTURE — DUAL SOURCE (PPT + Demo)
+       ================================================================== */
+        function applyCaptureToolbarMode() {
+          captureOverlay.classList.toggle("with-toolbar", captureToolbar);
+        }
+
+        function updateCaptureUI() {
+          const hasPpt = !!capStreamPpt;
+          const hasDemo = !!capStreamDemo;
+          captureActive = hasPpt || hasDemo;
+
+          btnCapPpt.classList.toggle("active", hasPpt);
+          btnCapDemo.classList.toggle("active", hasDemo);
+
+          // Show overlay if any source is active
+          if (captureActive) {
+            captureOverlay.classList.add("on");
+            applyCaptureToolbarMode();
+            welcome.style.display = "none";
+          } else {
+            captureOverlay.classList.remove("on");
+            captureOverlay.classList.remove("with-toolbar");
+            captureLabel.classList.remove("on");
+          }
+
+          // Show/hide videos based on active source
+          if (activeSource === 'ppt') {
+            capVideoPpt.classList.toggle('active', hasPpt);
+            capVideoDemo.classList.remove('active');
+            if (hasPpt) captureLabel.textContent = '📺 PPT';
+          } else {
+            capVideoDemo.classList.toggle('active', hasDemo);
+            capVideoPpt.classList.remove('active');
+            if (hasDemo) captureLabel.textContent = '📺 Demo';
+          }
+
+          // If active source has no stream, fall back to the other
+          if (activeSource === 'ppt' && !hasPpt && hasDemo) {
+            activeSource = 'demo';
+            capVideoDemo.classList.add('active');
+            captureLabel.textContent = '📺 Demo';
+          } else if (activeSource === 'demo' && !hasDemo && hasPpt) {
+            activeSource = 'ppt';
+            capVideoPpt.classList.add('active');
+            captureLabel.textContent = '📺 PPT';
+          }
+
+          captureLabel.classList.toggle('on', captureActive);
+
+          // Swap button only enabled if both sources exist
+          btnSwap.style.opacity = (hasPpt && hasDemo) ? '1' : '0.4';
+        }
+
+        function applyMute() {
+          capVideoPpt.muted = captureMuted;
+          capVideoDemo.muted = captureMuted;
+          btnMute.textContent = captureMuted ? '🔇 Muted' : '🔊 Audio';
+          btnMute.classList.toggle('active', !captureMuted);
+        }
+        applyMute(); // initial state
+
+        async function startCapture(source) {
+          const existing = source === 'ppt' ? capStreamPpt : capStreamDemo;
+          if (existing) {
+            // Stop this source
+            stopCapture(source);
+            return;
+          }
+
+          try {
+            const stream = await navigator.mediaDevices.getDisplayMedia({
+              video: { cursor: "always" },
+              audio: true,
+            });
+            const videoEl = source === 'ppt' ? capVideoPpt : capVideoDemo;
+            videoEl.srcObject = stream;
+            videoEl.muted = captureMuted;
+
+            if (source === 'ppt') {
+              capStreamPpt = stream;
+            } else {
+              capStreamDemo = stream;
+            }
+
+            // Switch to this source
+            activeSource = source;
+
+            // When user stops sharing via browser UI
+            stream.getVideoTracks()[0].addEventListener('ended', () => stopCapture(source));
+
+            toast(`${source.toUpperCase()} capture started`, 'success', 2000);
+            updateCaptureUI();
+          } catch (_) {
+            toast(`${source.toUpperCase()} capture cancelled`, 'warn');
+          }
+        }
+
+        function stopCapture(source) {
+          if (source === 'ppt' && capStreamPpt) {
+            capStreamPpt.getTracks().forEach(t => t.stop());
+            capStreamPpt = null;
+            capVideoPpt.srcObject = null;
+          } else if (source === 'demo' && capStreamDemo) {
+            capStreamDemo.getTracks().forEach(t => t.stop());
+            capStreamDemo = null;
+            capVideoDemo.srcObject = null;
+          }
+          toast(`${source.toUpperCase()} capture stopped`, 'info', 1500);
+          updateCaptureUI();
+        }
+
+        function stopAllCaptures() {
+          if (capStreamPpt) { capStreamPpt.getTracks().forEach(t => t.stop()); capStreamPpt = null; capVideoPpt.srcObject = null; }
+          if (capStreamDemo) { capStreamDemo.getTracks().forEach(t => t.stop()); capStreamDemo = null; capVideoDemo.srcObject = null; }
+          captureActive = false;
+          captureOverlay.classList.remove('on');
+          captureOverlay.classList.remove('with-toolbar');
+          captureLabel.classList.remove('on');
+          btnCapPpt.classList.remove('active');
+          btnCapDemo.classList.remove('active');
+          toast('All captures stopped', 'info', 1500);
+        }
+
+        function swapCapture() {
+          if (!capStreamPpt || !capStreamDemo) {
+            toast('Need both PPT and Demo to swap', 'warn', 2000);
+            return;
+          }
+          activeSource = activeSource === 'ppt' ? 'demo' : 'ppt';
+          updateCaptureUI();
+          toast(`Switched to ${activeSource.toUpperCase()}`, 'info', 1500);
+        }
+
+        btnCapPpt.addEventListener('click', () => startCapture('ppt'));
+        btnCapDemo.addEventListener('click', () => startCapture('demo'));
+        btnSwap.addEventListener('click', swapCapture);
+        btnMute.addEventListener('click', () => {
+          captureMuted = !captureMuted;
+          applyMute();
+          toast(captureMuted ? 'Audio muted' : 'Audio enabled', 'info', 1500);
+        });
+
+        // Toggle: keep toolbar visible during capture
+        btnCapToolbar.addEventListener("click", () => {
+          captureToolbar = !captureToolbar;
+          btnCapToolbar.classList.toggle("active", captureToolbar);
+          if (captureActive) applyCaptureToolbarMode();
+          toast(
+            captureToolbar
+              ? "Toolbar pinned over capture"
+              : "Toolbar hidden during capture",
+            "info",
+            2000,
+          );
+        });
+
+        /* ==================================================================
+       POWERPOINT WEBSOCKET
+       ================================================================== */
+        const PPT_WS = "ws://localhost:8080";
+
+        function pptConnect() {
+          if (pptWs && pptWs.readyState <= 1) return;
+          try {
+            pptWs = new WebSocket(PPT_WS);
+            pptWs.addEventListener("open", () => {
+              pptConnected = true;
+              pptDot.classList.add("ok");
+              sbPpt.textContent = "PPT: connected";
+              toast("PPT controller connected", "success", 2000);
+              if (pptRetry) {
+                clearInterval(pptRetry);
+                pptRetry = null;
+              }
+            });
+            pptWs.addEventListener("close", () => {
+              pptConnected = false;
+              pptDot.classList.remove("ok");
+              sbPpt.textContent = "PPT: disconnected";
+              scheduleRetry();
+            });
+            pptWs.addEventListener("error", () => {
+              pptConnected = false;
+              pptDot.classList.remove("ok");
+            });
+            pptWs.addEventListener("message", (e) => {
+              try {
+                const d = JSON.parse(e.data);
+                if (d.slide !== undefined)
+                  toast("Slide " + d.slide, "info", 1500);
+                if (d.error) toast("PPT: " + d.error, "error");
+              } catch (_) {}
+            });
+          } catch (_) {
+            scheduleRetry();
+          }
+        }
+        function scheduleRetry() {
+          if (pptRetry) return;
+          pptRetry = setInterval(pptConnect, 5000);
+        }
+        function pptSend(cmd) {
+          if (pptConnected && pptWs) {
+            pptWs.send(JSON.stringify({ action: cmd }));
+          } else {
+            toast("PPT not connected — start ppt-controller.ps1", "warn");
+          }
+        }
+
+        btnPptPrev.addEventListener("click", () => pptSend("previous"));
+        btnPptNext.addEventListener("click", () => pptSend("next"));
+        pptConnect();
+
+        /* ==================================================================
+       HELP MODAL
+       ================================================================== */
+        btnHelp.addEventListener("click", () =>
+          helpModal.classList.toggle("on"),
+        );
+        helpClose.addEventListener("click", () =>
+          helpModal.classList.remove("on"),
+        );
+        helpModal.addEventListener("click", (e) => {
+          if (e.target === helpModal) helpModal.classList.remove("on");
+        });
+
+        /* ==================================================================
+       KEYBOARD SHORTCUTS
+       ================================================================== */
+        document.addEventListener("keydown", (e) => {
+          const tag = e.target.tagName;
+          const inInput =
+            tag === "INPUT" ||
+            tag === "TEXTAREA" ||
+            tag === "SELECT" ||
+            e.target.isContentEditable;
+
+          // D hold → draw (freehand)
+          if (e.key === "d" && !inInput && !drawToggle) {
+            if (!drawHold) {
+              drawHold = true;
+              enterDraw("freehand");
+            }
+            return;
+          }
+
+          // Escape — exit draw + clear annotations
+          if (e.key === "Escape") {
+            if (drawMode) {
+              exitDraw();
+              clearAnnotations();
+              return;
+            }
+            if (helpModal.classList.contains("on")) {
+              helpModal.classList.remove("on");
+              return;
+            }
+            if (captureActive) {
+              stopAllCaptures();
+              return;
+            }
+            return;
+          }
+
+          if (inInput) return;
+
+          switch (e.key) {
+            case "c":
+            case "C":
+              clearAnnotations();
+              break;
+            case "f":
+            case "F":
+              activateTool("freehand");
+              break;
+            case "l":
+              activateTool("laser");
+              break;
+            case "a":
+              activateTool("arrow");
+              break;
+            case "r":
+              activateTool("rect");
+              break;
+            case "s":
+              swapCapture();
+              break;
+            case "m":
+              captureMuted = !captureMuted;
+              applyMute();
+              toast(captureMuted ? 'Audio muted' : 'Audio enabled', 'info', 1500);
+              break;
+            case "?":
+              helpModal.classList.toggle("on");
+              break;
+            case "ArrowRight":
+            case "PageDown":
+              pptSend("next");
+              break;
+            case "ArrowLeft":
+            case "PageUp":
+              pptSend("previous");
+              break;
+            case "[":
+              drawWidth = Math.max(1, drawWidth - 1);
+              brushSlider.value = drawWidth;
+              brushLbl.textContent = drawWidth + "px";
+              break;
+            case "]":
+              drawWidth = Math.min(20, drawWidth + 1);
+              brushSlider.value = drawWidth;
+              brushLbl.textContent = drawWidth + "px";
+              break;
+            default:
+              // 1-7 selects colour
+              if (e.key >= "1" && e.key <= "7") {
+                const i = +e.key - 1;
+                if (swatches[i]) {
+                  swatches.forEach((s) => s.classList.remove("sel"));
+                  swatches[i].classList.add("sel");
+                  drawColor = swatches[i].dataset.color;
+                }
+              }
+          }
+
+        });
+
+        document.addEventListener("keyup", (e) => {
+          if (e.key === "d" && drawHold && !drawToggle) {
+            drawHold = false;
+            exitDraw();
+          }
+        });
+
+        /* ==================================================================
+       INIT
+       ================================================================== */
+        console.log(
+          "%c☕ AI Café Presenter loaded",
+          "color:#0078d4;font-size:14px;font-weight:bold",
+        );
+        toast("AI Café Presenter ready", "info", 2500);
+      })();
+    </script>
+  </body>
+</html>

@@ -1,0 +1,13 @@
+{% extends 'Layout 1 Column' %} 
+ {% block main %}
+  {% include 'Customer Service-support case deflection'%}
+  {% if user %}
+    {% include 'Page Copy' %}
+  {% else %}
+    <div class='alert alert-block alert-info'>
+      <p><span class='fa fa-info-circle'></span>
+        {% editable snippets 'CustomerService/Support/SignIn' type: 'text', default: resx['CustomerService_Support_PleaseSignIn'], escape: true, tag: 'span' %}
+      </p>
+    </div>
+  {% endif %} 
+{% endblock %}

@@ -1,0 +1,119 @@
+.sub-title{
+      font-family: Segoe UI;
+      font-size: 68px;
+      font-weight: 600;
+      line-height: 92px;
+      letter-spacing: 0px;
+      margin:10px;
+    }
+    
+    .webtitle{
+    font-family: Segoe UI;
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 32px;
+    letter-spacing: 0px;
+    text-align: left;
+    color:black;
+    padding: 10px;
+    }
+    
+    .cardtitle{
+    font-family: Segoe UI;
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 32px;
+    letter-spacing: 0px;
+    text-align: left;
+    }
+    
+    .timetitle{
+    font-family: Arial;
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 36px;
+    letter-spacing: 0px;
+    text-align: left;
+    
+    }
+    
+    .forum_column{
+          padding: 51px;
+    }
+    
+    .forum_heading{
+     font-family: Segoe UI;font-size: 24px;font-weight: 700;line-height: 52px;letter-spacing: 0px;text-align: left;color:white;
+    }
+    .forum_description{
+          font-family: Segoe UI;font-size: 14px;font-weight: 600;text-align: left;
+    }
+    
+    .btn-info-home2{
+          color: #1B3978;border: 1px solid #B5B5B5;background: #F4F8FF;
+    
+    }
+    
+    button[aria-label="Search"] {
+          color: #5FC0CF;
+    }
+    
+    .selected{
+          color: #666666;
+    
+    }
+    
+    
+    @media screen and (min-width: 1199px) {
+          .card-left{
+                  margin-right: 8px;
+          }
+          .card-right{
+                  margin-left: 8px;
+          }
+          
+          .section-landing-mostpopular{
+                position:relative;
+                top:-4vh;
+          }
+    }
+    
+    @media screen and (max-width: 1199px) {
+          .card-left{
+                  margin-bottom: 16px;  
+          }
+          .card-right{
+                  margin-bottom: 16px; 
+          }
+        
+          
+    }
+    @media screen and (min-width: 992px) {
+          .helplayout{
+                  min-height: 300px; 
+          }
+          .populararticle{
+                  position: relative;
+                  top:-7vh;
+          }
+    }
+    .removemargin{ 
+        margin-top: 0px ;
+        margin-bottom: 0px ;
+        padding: 0px ;
+    }
+    
+    .rowmarginremove{
+          margin-left: 0px ;
+        margin-right: 0px ;
+    }
+    
+    .itemsCenter {
+          justify-content: center;
+          align-items: center;
+    }
+    .btn-info-home0{
+      margin-top: 4rem;
+      color: #3269DB;
+      border-color: #3269DB;
+      background: transparent;
+  }

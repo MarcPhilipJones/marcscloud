@@ -1,0 +1,179 @@
+{
+  "properties": {
+    "connectionReferences": {
+      "shared_commondataserviceforapps": {
+        "api": {
+          "name": "shared_commondataserviceforapps"
+        },
+        "connection": {
+          "connectionReferenceLogicalName": "new_sharedcommondataserviceforapps_9fc63"
+        },
+        "runtimeSource": "embedded"
+      },
+      "shared_conversionservice": {
+        "api": {
+          "name": "shared_conversionservice"
+        },
+        "connection": {
+          "connectionReferenceLogicalName": "new_sharedconversionservice_420f7"
+        },
+        "runtimeSource": "embedded"
+      }
+    },
+    "definition": {
+      "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+      "contentVersion": "1.0.0.0",
+      "parameters": {
+        "$authentication": {
+          "defaultValue": {},
+          "type": "SecureObject"
+        },
+        "$connections": {
+          "defaultValue": {},
+          "type": "Object"
+        }
+      },
+      "triggers": {
+        "When_a_row_is_added,_modified_or_deleted": {
+          "type": "OpenApiConnectionWebhook",
+          "inputs": {
+            "parameters": {
+              "subscriptionRequest/message": 1,
+              "subscriptionRequest/entityname": "email",
+              "subscriptionRequest/scope": 4,
+              "subscriptionRequest/filterexpression": "directioncode eq false and statuscode eq 4\n"
+            },
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+              "operationId": "SubscribeWebhookTrigger",
+              "connectionName": "shared_commondataserviceforapps"
+            }
+          }
+        }
+      },
+      "actions": {
+        "Get_a_row_by_ID": {
+          "type": "OpenApiConnection",
+          "inputs": {
+            "parameters": {
+              "entityName": "emails",
+              "recordId": "@triggerOutputs()?['body/activityid']"
+            },
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+              "operationId": "GetItem",
+              "connectionName": "shared_commondataserviceforapps"
+            }
+          },
+          "runAfter": {},
+          "metadata": {
+            "operationMetadataId": "c2c20c96-da9e-4799-864d-5cbc63e598cf"
+          }
+        },
+        "Create_text_with_GPT_using_a_prompt": {
+          "type": "OpenApiConnection",
+          "inputs": {
+            "parameters": {
+              "recordId": "2d8bc115-acdd-4ed4-a232-a864b46190b8",
+              "item/requestv2/var_EmailInbound": "@body('Html_to_text')"
+            },
+            "host": {
+              "apiId": "providers/Microsoft.ProcessSimple/operationGroups/aibuilder",
+              "operationId": "aibuilderpredict_customprompt",
+              "connectionName": "shared_commondataserviceforapps"
+            }
+          },
+          "runAfter": {
+            "Html_to_text": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "82c7cf1b-c82c-4e72-b593-2dc0a7506cc7",
+            "flowSystemMetadata": {
+              "portalOperationApiDisplayNameOverride": "AI Builder",
+              "portalOperationIconOverride": "https://content.powerapps.com/resource/makerx/static/pauto/images/designeroperations/aiBuilderNew.51dbdb6b.png",
+              "portalOperationBrandColorOverride": "#0A76C4",
+              "portalOperationApiTierOverride": "Standard"
+            }
+          }
+        },
+        "Initialize_variable": {
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "varEmailBody",
+                "type": "string",
+                "value": "@body('Get_a_row_by_ID')?['description']"
+              }
+            ]
+          },
+          "runAfter": {
+            "Get_a_row_by_ID": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "ebf43b8b-eea9-4198-bb87-f5306ce69783"
+          }
+        },
+        "Html_to_text": {
+          "type": "OpenApiConnection",
+          "inputs": {
+            "parameters": {
+              "Content": "<p class=\"editor-paragraph\">@{variables('varEmailBody')}</p>"
+            },
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_conversionservice",
+              "operationId": "HtmlToText",
+              "connectionName": "shared_conversionservice"
+            }
+          },
+          "runAfter": {
+            "Initialize_variable": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "1be80dd2-794a-45cc-8366-c56ce95d0c24"
+          }
+        },
+        "Update_a_row": {
+          "type": "OpenApiConnection",
+          "inputs": {
+            "parameters": {
+              "entityName": "emails",
+              "recordId": "@body('Get_a_row_by_ID')?['activityid']",
+              "item/mj_ai_piidata": "@body('Create_text_with_GPT_using_a_prompt')?['responsev2']?['predictionOutput']?['structuredOutput']?['AI_PIIData']",
+              "item/mj_ai_piidatamultiline": "@body('Create_text_with_GPT_using_a_prompt')?['responsev2']?['predictionOutput']?['structuredOutput']?['AI_PIIData']",
+              "item/mj_ai_suggestedresponsegeneralknowledge": "@body('Create_text_with_GPT_using_a_prompt')?['responsev2']?['predictionOutput']?['structuredOutput']?['AI_SuggestedResponseGeneralKnowledge']",
+              "item/mj_ai_category": "@body('Create_text_with_GPT_using_a_prompt')?['responsev2']?['predictionOutput']?['structuredOutput']?['AI_Category']",
+              "item/mj_ai_piidateyesno": "@body('Create_text_with_GPT_using_a_prompt')?['responsev2']?['predictionOutput']?['structuredOutput']?['AI_PIIDataYesNo']",
+              "item/mj_ai_priority": "@body('Create_text_with_GPT_using_a_prompt')?['responsev2']?['predictionOutput']?['structuredOutput']?['AI_Priority']",
+              "item/mj_ai_profanities": "@body('Create_text_with_GPT_using_a_prompt')?['responsev2']?['predictionOutput']?['structuredOutput']?['AI_Profanities']",
+              "item/mj_ai_sentiment": "@body('Create_text_with_GPT_using_a_prompt')?['responsev2']?['predictionOutput']?['structuredOutput']?['AI_Sentiment']",
+              "item/mj_ai_shortdescription": "@body('Create_text_with_GPT_using_a_prompt')?['responsev2']?['predictionOutput']?['structuredOutput']?['AI_ShortDescription']"
+            },
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+              "operationId": "UpdateRecord",
+              "connectionName": "shared_commondataserviceforapps"
+            }
+          },
+          "runAfter": {
+            "Create_text_with_GPT_using_a_prompt": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "41bdf6ae-7dcc-4092-98ce-e7804ea65f21"
+          }
+        }
+      },
+      "outputs": {}
+    },
+    "templateName": null
+  },
+  "schemaVersion": "1.0.0.0"
+}

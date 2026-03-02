@@ -1,0 +1,40 @@
+{
+  "name": "contact-code-app",
+  "private": true,
+  "version": "0.2.0",
+  "description": "Power Apps Code App — Contact management app using official Dataverse SDK, React, TypeScript, and Microsoft Fluent UI",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "lint": "eslint .",
+    "preview": "vite preview",
+    "deploy": "npm run build && pac code push --solutionName CodeApps",
+    "init:app": "pac code init --displayname \"Contact Code App\"",
+    "add:contacts": "pac code add-data-source -a dataverse -t contact"
+  },
+  "dependencies": {
+    "@fluentui/react-components": "^9.56.0",
+    "@fluentui/react-icons": "^2.0.266",
+    "@microsoft/power-apps": "^1.0.4",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "react-router-dom": "^7.6.0",
+    "recharts": "^3.7.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.1",
+    "@microsoft/power-apps-vite": "^1.0.2",
+    "@types/node": "^24.10.1",
+    "@types/react": "^19.2.5",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^5.1.1",
+    "eslint": "^9.39.1",
+    "eslint-plugin-react-hooks": "^7.0.1",
+    "eslint-plugin-react-refresh": "^0.4.24",
+    "globals": "^16.5.0",
+    "typescript": "~5.9.3",
+    "typescript-eslint": "^8.46.4",
+    "vite": "^7.2.4"
+  }
+}

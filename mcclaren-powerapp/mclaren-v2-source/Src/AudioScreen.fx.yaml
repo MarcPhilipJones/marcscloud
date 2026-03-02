@@ -1,0 +1,187 @@
+AudioScreen As screen:
+    Fill: =McLarenBlack
+
+    AudioBackgroundImage As image:
+        Height: =Parent.Height
+        Image: ="https://www.contosodemos.co.uk/mclaren-570s-spider-home.jpg"
+        ImagePosition: =ImagePosition.Fill
+        Transparency: =0.82
+        Width: =Parent.Width
+        X: =0
+        Y: =0
+        ZIndex: =0
+
+    AudioBackBtn As button:
+        BorderColor: =McLarenOrange
+        BorderThickness: =2
+        Color: =McLarenWhite
+        Fill: =Color.Transparent
+        Font: =Font.'Segoe UI'
+        Height: =50
+        OnSelect: =Navigate(HomeScreen, ScreenTransition.Fade)
+        Text: ="< BACK"
+        Width: =120
+        X: =20
+        Y: =15
+        ZIndex: =1
+
+    AudioTitle As label:
+        Align: =Align.Center
+        Color: =McLarenOrange
+        Font: =Font.'Segoe UI'
+        FontWeight: =FontWeight.Bold
+        Height: =40
+        Size: =24
+        Text: ="AUDIO SETTINGS"
+        Width: =400
+        X: =Parent.Width / 2 - Self.Width / 2
+        Y: =20
+        ZIndex: =2
+
+    AudioSaveBtn As button:
+        Color: =McLarenBlack
+        Fill: =McLarenOrange
+        Font: =Font.'Segoe UI'
+        FontWeight: =FontWeight.Bold
+        Height: =50
+        OnSelect: =Notify("Audio settings saved!", NotificationType.Success)
+        Text: ="SAVE"
+        Width: =120
+        X: =Parent.Width - 140
+        Y: =15
+        ZIndex: =3
+
+    RadioStationsCard As label:
+        Color: =McLarenWhite
+        Fill: =McLarenDarkGrey
+        Font: =Font.'Segoe UI'
+        FontWeight: =FontWeight.Bold
+        Height: =120
+        Size: =16
+        Text: ="FAVOURITE RADIO STATIONS - Add text inputs in Power Apps Studio"
+        Width: =Parent.Width - 80
+        X: =40
+        Y: =90
+        ZIndex: =4
+
+    BassCard As label:
+        Color: =McLarenWhite
+        Fill: =McLarenDarkGrey
+        Font: =Font.'Segoe UI'
+        FontWeight: =FontWeight.Bold
+        Height: =140
+        Size: =16
+        Text: ="BASS"
+        Width: =(Parent.Width - 120) / 3
+        X: =40
+        Y: =230
+        ZIndex: =5
+
+    BassDisplay As label:
+        Align: =Align.Right
+        Color: =McLarenOrange
+        Font: =Font.'Segoe UI'
+        FontWeight: =FontWeight.Bold
+        Height: =25
+        Size: =16
+        Text: =Text(BassSlider.Value, "0")
+        Width: =50
+        X: =((Parent.Width - 120) / 3) - 20
+        Y: =240
+        ZIndex: =6
+
+    BassSlider As slider:
+        Default: =varBassLevel
+        HandleFill: =McLarenWhite
+        Height: =30
+        Max: =10
+        Min: =-10
+        RailFill: =McLarenSilver
+        ShowValue: =false
+        ValueFill: =McLarenOrange
+        Width: =(Parent.Width - 200) / 3
+        X: =60
+        Y: =310
+        ZIndex: =7
+
+    TrebleCard As label:
+        Color: =McLarenWhite
+        Fill: =McLarenDarkGrey
+        Font: =Font.'Segoe UI'
+        FontWeight: =FontWeight.Bold
+        Height: =140
+        Size: =16
+        Text: ="TREBLE"
+        Width: =(Parent.Width - 120) / 3
+        X: =60 + (Parent.Width - 120) / 3
+        Y: =230
+        ZIndex: =8
+
+    TrebleDisplay As label:
+        Align: =Align.Right
+        Color: =McLarenOrange
+        Font: =Font.'Segoe UI'
+        FontWeight: =FontWeight.Bold
+        Height: =25
+        Size: =16
+        Text: =Text(TrebleSlider.Value, "0")
+        Width: =50
+        X: =60 + 2 * (Parent.Width - 120) / 3 - 70
+        Y: =240
+        ZIndex: =9
+
+    TrebleSlider As slider:
+        Default: =varTrebleLevel
+        HandleFill: =McLarenWhite
+        Height: =30
+        Max: =10
+        Min: =-10
+        RailFill: =McLarenSilver
+        ShowValue: =false
+        ValueFill: =McLarenOrange
+        Width: =(Parent.Width - 200) / 3
+        X: =80 + (Parent.Width - 120) / 3
+        Y: =310
+        ZIndex: =10
+
+    NavVolCard As label:
+        Color: =McLarenWhite
+        Fill: =McLarenDarkGrey
+        Font: =Font.'Segoe UI'
+        FontWeight: =FontWeight.Bold
+        Height: =140
+        Size: =16
+        Text: ="NAV VOICE"
+        Width: =(Parent.Width - 120) / 3
+        X: =80 + 2 * (Parent.Width - 120) / 3
+        Y: =230
+        ZIndex: =11
+
+    NavVolDisplay As label:
+        Align: =Align.Right
+        Color: =McLarenOrange
+        Font: =Font.'Segoe UI'
+        FontWeight: =FontWeight.Bold
+        Height: =25
+        Size: =16
+        Text: =Text(NavVolSlider.Value, "0") & "%"
+        Width: =60
+        X: =Parent.Width - 110
+        Y: =240
+        ZIndex: =12
+
+    NavVolSlider As slider:
+        Default: =varNavVolume
+        HandleFill: =McLarenWhite
+        Height: =30
+        Max: =100
+        Min: =0
+        RailFill: =McLarenSilver
+        ShowValue: =false
+        ValueFill: =McLarenOrange
+        Width: =(Parent.Width - 200) / 3
+        X: =100 + 2 * (Parent.Width - 120) / 3
+        Y: =310
+        ZIndex: =13
+
+

@@ -1,0 +1,25 @@
+{% if user and user.parentcustomerid %}
+    <input type="hidden" id="case-user-contact" value="{{user.id}}" />
+    <input type="hidden" id="case-user-contact-name" value="{{user.fullname|escape}}" />
+    <input type="hidden" id="case-user-account" value="{{user.parentcustomerid.id}}" />
+    <input type="hidden" id="case-user-account-name" value="{{user.parentcustomerid.name|escape}}" />
+  {% endif %}
+  
+  {% assign entitlements_enabled = settings["CustomerSupport/CaseEntitlementEnabled"] | boolean %}
+  {% if entitlements_enabled %}
+    <script type="text/javascript">
+      // Show entitlement and prodcut fields if site setting = true
+      (function ($) {
+        $("#productid_lookupmodal").parent().parent().show();
+        $("#entitlementid_lookupmodal").parent().parent().show();
+      }(jQuery));
+    </script>
+  {% else %}
+    <script type="text/javascript">
+      // Hide entitlement and prodcut fields if site setting = false
+      (function ($) {
+        $("#productid_lookupmodal").parent().parent().hide();
+        $("#entitlementid_lookupmodal").parent().parent().hide();
+      }(jQuery));
+    </script>
+  {% endif %}

@@ -1,0 +1,45 @@
+{% raw %}
+ <script id="case-deflection-results" type="text/x-handlebars-template">
+    {{# each items}}
+    <li class="list-group-item">
+      <h4 class="list-group-item-heading">
+         {{#urlquerystringcheck url}}
+            <a href="{{ url }}?caseTitle={{ ../caseTitle }}">{{ title }}</a>
+         {{else}}
+            <a href="{{ url }}&caseTitle={{ ../caseTitle }}">{{ title }}</a>
+         {{/urlquerystringcheck}}
+      </h4>
+      <p class="list-group-item-text search-results fragment">{{{ fragment }}}</p>
+      <div>
+        {{#label entityLogicalName 'adx_communityforum'}}
+        <span class='label label-info'>{% endraw %}{{ resx['Forums_Label']}}{% raw %}</span>
+        {{/label}}
+        {{#label entityLogicalName 'adx_communityforumthread'}}
+        <span class='label label-info'>{% endraw %}{{ resx['Forums_Label'] }}{% raw %}</span>
+        {{/label}}
+        {{#label entityLogicalName 'adx_communityforumpost'}}
+        <span class='label label-info'>{% endraw %}{{ resx['Forums_Label'] }}{% raw %}</span>
+        {{/label}}
+        {{#label entityLogicalName 'adx_event'}}
+        <span class='label label-info'>{% endraw %} {{ resx['Events_Label'] }} {% raw %}</span>
+        {{/label}}
+        {{#label entityLogicalName 'adx_eventschedule'}}
+        <span class='label label-info'>{% endraw %} {{ resx['Events_Label'] }} {% raw %}</span>
+        {{/label}}
+        {{#label entityLogicalName 'adx_issue'}}
+        <span class='label label-danger'>{% endraw %} {{ resx['Issues_Label'] }} {% raw %}</span>
+        {{/label}}
+        {{#label entityLogicalName 'incident'}}
+        <span class='label label-success'>{% endraw %} {{ resx['Resolved_Cases_Label'] }} {% raw %}</span>
+        {{/label}}
+        {{#label entityLogicalName 'kbarticle'}}
+        <span class='label label-primary'>{% endraw %} {{ resx['Knowledge_Base_Label'] }} {% raw %}</span>
+        {{/label}}
+        {{#label entityLogicalName 'knowledgearticle'}}
+        <span class='label label-primary'>{% endraw %} {{ resx['Knowledge_Base_Label']}} {% raw %}</span>
+        {{/label}}
+      </div> 
+    </li>
+    {{/each}}
+  </script>
+{% endraw%}

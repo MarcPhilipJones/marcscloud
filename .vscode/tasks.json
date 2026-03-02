@@ -43,6 +43,26 @@
       "type": "shell",
       "command": "az deployment group create --resource-group ${input:resourceGroup} --template-file templates/azuredeploy.json --parameters @parameters/dev.parameters.json --parameters @parameters/dev.secrets.parameters.json",
       "problemMatcher": []
+    },
+    {
+      "label": "Setup Power Platform Auth (PAC CLI)",
+      "type": "shell",
+      "command": "& '${workspaceFolder}\\scripts\\Setup-PowerPlatformAuth.ps1'",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "new"
+      }
+    },
+    {
+      "label": "Setup Power Platform Auth (with env vars)",
+      "type": "shell",
+      "command": "& '${workspaceFolder}\\scripts\\Setup-PowerPlatformAuth.ps1' -SetEnvVars -Persist",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "new"
+      }
     }
   ],
   "inputs": [

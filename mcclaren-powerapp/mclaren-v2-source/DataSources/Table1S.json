@@ -1,0 +1,97 @@
+[
+  {
+    "CdsFCBContext": "{\"FileType\":true,\"ImageExternalStorage\":true}",
+    "EntitySetName": "cr8c9_table1s",
+    "IsHidden": false,
+    "IsSampleData": false,
+    "IsWritable": true,
+    "LogicalName": "cr8c9_table1",
+    "MaxGetRowsCount": 500,
+    "Name": "Table1S",
+    "NativeCDSDataSourceInfoNameMapping": {
+      "_ownerid_value": "Owner",
+      "cr8c9_newcolumn": "New column",
+      "cr8c9_table1_AsyncOperations": "System Jobs",
+      "cr8c9_table1_BulkDeleteFailures": "Bulk Delete Failures",
+      "cr8c9_table1_DuplicateBaseRecord": "Duplicate Records (cr8c9_table1_DuplicateBaseRecord)",
+      "cr8c9_table1_DuplicateMatchingRecord": "Duplicate Records (cr8c9_table1_DuplicateMatchingRecord)",
+      "cr8c9_table1_MailboxTrackingFolders": "Mailbox Auto Tracking Folders",
+      "cr8c9_table1_PrincipalObjectAttributeAccesses": "Field Sharing",
+      "cr8c9_table1_ProcessSession": "Process Sessions",
+      "cr8c9_table1_SyncErrors": "Sync Errors",
+      "cr8c9_table1id": "Table1",
+      "createdby": "Created By",
+      "createdon": "Created On",
+      "createdonbehalfby": "Created By (Delegate)",
+      "importsequencenumber": "Import Sequence Number",
+      "modifiedby": "Modified By",
+      "modifiedon": "Modified On",
+      "modifiedonbehalfby": "Modified By (Delegate)",
+      "overriddencreatedon": "Record Created On",
+      "owningbusinessunit": "Owning Business Unit",
+      "owningteam": "Owning Team",
+      "owninguser": "Owning User",
+      "statecode": "Status",
+      "statuscode": "Status Reason",
+      "timezoneruleversionnumber": "Time Zone Rule Version Number",
+      "utcconversiontimezonecode": "UTC Conversion Time Zone Code",
+      "versionnumber": "Version Number"
+    },
+    "PreferredName": "Table1S",
+    "Type": "NativeCDSDataSourceInfo"
+  },
+  {
+    "DisplayName": "Table1S (Views)",
+    "Name": "_cr8c9_table1_views",
+    "RelatedEntityName": "Table1S",
+    "TrimmedViewName": true,
+    "Type": "ViewInfo",
+    "ViewInfoNameMapping": {
+      "0b9b746a-3a34-473d-99a6-2180875111ae": "Table1 Advanced Find View",
+      "1bc1e67e-0bb0-4209-a4fe-0d27ebc4ac58": "Table1 Associated View",
+      "452c614d-e179-4575-8033-807c46d5703c": "Active Table1S",
+      "53bf4c21-11da-4ec1-bcc8-5c0552970ece": "Inactive Table1S",
+      "dd7e0c99-dc3c-4c96-889b-a887cdc5aa98": "Table1 Lookup View"
+    }
+  },
+  {
+    "DisplayName": "Status (Table1S)",
+    "Name": "cr8c9_table1_statecode",
+    "OptionSetInfoNameMapping": {
+      "0": "Active",
+      "1": "Inactive"
+    },
+    "OptionSetIsBooleanValued": false,
+    "OptionSetIsGlobal": false,
+    "OptionSetReference": {
+      "OptionSetReferenceItem0": {
+        "OptionSetReferenceColumnName": "statecode",
+        "OptionSetReferenceEntityName": "Table1S"
+      }
+    },
+    "OptionSetTypeKey": "StateType",
+    "RelatedColumnInvariantName": "statecode",
+    "RelatedEntityName": "Table1S",
+    "Type": "OptionSetInfo"
+  },
+  {
+    "DisplayName": "Status Reason (Table1S)",
+    "Name": "cr8c9_table1_statuscode",
+    "OptionSetInfoNameMapping": {
+      "1": "Active",
+      "2": "Inactive"
+    },
+    "OptionSetIsBooleanValued": false,
+    "OptionSetIsGlobal": false,
+    "OptionSetReference": {
+      "OptionSetReferenceItem0": {
+        "OptionSetReferenceColumnName": "statuscode",
+        "OptionSetReferenceEntityName": "Table1S"
+      }
+    },
+    "OptionSetTypeKey": "StatusType",
+    "RelatedColumnInvariantName": "statuscode",
+    "RelatedEntityName": "Table1S",
+    "Type": "OptionSetInfo"
+  }
+]

@@ -26,6 +26,15 @@ parameters/Notes.txt
 # Node modules (if using custom connectors)
 node_modules/
 
+# Python virtual environment
+.venv/
+
+# Python bytecode
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+
 # Logs
 *.log
 logs/

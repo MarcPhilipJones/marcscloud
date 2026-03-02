@@ -1,0 +1,57 @@
+# EditorConfig — consistent formatting across editors and contributors
+# https://editorconfig.org
+
+root = true
+
+# Default for all files
+[*]
+indent_style = space
+indent_size = 4
+end_of_line = lf
+charset = utf-8
+trim_trailing_whitespace = true
+insert_final_newline = true
+
+# JSON / JSONC (ARM templates, parameters, Logic Apps definitions)
+[*.{json,jsonc}]
+indent_size = 2
+
+# YAML (Power Apps .pa.yaml, Azure Pipelines, GitHub Actions, HA config)
+[*.{yml,yaml}]
+indent_size = 2
+
+# JavaScript / TypeScript (PCF controls, contractor portal)
+[*.{js,ts,jsx,tsx}]
+indent_size = 2
+
+# HTML / CSS
+[*.{html,css,scss}]
+indent_size = 2
+
+# Bicep (Azure IaC)
+[*.bicep]
+indent_size = 2
+
+# Markdown
+[*.md]
+trim_trailing_whitespace = false
+
+# PowerShell
+[*.{ps1,psm1,psd1}]
+indent_size = 4
+
+# Python
+[*.py]
+indent_size = 4
+
+# C# (PCF controls, Dataverse plugins)
+[*.cs]
+indent_size = 4
+
+# XML (Dataverse metadata, .resx, .csproj)
+[*.{xml,csproj,resx}]
+indent_size = 2
+
+# Makefiles (tabs required)
+[Makefile]
+indent_style = tab

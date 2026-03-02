@@ -1,0 +1,57 @@
+<div class="row sectionBlockLayout text-left" style='display: flex; flex-wrap: wrap; padding: 8px; margin: 0px; background: linear-gradient(135deg, #FFC107 0%, #FFD54F 50%, #FFC107 100%);'>
+  <div role="main" class="container">
+    <div class="row" style="margin: px 0px; padding: px;">
+      <div class="col-md-8 col-md-offset-2" style="padding:40px">
+        {% editable snippets 'Home/Subtitle' type:'html' %}{% include 'Search' search_id:'search_control' paramssearchid:'paramssearchid'%}
+        <div class="row sectionBlockLayout" style="display: flex; flex-wrap: wrap; padding: 8px; margin: 0px; min-height: 15px;"></div>
+      </div>
+    </div>
+    <div class="section-landing-mostpopular" style="font-family: Segoe UI; font-weight: 700; font-size: 24px; line-height: 52px; letter-spacing: 0px; text-align: left; color: #000000; border-left: 4px solid #000000; padding-left: 15px;">{% editable snippets 'KnowledgeMgmt/MostPopularArticles' type: 'text', default: resx['KnowledgeMgmt_Most_Popular_Articles'], escape: true, tag: 'span' %}</div>
+  </div>
+</div>
+<div class="row sectionBlockLayout" style="display: flex; flex-wrap: wrap; padding: 8px; margin: 0px; min-height: 15px;"></div>
+{% include 'Knowledge Management - Most Popular Articles' popularKBCount:"3" %}
+<div class="row sectionBlockLayout text-left" style="display: flex; flex-wrap: wrap; margin: 0px; min-height: auto; padding: 8px;">
+  <div class="container" style="padding: 0px; display: flex; flex-wrap: wrap; box-shadow: rgba(0, 0, 0, 0.1) 0px 0px 3px 0.5px;">
+    <div class="col-md-6 col-sm-12 col-xs-12 columnBlockLayout removemargin" style="flex-grow: 1; display: flex; flex-direction: column; min-width: 310px; word-break: break-word; background-color: rgb(244, 248, 255); padding: 24px;background-image: url('/C 1.png');background-position: center;background-repeat: no-repeat;background-size:contain;background-origin: content-box;">{% include 'Knowledge Management - Most Recent Articles' recentKBCount:"3"%}</div>
+    <div class="col-md-6 col-sm-12 col-xs-12 columnBlockLayout removemargin" style="flex-grow: 1; display: flex; flex-direction: column; min-width: 310px; word-break: break-word; padding: 24px;">{% include 'Knowledge Management - Top Rated Articles' topKBCount:"3" %}
+      <button onclick="window.location.href='/knowledgebase'" type="button" value="knowledgebase" data-ppid="8b167a83-ae23-b5ac-980a-b601dc277aa0" class="btn btn-info-home0" style="margin-left: 40px; margin-right: auto;">View all articles</button>
+    </div>
+  </div>
+</div>
+<div class="row sectionBlockLayout text-left" style="display: flex; flex-wrap: wrap; margin: 0px; min-height: auto; padding: 0px;">
+  <div class="container" style="padding: 0px; display: flex; flex-wrap: wrap; width: 100%;">
+    <div class="row sectionBlockLayout text-left" style="margin: 40px 0px 0px; padding: 0px; display: flex; flex-wrap: wrap; min-height: auto; width: 100%;">
+      <div class="col-md-7 col-sm-12 col-xs-12 columnBlockLayout removemargin" style="flex-grow: 1; display: flex; flex-direction: column; min-width: 310px; word-break: break-word; padding: 60px 40px; background: #000000;">
+        <h2 style="color: #FFC107; font-size: 2.5em; font-weight: 700; margin-bottom: 20px;">🚗 Roadside Assistance</h2>
+        <p style="color: #FFFFFF; font-size: 1.2em; margin-bottom: 20px;">We're the UK's largest breakdown provider. Here to help 24/7, 365 days a year.</p>
+        <p style="color: #FFC107; font-size: 1.5em; font-weight: bold;">📞 Call 0800 88 77 66</p>
+      </div>
+      <div class="col-md-5 col-sm-12 col-xs-12 columnBlockLayout removemargin" style="flex-grow: 1; display: flex; flex-direction: column; min-width: 310px; word-break: break-word; background: linear-gradient(135deg, #000000 0%, #333333 100%);">
+        <div class="forum_column">
+          <h1 class="forum_heading" style="color: #FFC107;">{{ forums_sm.adx_name | escape }}</h1>
+          <span class="forum_description" style="color: #FFFFFF;">{% editable snippets "Forum/HomeDescription" %}</span><button onclick="window.location.href='/forums'" type="button" value="forums" class="btn btn-info-home" style="margin-top: 15px; background-color: #FFC107; color: #000000; border: none;">View More</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="row sectionBlockLayout text-left" style="padding: 0px; display: flex; flex-wrap: wrap; margin: 0px; min-height: auto;">
+  <div class="container" style="padding: 0px; display: flex; flex-wrap: wrap; width: 100%;">
+    <div class="col-md-7 col-sm-7 col-xs-7 columnBlockLayout removemargin" style="flex-grow: 1; display: flex; flex-direction: column; min-width: 310px; word-break: break-word;">
+      <div class="row text-left rowmarginremove" style="flex-wrap: wrap; display: flex; min-height: 300px;">
+        <div class="col-md-8 col-sm-8 col-xs-6 columnBlockLayout helplayout removemargin" style="min-width: auto; flex-grow: 1; display: flex; flex-direction: column; word-break: break-word;">
+          <div class="row sectionBlocklayout" style="display: flex; flex-wrap: wrap; padding: 8px; margin: 0px; min-height: 105px;"></div>
+          <h3 style="text-align: center; color: #000000; font-family: Segoe UI; font-weight: 700; line-height: 52px; letter-spacing: 0px; padding: 0 12px;">We are here to help</h3>
+        </div>
+        <div class="col-md-4 col-sm-4 col-xs-6 columnBlockLayout helplayout removemargin itemsCenter" style="min-width: auto; flex-grow: 1; display: flex; flex-direction: column; word-break: break-word; background: rgb(244, 248, 255);"><img src="/Shape 1.png" alt="" name="Shape (1).png" style="max-width: 100%;width: 75px;height: 75px;margin: 10px;" /><button onclick="window.location.href='/knowledgebase'" type="button"  value="knowledgebase" class="btn btn-info-home2">Browse the KB</button></div>
+      </div>
+    </div>
+    <div class="col-md-5 col-sm-5 col-xs-5 columnBlockLayout removemargin" style="flex-grow: 1; display: flex; flex-direction: column; min-width: 310px; word-break: break-word;">
+      <div class="row text-left rowmarginremove" style="flex-wrap: wrap; display: flex; min-height: 300px;">
+        <div class="col-md-6 col-sm-6 col-xs-6 columnBlockLayout helplayout removemargin itemsCenter" style="min-width: auto; flex-grow: 1; display: flex; flex-direction: column; word-break: break-word; background:#000000;"><img src="/Shape 2.png" alt="" name="Shape (2).png" style="max-width: 100%;width: 75px;height: 75px;margin: 10px;"  /><button onclick="window.location.href='/support/create-case'" type="button" value="create-case" class="btn btn-info-home" style="background-color: #FFC107; color: #000000; border: none;">Create Case</button></div>
+        <div class="col-md-6 col-sm-6 col-xs-6 columnBlockLayout helplayout removemargin itemsCenter" style="min-width: auto; flex-grow: 1; display: flex; flex-direction: column; word-break: break-word; background: rgb(244, 248, 255);"><img src="/Shape 3.png" alt="" name="Shape (3).png" style="max-width: 100%;width: 75px;height: 75px;margin: 10px;"  /><button onclick="window.location.href='/contact-us'" type="button" value="contact-us" class="btn btn-info-home2">Contact Us</button></div>
+      </div>
+    </div>
+  </div>
+</div>

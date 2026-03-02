@@ -1,0 +1,18 @@
+{% assign entitlements_enabled = settings["CustomerSupport/CaseEntitlementEnabled"] | boolean %}
+          {% if entitlements_enabled %}
+            <script type="text/javascript">
+              // Show entitlement and product fields if site setting = true
+              (function ($) {
+                $("#productid").closest("td").show();
+               $("#entitlementid").closest("td").show();
+              }(jQuery));
+            </script>
+          {% else %}
+            <script type="text/javascript">
+              // Hide entitlement and product fields if site setting = false
+              (function ($) {
+                $("#productid").closest("td").hide();
+               $("#entitlementid").closest("td").hide();
+              }(jQuery));
+            </script>
+          {% endif %}

@@ -1,0 +1,27 @@
+/* Global reset — Fluent UI manages component styles */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  width: 100%;
+  font-family: var(--fontFamilyBase);
+  background-color: var(--colorNeutralBackground2);
+  color: var(--colorNeutralForeground1);
+}
+
+a {
+  color: var(--colorBrandForegroundLink);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}

@@ -1,0 +1,974 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>McLaren Owner Dashboard</title>
+    <style>
+      /* ===================================================================
+       RESET & BASE
+       =================================================================== */
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      :root {
+        /* Brand palette */
+        --orange: #ff8c00;
+        --orange-glow: rgba(255, 140, 0, 0.45);
+        --orange-dim: rgba(255, 140, 0, 0.18);
+        --blue-accent: #3a6ea5;
+        --blue-glow: rgba(58, 110, 165, 0.25);
+        --blue-border: rgba(80, 140, 200, 0.22);
+
+        /* Surfaces */
+        --bg-page: #0a0c10;
+        --bg-tablet: #0f1217;
+        --bg-card: rgba(16, 22, 32, 0.82);
+        --bg-card-hover: rgba(22, 30, 44, 0.9);
+        --border-card: rgba(90, 140, 200, 0.18);
+        --border-glow: rgba(90, 140, 200, 0.08);
+
+        /* Text */
+        --text-primary: #e8ecf0;
+        --text-secondary: #8a95a5;
+        --text-muted: #566070;
+
+        /* Misc */
+        --radius-lg: 18px;
+        --radius-md: 14px;
+        --radius-sm: 10px;
+        --transition: 0.25s ease;
+      }
+
+      body {
+        font-family:
+          "Segoe UI",
+          system-ui,
+          -apple-system,
+          sans-serif;
+        background: var(--bg-page);
+        color: var(--text-primary);
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 24px;
+      }
+
+      /* ===================================================================
+       CARBON-FIBER TEXTURE (pure CSS pattern)
+       Layered repeating-linear-gradients that mimic woven carbon fibre.
+       =================================================================== */
+      body::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        z-index: 0;
+        opacity: 0.12;
+        background:
+          repeating-linear-gradient(
+            0deg,
+            transparent,
+            transparent 2px,
+            rgba(255, 255, 255, 0.03) 2px,
+            rgba(255, 255, 255, 0.03) 4px
+          ),
+          repeating-linear-gradient(
+            90deg,
+            transparent,
+            transparent 2px,
+            rgba(255, 255, 255, 0.03) 2px,
+            rgba(255, 255, 255, 0.03) 4px
+          ),
+          repeating-linear-gradient(
+            45deg,
+            transparent,
+            transparent 6px,
+            rgba(100, 160, 255, 0.04) 6px,
+            rgba(100, 160, 255, 0.04) 7px
+          );
+        pointer-events: none;
+      }
+
+      /* ===================================================================
+       TABLET FRAME — the "iPad-like bezel"
+       =================================================================== */
+      .tablet {
+        position: relative;
+        z-index: 1;
+        width: 100%;
+        max-width: 1200px;
+        background: var(--bg-tablet);
+        border: 1px solid rgba(120, 160, 210, 0.15);
+        border-radius: 28px;
+        box-shadow:
+          0 0 80px rgba(0, 0, 0, 0.6),
+          inset 0 0 60px rgba(0, 0, 0, 0.35),
+          0 0 4px var(--blue-glow);
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+      }
+
+      /* ===================================================================
+       HEADER — logo row + nav tabs + search
+       =================================================================== */
+      header {
+        padding: 18px 28px 0;
+      }
+
+      .header-top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 14px;
+      }
+
+      /* Logo placeholder — italic bold like McLaren wordmark */
+      .logo {
+        font-size: 1.55rem;
+        font-weight: 700;
+        font-style: italic;
+        letter-spacing: 3px;
+        text-transform: uppercase;
+        color: #fff;
+      }
+      .logo span {
+        color: var(--orange);
+      }
+
+      /* Search field */
+      .search-box {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        background: rgba(255, 255, 255, 0.06);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 22px;
+        padding: 7px 16px;
+        min-width: 180px;
+        transition: border-color var(--transition);
+      }
+      .search-box:focus-within {
+        border-color: var(--orange);
+      }
+      .search-box svg {
+        width: 16px;
+        height: 16px;
+        stroke: var(--text-secondary);
+      }
+      .search-box input {
+        background: none;
+        border: none;
+        outline: none;
+        color: var(--text-primary);
+        font-size: 0.85rem;
+        width: 100%;
+      }
+      .search-box input::placeholder {
+        color: var(--text-muted);
+      }
+
+      /* ===================================================================
+       NAVIGATION TABS — pill-shaped buttons
+       =================================================================== */
+      .nav-tabs {
+        display: flex;
+        gap: 6px;
+        padding: 0 0 16px;
+        overflow-x: auto;
+        scrollbar-width: none;
+      }
+      .nav-tabs::-webkit-scrollbar {
+        display: none;
+      }
+
+      .nav-tab {
+        flex-shrink: 0;
+        padding: 10px 28px;
+        border-radius: 28px;
+        font-size: 0.88rem;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        cursor: pointer;
+        transition: all var(--transition);
+        border: 1px solid transparent;
+        user-select: none;
+
+        /* Inactive default */
+        background: linear-gradient(
+          145deg,
+          rgba(30, 40, 58, 0.7),
+          rgba(18, 24, 36, 0.9)
+        );
+        color: var(--text-secondary);
+        border-color: rgba(80, 120, 180, 0.12);
+      }
+      .nav-tab:hover {
+        color: var(--text-primary);
+        border-color: rgba(80, 120, 180, 0.25);
+        background: linear-gradient(
+          145deg,
+          rgba(38, 50, 68, 0.7),
+          rgba(24, 32, 48, 0.9)
+        );
+      }
+
+      /* Active tab — orange, raised, inner glow */
+      .nav-tab.active {
+        background: linear-gradient(145deg, #e07800, #ff9a1a);
+        color: #fff;
+        border-color: rgba(255, 160, 30, 0.5);
+        box-shadow:
+          0 2px 14px var(--orange-glow),
+          inset 0 1px 1px rgba(255, 255, 255, 0.18);
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+      }
+
+      /* ===================================================================
+       MAIN CONTENT — two-column grid
+       =================================================================== */
+      main {
+        display: grid;
+        grid-template-columns: 1.3fr 1fr;
+        gap: 18px;
+        padding: 0 28px 18px;
+        flex: 1;
+        min-height: 0;
+      }
+
+      /* ===================================================================
+       CARD BASE STYLES
+       =================================================================== */
+      .card {
+        background: var(--bg-card);
+        border: 1px solid var(--border-card);
+        border-radius: var(--radius-md);
+        padding: 18px 20px;
+        box-shadow:
+          0 0 20px var(--border-glow),
+          inset 0 0 30px rgba(0, 0, 0, 0.15);
+        transition:
+          border-color var(--transition),
+          box-shadow var(--transition);
+        display: flex;
+        flex-direction: column;
+      }
+      .card:hover {
+        border-color: rgba(90, 140, 200, 0.3);
+        box-shadow:
+          0 0 28px rgba(90, 140, 200, 0.12),
+          inset 0 0 30px rgba(0, 0, 0, 0.15);
+      }
+
+      .card-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 12px;
+      }
+      .card-title {
+        font-size: 0.82rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: var(--text-secondary);
+      }
+
+      /* Three-dot menu icon */
+      .card-menu {
+        cursor: pointer;
+        color: var(--text-muted);
+        font-size: 1.1rem;
+        letter-spacing: 2px;
+        transition: color var(--transition);
+      }
+      .card-menu:hover {
+        color: var(--text-primary);
+      }
+
+      /* ===================================================================
+       ACTIVE VEHICLE CARD (left column)
+       =================================================================== */
+      .active-vehicle {
+        grid-row: 1 / -1; /* span full height of the right-side grid */
+        border-color: var(--orange-dim);
+        position: relative;
+        overflow: hidden;
+      }
+      /* Orange accent line on left edge */
+      .active-vehicle::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 12%;
+        bottom: 12%;
+        width: 3px;
+        background: linear-gradient(
+          180deg,
+          transparent,
+          var(--orange),
+          transparent
+        );
+        border-radius: 3px;
+      }
+
+      .vehicle-name {
+        font-size: 1.7rem;
+        font-weight: 700;
+        color: #fff;
+        margin-bottom: 14px;
+      }
+
+      /* Image area — real car photo */
+      .vehicle-image {
+        flex: 1;
+        min-height: 220px;
+        border-radius: var(--radius-sm);
+        position: relative;
+        overflow: hidden;
+        margin-bottom: 16px;
+        background: linear-gradient(160deg, #14181f 0%, #0d1018 100%);
+      }
+      .vehicle-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: center 60%;
+        display: block;
+        border-radius: var(--radius-sm);
+        transition:
+          transform 0.6s ease,
+          opacity 0.5s ease;
+      }
+      .vehicle-image img:hover {
+        transform: scale(1.03);
+      }
+      /* Gradient overlay at bottom of image for text readability */
+      .vehicle-image::after {
+        content: "";
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 40%;
+        background: linear-gradient(
+          to top,
+          rgba(15, 18, 24, 0.85),
+          transparent
+        );
+        pointer-events: none;
+        border-radius: 0 0 var(--radius-sm) var(--radius-sm);
+      }
+      /* Image labels (LONDON / 50% overlays) */
+      .image-label {
+        position: absolute;
+        bottom: 12px;
+        font-size: 0.65rem;
+        font-weight: 600;
+        letter-spacing: 1.5px;
+        text-transform: uppercase;
+        color: rgba(255, 255, 255, 0.6);
+        z-index: 2;
+      }
+      .image-label.left {
+        left: 16px;
+      }
+      .image-label.right {
+        right: 16px;
+      }
+
+      /* Carousel slide visibility */
+      .vehicle-image .slide {
+        position: absolute;
+        inset: 0;
+        opacity: 0;
+        transition: opacity 0.6s ease;
+      }
+      .vehicle-image .slide.active {
+        position: relative;
+        opacity: 1;
+      }
+      .vehicle-image .slide img {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+      }
+      .vehicle-image .slide.active img {
+        position: relative;
+      }
+
+      /* Carousel dots */
+      .carousel-dots {
+        display: flex;
+        gap: 8px;
+        justify-content: center;
+        margin-bottom: 16px;
+      }
+      .carousel-dots .dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--text-muted);
+        transition: background var(--transition);
+      }
+      .carousel-dots .dot.active {
+        background: var(--orange);
+        box-shadow: 0 0 6px var(--orange-glow);
+      }
+
+      /* Info strip at bottom of vehicle card */
+      .vehicle-info {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+      }
+      .info-segment {
+        flex: 1;
+        text-align: center;
+        padding: 6px 0;
+      }
+      .info-segment + .info-segment {
+        border-left: 1px solid rgba(255, 255, 255, 0.08);
+      }
+      .info-label {
+        font-size: 0.68rem;
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+        color: var(--text-muted);
+        margin-bottom: 2px;
+      }
+      .info-value {
+        font-size: 0.92rem;
+        font-weight: 600;
+        color: var(--text-primary);
+      }
+
+      .btn-details {
+        margin-left: auto;
+        padding: 10px 26px;
+        border-radius: 24px;
+        font-size: 0.84rem;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        color: var(--orange);
+        background: transparent;
+        border: 1.5px solid var(--orange);
+        cursor: pointer;
+        transition: all var(--transition);
+        box-shadow: 0 0 10px rgba(255, 140, 0, 0.12);
+      }
+      .btn-details:hover {
+        background: var(--orange);
+        color: #fff;
+        box-shadow: 0 0 18px var(--orange-glow);
+      }
+
+      /* ===================================================================
+       RIGHT COLUMN — 2×2 card grid
+       =================================================================== */
+      .right-cards {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        grid-template-rows: 1fr 1fr;
+        gap: 18px;
+      }
+
+      /* ===================================================================
+       COLLECTION SUMMARY — donut gauge
+       =================================================================== */
+      .gauge-wrap {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex: 1;
+        position: relative;
+      }
+      .gauge-svg {
+        width: 110px;
+        height: 110px;
+      }
+      .gauge-bg {
+        fill: none;
+        stroke: rgba(255, 255, 255, 0.06);
+        stroke-width: 10;
+      }
+      .gauge-fill {
+        fill: none;
+        stroke: var(--orange);
+        stroke-width: 10;
+        stroke-linecap: round;
+        /* Circumference = 2π × 42 ≈ 263.9 → show 66 % filled for 2/3 */
+        stroke-dasharray: 175 264;
+        stroke-dashoffset: 0;
+        transform: rotate(-90deg);
+        transform-origin: center;
+        filter: drop-shadow(0 0 4px var(--orange-glow));
+        transition: stroke-dasharray 0.8s ease;
+      }
+      .gauge-center {
+        position: absolute;
+        text-align: center;
+      }
+      .gauge-number {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: #fff;
+        line-height: 1;
+      }
+      .gauge-label {
+        font-size: 0.65rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: var(--text-secondary);
+      }
+      .gauge-meta {
+        text-align: center;
+        font-size: 0.72rem;
+        color: var(--text-secondary);
+        margin-top: 8px;
+      }
+      .gauge-meta strong {
+        color: var(--orange);
+        font-weight: 600;
+      }
+
+      /* ===================================================================
+       LIST CARDS — Recent Activity, Permissions, Preferences
+       =================================================================== */
+      .card-list {
+        list-style: none;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+      .card-list li {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      .list-icon {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        font-size: 0.95rem;
+      }
+      .list-icon.orange {
+        background: rgba(255, 140, 0, 0.14);
+        color: var(--orange);
+      }
+      .list-icon.blue {
+        background: rgba(58, 110, 165, 0.16);
+        color: var(--blue-accent);
+      }
+      .list-icon.green {
+        background: rgba(46, 160, 90, 0.14);
+        color: #2ea05a;
+      }
+
+      .list-text-main {
+        font-size: 0.82rem;
+        font-weight: 600;
+        color: var(--text-primary);
+      }
+      .list-text-sub {
+        font-size: 0.72rem;
+        color: var(--text-secondary);
+      }
+
+      /* Expand arrow in card */
+      .card-expand {
+        text-align: center;
+        margin-top: auto;
+        padding-top: 6px;
+      }
+      .card-expand svg {
+        stroke: var(--text-muted);
+        width: 18px;
+        height: 18px;
+        cursor: pointer;
+        transition: stroke var(--transition);
+      }
+      .card-expand svg:hover {
+        stroke: var(--text-primary);
+      }
+
+      /* ===================================================================
+       FOOTER / STATUS BAR
+       =================================================================== */
+      footer {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 10px 28px;
+        border-top: 1px solid rgba(255, 255, 255, 0.05);
+        font-size: 0.72rem;
+        color: var(--text-muted);
+      }
+      .status-indicator {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .status-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #2ea05a;
+        box-shadow: 0 0 6px rgba(46, 160, 90, 0.5);
+      }
+      .sync-time {
+        letter-spacing: 0.5px;
+      }
+
+      /* ===================================================================
+       RESPONSIVE — stack columns on narrow viewports
+       =================================================================== */
+      @media (max-width: 860px) {
+        body {
+          padding: 10px;
+        }
+        .tablet {
+          border-radius: 18px;
+        }
+
+        main {
+          grid-template-columns: 1fr;
+          padding: 0 16px 16px;
+        }
+        .active-vehicle {
+          grid-row: auto;
+        }
+        .right-cards {
+          grid-template-columns: 1fr 1fr;
+        }
+
+        header {
+          padding: 14px 16px 0;
+        }
+        footer {
+          padding: 10px 16px;
+        }
+      }
+
+      @media (max-width: 560px) {
+        .right-cards {
+          grid-template-columns: 1fr;
+        }
+
+        .nav-tabs {
+          gap: 4px;
+        }
+        .nav-tab {
+          padding: 8px 18px;
+          font-size: 0.8rem;
+        }
+
+        .vehicle-name {
+          font-size: 1.3rem;
+        }
+        .header-top {
+          flex-wrap: wrap;
+          gap: 10px;
+        }
+        .search-box {
+          width: 100%;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- ================================================================
+     TABLET FRAME
+     ================================================================ -->
+    <div class="tablet">
+      <!-- ==============================================================
+       HEADER — logo, navigation tabs, search
+       ============================================================== -->
+      <header>
+        <div class="header-top">
+          <!-- Logo placeholder (italic wordmark style) -->
+          <div class="logo">Mc<span>L</span>aren</div>
+
+          <!-- Search field -->
+          <div class="search-box">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <circle cx="11" cy="11" r="8" />
+              <line x1="21" y1="21" x2="16.65" y2="16.65" />
+            </svg>
+            <input type="text" placeholder="Search" />
+          </div>
+        </div>
+
+        <!-- Primary navigation tabs -->
+        <nav class="nav-tabs" aria-label="Main navigation">
+          <div class="nav-tab active" role="button" tabindex="0">Overview</div>
+          <div class="nav-tab" role="button" tabindex="0">Collection</div>
+          <div class="nav-tab" role="button" tabindex="0">Configuration</div>
+          <div class="nav-tab" role="button" tabindex="0">Preferences</div>
+          <div class="nav-tab" role="button" tabindex="0">Profile</div>
+        </nav>
+      </header>
+
+      <!-- ==============================================================
+       MAIN CONTENT — left column + right 2×2 grid
+       ============================================================== -->
+      <main>
+        <!-- LEFT: Active Vehicle card -->
+        <section class="card active-vehicle">
+          <div class="card-header">
+            <span class="card-title">Active Vehicle</span>
+            <span class="card-menu">⋯</span>
+          </div>
+
+          <h2 class="vehicle-name">McLaren 750S</h2>
+
+          <!-- Car image carousel -->
+          <div class="vehicle-image" id="carousel">
+            <div class="slide active">
+              <img
+                src="images/mclaren-750s-home.jpg"
+                alt="McLaren 750S front three-quarter"
+              />
+            </div>
+            <div class="slide">
+              <img
+                src="images/mclaren-750s-jc96-home-hero.jpg"
+                alt="McLaren 750S dynamic"
+              />
+            </div>
+            <div class="slide">
+              <img src="images/750s-in-factory.jpg" alt="750S in factory" />
+            </div>
+            <div class="slide">
+              <img
+                src="images/mclaren-interior-inside-10.jpg"
+                alt="McLaren interior"
+              />
+            </div>
+            <div class="slide">
+              <img src="images/mclaren-gts-home.jpg" alt="McLaren GTS" />
+            </div>
+            <span class="image-label left">LONDON</span>
+            <span class="image-label right">50%</span>
+          </div>
+
+          <!-- Carousel dots -->
+          <div class="carousel-dots">
+            <span class="dot active"></span>
+            <span class="dot"></span>
+            <span class="dot"></span>
+            <span class="dot"></span>
+            <span class="dot"></span>
+          </div>
+
+          <!-- Info strip + View Details button -->
+          <div class="vehicle-info">
+            <div class="info-segment">
+              <div class="info-label">Status</div>
+              <div class="info-value">Owned</div>
+            </div>
+            <div class="info-segment">
+              <div class="info-label">Location</div>
+              <div class="info-value">London</div>
+            </div>
+            <div class="info-segment">
+              <div class="info-label">Status</div>
+              <div class="info-value">750S</div>
+            </div>
+            <button class="btn-details">View Details</button>
+          </div>
+        </section>
+
+        <!-- RIGHT: 2×2 card grid -->
+        <div class="right-cards">
+          <!-- Card 1 — Collection Summary (donut gauge) -->
+          <section class="card">
+            <div class="card-header">
+              <span class="card-title">Collection Summary</span>
+              <span class="card-menu">⋯</span>
+            </div>
+            <div class="gauge-wrap">
+              <svg class="gauge-svg" viewBox="0 0 100 100">
+                <circle class="gauge-bg" cx="50" cy="50" r="42" />
+                <circle class="gauge-fill" cx="50" cy="50" r="42" />
+              </svg>
+              <div class="gauge-center">
+                <div class="gauge-number">3</div>
+                <div class="gauge-label">Total Cars</div>
+              </div>
+            </div>
+            <div class="gauge-meta">
+              <strong>2</strong> Owned &nbsp;|&nbsp;
+              <strong>1</strong> Previously Owned
+            </div>
+          </section>
+
+          <!-- Card 2 — Personalisation -->
+          <section class="card">
+            <div class="card-header">
+              <span class="card-title">Personalisation</span>
+              <span class="card-menu">⋯</span>
+            </div>
+            <ul class="card-list">
+              <li>
+                <div class="list-icon orange">⚙</div>
+                <div>
+                  <div class="list-text-main">Virtual Config</div>
+                  <div class="list-text-sub">750S Spider (Today)</div>
+                </div>
+              </li>
+              <li>
+                <div class="list-icon blue">👤</div>
+                <div>
+                  <div class="list-text-main">Authorized Party Added</div>
+                  <div class="list-text-sub">J. Smith (Yesterday)</div>
+                </div>
+              </li>
+            </ul>
+            <!-- Expand chevron -->
+            <div class="card-expand">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <polyline points="6 9 12 15 18 9" />
+              </svg>
+            </div>
+          </section>
+
+          <!-- Card 3 — Recent Activity -->
+          <section class="card">
+            <div class="card-header">
+              <span class="card-title">Recent Activity</span>
+              <span class="card-menu">⋯</span>
+            </div>
+            <ul class="card-list">
+              <li>
+                <div class="list-icon orange">⚙</div>
+                <div>
+                  <div class="list-text-main">Virtual Config</div>
+                  <div class="list-text-sub">750S Spider (Today)</div>
+                </div>
+              </li>
+              <li>
+                <div class="list-icon blue">👤</div>
+                <div>
+                  <div class="list-text-main">Authorized Party Added</div>
+                  <div class="list-text-sub">J. Smith (Yesterday)</div>
+                </div>
+              </li>
+            </ul>
+          </section>
+
+          <!-- Card 4 — Preferences Snapshot -->
+          <section class="card">
+            <div class="card-header">
+              <span class="card-title">Preferences Snapshot</span>
+              <span class="card-menu">⋯</span>
+            </div>
+            <ul class="card-list">
+              <li>
+                <div class="list-icon green">✉</div>
+                <div>
+                  <div class="list-text-main">Marketing</div>
+                  <div class="list-text-sub">Email</div>
+                </div>
+              </li>
+              <li>
+                <div class="list-icon orange">🏎</div>
+                <div>
+                  <div class="list-text-main">Drive</div>
+                  <div class="list-text-sub">Track Mode</div>
+                </div>
+              </li>
+            </ul>
+          </section>
+        </div>
+        <!-- /.right-cards -->
+      </main>
+
+      <!-- ==============================================================
+       FOOTER — connection status bar
+       ============================================================== -->
+      <footer>
+        <div class="status-indicator">
+          <span class="status-dot"></span>
+          <span>Connected</span>
+        </div>
+        <span class="sync-time">Last Sync: 10:03 AM</span>
+      </footer>
+    </div>
+    <!-- /.tablet -->
+
+    <!-- ================================================================
+     MINIMAL JS — tab switching + gauge entrance animation
+     ================================================================ -->
+    <script>
+      // Tab click → move .active class
+      document.querySelectorAll(".nav-tab").forEach((tab) => {
+        tab.addEventListener("click", () => {
+          document.querySelector(".nav-tab.active")?.classList.remove("active");
+          tab.classList.add("active");
+        });
+      });
+
+      // Simple gauge entrance animation (animate stroke-dasharray)
+      window.addEventListener("DOMContentLoaded", () => {
+        const fill = document.querySelector(".gauge-fill");
+        if (!fill) return;
+        fill.style.strokeDasharray = "0 264";
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            fill.style.strokeDasharray = "175 264";
+          });
+        });
+      });
+
+      // Image carousel — auto-rotate every 4s, sync with dots
+      (() => {
+        const slides = document.querySelectorAll("#carousel .slide");
+        const dots = document.querySelectorAll(".carousel-dots .dot");
+        if (!slides.length) return;
+        let current = 0;
+
+        function goTo(idx) {
+          slides[current].classList.remove("active");
+          dots[current]?.classList.remove("active");
+          current = idx % slides.length;
+          slides[current].classList.add("active");
+          dots[current]?.classList.add("active");
+        }
+
+        // Click dots to navigate
+        dots.forEach((dot, i) => dot.addEventListener("click", () => goTo(i)));
+
+        // Auto-advance every 4 seconds
+        setInterval(() => goTo(current + 1), 4000);
+      })();
+    </script>
+  </body>
+</html>

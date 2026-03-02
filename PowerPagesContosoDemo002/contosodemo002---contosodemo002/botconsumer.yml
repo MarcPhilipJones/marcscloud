@@ -1,0 +1,6 @@
+- adx_botconsumer_adx_webrole: []
+  adx_botconsumerid: f0056592-1cfd-f011-8406-7c1e5277b875
+  adx_botschemaname: adx_2ef4e87d-3007-4e9e-81bf-287c67eec193
+  adx_configjson: '{"skillConfigViewName":"ContosoDemo002 bot Answers"}'
+  adx_name: botConsumer
+  versionnumber: 69009751

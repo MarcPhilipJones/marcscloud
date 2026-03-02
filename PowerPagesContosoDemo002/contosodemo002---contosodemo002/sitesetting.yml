@@ -1,0 +1,273 @@
+- adx_description: Enable this setting to turn ON out-of-box summarization within Case Entity.
+  adx_name: Webapi/incident/fields
+  adx_sitesettingid: 02152e30-1cfd-f011-8406-7c1e5277b875
+  adx_value: ticketnumber,modifiedon,title,description
+- adx_description: Enable this setting to turn ON out-of-box summarization within knowledge article.
+  adx_name: Webapi/knowledgearticle/fields
+  adx_sitesettingid: 05152e30-1cfd-f011-8406-7c1e5277b875
+  adx_value: title,content
+- adx_description: Enable this setting to turn ON out-of-box summarization within Forum Thread.
+  adx_name: Webapi/adx_communityforumpost/enabled
+  adx_sitesettingid: 0b152e30-1cfd-f011-8406-7c1e5277b875
+  adx_value: true
+- adx_description: Controls whether Content Access Level is enabled or disabled.
+  adx_name: KnowledgeManagement/ContentAccessLevel/Enabled
+  adx_sitesettingid: 1d142e30-1cfd-f011-8406-7c1e5277b875
+  adx_value: False
+- adx_description: Enable this setting to turn ON out-of-box summarization within Case Entity.
+  adx_name: Webapi/incident/enabled
+  adx_sitesettingid: 1f152e30-1cfd-f011-8406-7c1e5277b875
+  adx_value: true
+- adx_description: Enable this setting to turn ON out-of-box summarization within Case Entity.
+  adx_name: Webapi/adx_portalcomment/fields
+  adx_sitesettingid: 22152e30-1cfd-f011-8406-7c1e5277b875
+  adx_value: description
+- adx_description: Enable this setting to turn ON out-of-box summarization within knowledge article.
+  adx_name: Webapi/knowledgearticle/enabled
+  adx_sitesettingid: 23152e30-1cfd-f011-8406-7c1e5277b875
+  adx_value: true
+- adx_description: Enable this setting to turn ON out-of-box summarization within Forum Thread.
+  adx_name: Webapi/adx_communityforumthread/fields
+  adx_sitesettingid: 24152e30-1cfd-f011-8406-7c1e5277b875
+  adx_value: adx_name
+- adx_description: 'The amount of time the IP address will have to wait if Authentication/LoginThrottling/MaxInvaildAttemptsFromIPAddress occur within Authentication/LoginThrottling/MaxAttemptsTimeLimitTimeSpan amount of time. Default: 00:10:00 (10 mins)'
+  adx_name: Authentication/LoginThrottling/IpAddressTimeoutTimeSpan
+  adx_sitesettingid: 25142e30-1cfd-f011-8406-7c1e5277b875
+  adx_value: 00:10:00
+- adx_name: Authentication/OpenAuth/Facebook/AppSecret
+  adx_sitesettingid: 26142e30-1cfd-f011-8406-7c1e5277b875
+  importsequencenumber: 5
+- adx_description: Determines if users will see knowledge articles that aren�t associated with products when product filtering is turned on.
+  adx_name: ProductFiltering/DisplayArticlesWithoutAssociatedProducts
+  adx_sitesettingid: 29142e30-1cfd-f011-8406-7c1e5277b875
+  adx_value: True
+- adx_name: Profile/ShowMarketingOptionsPanel
+  adx_sitesettingid: 3b142e30-1cfd-f011-8406-7c1e5277b875
+  adx_value: True
+- adx_description: Enable this setting to turn ON out-of-box summarization within knowledge article.
+  adx_name: Summarization/prompt/knowledge_article_summary
+  adx_sitesettingid: 3c152e30-1cfd-f011-8406-7c1e5277b875
+  adx_value: "Given the details of a Knowledge Article, generate a summary highlighting the key details and critical information. Ensure that the knowledgearticleid is not included in the summary. If there is not enough content to summarize, return: 'Not Enough Content to Summarize'."
+- adx_description: A true or false value. If set to true, the local account will be marked as deprecated. The portal user will be required to migrate to a non-deprecated account.
+  adx_name: Authentication/Registration/LocalLoginDeprecated
+  adx_sitesettingid: 3d142e30-1cfd-f011-8406-7c1e5277b875
+  adx_value: False
+- adx_name: Authentication/Registration/Enabled
+  adx_sitesettingid: 3e142e30-1cfd-f011-8406-7c1e5277b875
+  adx_value: true
+  importsequencenumber: 5
+- adx_description: 'The default number of unauthenticated login attempts from an IP address before the IP address is blocked for Authentication/LoginThrottling/IpAddressTimeoutTimeSpan if the attempts occur within Authentication/LoginThrottling/MaxAttemptsTimeLimitTimeSpan amount of time. Default: 1000'
+  adx_name: Authentication/LoginThrottling/MaxInvaildAttemptsFromIPAddress
+  adx_sitesettingid: 41142e30-1cfd-f011-8406-7c1e5277b875
+  adx_value: 1000
+- adx_description: Enable this setting to turn ON out-of-box summarization within Forum Thread.
+  adx_name: Summarization/prompt/forum_thread_summary
+  adx_sitesettingid: 47152e30-1cfd-f011-8406-7c1e5277b875
+  adx_value: "Given the details of a Forum Thread, generate a summary highlighting the key details and critical information. Ensure that the adx_communityforumthreadid is not included in the summary. If there is not enough content to summarize, return: 'Not enough Content to Summarize'."
+- adx_description: Enable this setting to turn ON out-of-box summarization within Forum Thread.
+  adx_name: Webapi/adx_communityforumpost/fields
+  adx_sitesettingid: 48152e30-1cfd-f011-8406-7c1e5277b875
+  adx_value: adx_content,statecode,adx_name
+- adx_name: Search/IndexNotesAttachments
+  adx_sitesettingid: 51152e30-1cfd-f011-8406-7c1e5277b875
+  adx_value: false
+- adx_name: Authentication/OpenAuth/Facebook/AppId
+  adx_sitesettingid: 52142e30-1cfd-f011-8406-7c1e5277b875
+  importsequencenumber: 5
+- adx_description: Enable this setting to turn ON out-of-box summarization within knowledge article.
+  adx_name: Summarization/knowledgearticle_aspx/enbaled
+  adx_sitesettingid: 52152e30-1cfd-f011-8406-7c1e5277b875
+  adx_value: true
+- adx_name: Authentication/OpenAuth/Microsoft/ClientId
+  adx_sitesettingid: 53142e30-1cfd-f011-8406-7c1e5277b875
+  importsequencenumber: 5
+- adx_name: HTTP/X-Frame-Options
+  adx_sitesettingid: 56142e30-1cfd-f011-8406-7c1e5277b875
+  adx_value: SAMEORIGIN
+- adx_description: Set to "True" to force the user to submit the profile information before accessing the website contents.
+  adx_name: Profile/ForceSignUp
+  adx_sitesettingid: 57142e30-1cfd-f011-8406-7c1e5277b875
+  adx_value: False
+  importsequencenumber: 2
+- adx_description: Enable this setting to turn ON out-of-box summarization within Forum Thread.
+  adx_name: Webapi/adx_communityforumthread/enabled
+  adx_sitesettingid: 5e152e30-1cfd-f011-8406-7c1e5277b875
+  adx_value: true
+- adx_name: Authentication/OpenAuth/LinkedIn/ConsumerKey
+  adx_sitesettingid: 5f152e30-1cfd-f011-8406-7c1e5277b875
+- adx_description: Used to group a set of entities under an entry in the record type facet view.
+  adx_name: Search/RecordTypeFacetsEntities
+  adx_sitesettingid: 6b142e30-1cfd-f011-8406-7c1e5277b875
+  adx_value: Forums:adx_communityforum,adx_communityforumthread,adx_communityforumpost;Downloads:annotation,adx_webfile
+- adx_description: Site setting that determines if the language code is included in the portal URL.
+  adx_name: MultiLanguage/DisplayLanguageCodeInURL
+  adx_sitesettingid: 6d142e30-1cfd-f011-8406-7c1e5277b875
+  adx_value: False
+- adx_name: Authentication/OpenAuth/Twitter/ConsumerSecret
+  adx_sitesettingid: 707d352a-1cfd-f011-8406-7c1e5277b875
+  importsequencenumber: 5
+- adx_description: Set to "True" to capture view count data for Knowledge Management.
+  adx_name: KnowledgeManagement/Article/CaptureViewCount
+  adx_sitesettingid: 717d352a-1cfd-f011-8406-7c1e5277b875
+  adx_value: True
+- adx_description: 'The amount of time the Authentication/LoginThrottling/MaxInvaildAttemptsFromIPAddress are to be within before the IP address has to wait Authentication/LoginThrottling/IpAddressTimeoutTimeSpan. Default: 00:03:00 (3 mins)'
+  adx_name: Authentication/LoginThrottling/MaxAttemptsTimeLimitTimeSpan
+  adx_sitesettingid: 72152e30-1cfd-f011-8406-7c1e5277b875
+  adx_value: 00:03:00
+- adx_name: CustomerSupport/CaseEntitlementEnabled
+  adx_sitesettingid: 727d352a-1cfd-f011-8406-7c1e5277b875
+  adx_value: false
+- adx_name: Search/Enabled
+  adx_sitesettingid: 737d352a-1cfd-f011-8406-7c1e5277b875
+  adx_value: true
+- adx_description: Set whether the footer web template is output cached.
+  adx_name: Footer/OutputCache/Enabled
+  adx_sitesettingid: 75142e30-1cfd-f011-8406-7c1e5277b875
+  adx_value: True
+- adx_name: Authentication/Registration/LocalLoginEnabled
+  adx_sitesettingid: 75152e30-1cfd-f011-8406-7c1e5277b875
+  adx_value: true
+- adx_description: Determines if product filtering is turned on (enabled) or off (disabled).
+  adx_name: ProductFiltering/Enabled
+  adx_sitesettingid: 76152e30-1cfd-f011-8406-7c1e5277b875
+  adx_value: False
+- adx_name: Authentication/Registration/OpenRegistrationEnabled
+  adx_sitesettingid: 77152e30-1cfd-f011-8406-7c1e5277b875
+  adx_value: true
+  importsequencenumber: 2
+- adx_description: 'Relationship to use to query the Contacts Product association. If you use a custom intersect ex: like an Asset entity, then you can include the relationship names from Contact to Asset and Asset to Product, separated by �;� delimiter.'
+  adx_name: ProductFiltering/ContactToProductRelationshipNames
+  adx_sitesettingid: 7a152e30-1cfd-f011-8406-7c1e5277b875
+  adx_value: adx_contactproduct
+- adx_name: Authentication/Registration/EmailConfirmationEnabled
+  adx_sitesettingid: 7b142e30-1cfd-f011-8406-7c1e5277b875
+  adx_value: true
+  importsequencenumber: 2
+- adx_description: Set whether the header web template is output cached.
+  adx_name: Header/OutputCache/Enabled
+  adx_sitesettingid: 7b152e30-1cfd-f011-8406-7c1e5277b875
+  adx_value: True
+- adx_description: Enables or disables Azure AD as an external identity provider. By default, it is set to true.
+  adx_name: Authentication/Registration/AzureADLoginEnabled
+  adx_sitesettingid: 7c152e30-1cfd-f011-8406-7c1e5277b875
+  adx_value: true
+  importsequencenumber: 2
+- adx_description: 'Override query for site search, to apply additional weights and filters. @Query is the query text entered by a user. Lucene query syntax reference: http://lucene.apache.org/core/old_versioned_docs/versions/2_9_1/queryparsersyntax.html'
+  adx_name: search/query
+  adx_sitesettingid: 7d152e30-1cfd-f011-8406-7c1e5277b875
+  adx_value: +(@Query) _title:(@Query) _logicalname:knowledgearticle~0.9^0.3 _logicalname:annotation~0.9^0.25 _logicalname:adx_webpage~0.9^0.2 -_logicalname:adx_webfile~0.9 adx_partialurl:(@Query) -_logicalname:adx_communityforumthread~0.9
+- adx_description: Enable this setting to turn ON summarization capabilities for all features
+  adx_name: Summarization/Data/Enable
+  adx_sitesettingid: 80152e30-1cfd-f011-8406-7c1e5277b875
+  adx_value: true
+- adx_description: Enable this setting to turn ON out-of-box summarization within Case Entity.
+  adx_name: Summarization/prompt/case_summary
+  adx_sitesettingid: 81152e30-1cfd-f011-8406-7c1e5277b875
+  adx_value: "Given the details of a Case record, generate a summary highlighting the key details and critical information. Ensure that the 'incidentid' is not included in the summary. If there is not enough content to summarize, return: 'Not enough Content to Summarize'."
+- adx_name: Authentication/OpenAuth/LinkedIn/ConsumerSecret
+  adx_sitesettingid: 82152e30-1cfd-f011-8406-7c1e5277b875
+- adx_description: Enable this setting to turn ON out-of-box summarization within Forum Thread.
+  adx_name: Summarization/forumthread_aspx/enbaled
+  adx_sitesettingid: 83152e30-1cfd-f011-8406-7c1e5277b875
+  adx_value: true
+- adx_name: Authentication/OpenAuth/Twitter/ConsumerKey
+  adx_sitesettingid: 84152e30-1cfd-f011-8406-7c1e5277b875
+  importsequencenumber: 5
+- adx_name: Search/IndexQueryName
+  adx_sitesettingid: 85152e30-1cfd-f011-8406-7c1e5277b875
+  adx_value: Portal Search
+- adx_description: Denies use of the portal to minors without parental consent. By default, it is set to false.
+  adx_name: Authentication/Registration/DenyMinorsWithoutParentalConsent
+  adx_sitesettingid: 86152e30-1cfd-f011-8406-7c1e5277b875
+  adx_value: false
+- adx_description: Sets whether or not the portal can redirect the user to the profile page after successful sign-in. By default, it is set to true.
+  adx_name: Authentication/Registration/ProfileRedirectEnabled
+  adx_sitesettingid: 87152e30-1cfd-f011-8406-7c1e5277b875
+  adx_value: true
+  importsequencenumber: 2
+- adx_description: Denies use of the portal to minors. By default, it is set to false.
+  adx_name: Authentication/Registration/DenyMinors
+  adx_sitesettingid: 88152e30-1cfd-f011-8406-7c1e5277b875
+  adx_value: false
+- adx_name: DisableValidationWebTemplate
+  adx_sitesettingid: 89152e30-1cfd-f011-8406-7c1e5277b875
+  adx_value: false
+- adx_description: External search engines that will be tracked as knowledge article referrers for a portal.
+  adx_name: KnowledgeManagement/Analytics/ExternalSearchEngines
+  adx_sitesettingid: 8a142e30-1cfd-f011-8406-7c1e5277b875
+  adx_value: bing|google|duckduckgo|msn|wolframalpha|yahoo|ask|altavista|live|aol|yandex|baidu
+- adx_description: Determines if faceted search is used for this portal.
+  adx_name: Search/FacetedView
+  adx_sitesettingid: 8a152e30-1cfd-f011-8406-7c1e5277b875
+  adx_value: True
+- adx_description: A date/time value in GMT format to represent the effective date of the current published terms and conditions. If the terms agreement is enabled, portal users that have not accepted the terms after this date will be asked to accept them the next time they sign in. If the date is not provided, and the terms agreement is enabled, the terms will be presented every time portal users sign in.
+  adx_name: Authentication/Registration/TermsPublicationDate
+  adx_sitesettingid: 8b152e30-1cfd-f011-8406-7c1e5277b875
+- adx_name: Authentication/Registration/LoginButtonAuthenticationType
+  adx_sitesettingid: 90142e30-1cfd-f011-8406-7c1e5277b875
+  importsequencenumber: 2
+- adx_name: Authentication/OpenAuth/Microsoft/ClientSecret
+  adx_sitesettingid: 95142e30-1cfd-f011-8406-7c1e5277b875
+  importsequencenumber: 5
+- adx_name: Authentication/Registration/InvitationEnabled
+  adx_sitesettingid: a7142e30-1cfd-f011-8406-7c1e5277b875
+  adx_value: true
+  importsequencenumber: 2
+- adx_description: Site setting that controls the depth of the webpage hierarchy that�s cloned in a newly-added supported language. Web link sets and content snippets are cloned in the newly-added language when webpages are cloned.
+  adx_name: MultiLanguage/MaximumDepthToClone
+  adx_sitesettingid: ae142e30-1cfd-f011-8406-7c1e5277b875
+  adx_value: 3
+- adx_description: 'Relationship to use to query the Accounts Product association. If you use a custom intersect ex: like an Asset entity, then you can include the relationship names from Account to Asset and Asset to Product, separate by �;� delimiter.'
+  adx_name: ProductFiltering/AccountToProductRelationshipNames
+  adx_sitesettingid: b4142e30-1cfd-f011-8406-7c1e5277b875
+  adx_value: adx_accountproduct
+- adx_description: 'The Prefix entered here will be used to filter Notes Text, allowing you to control notes exposed on the Portal ex: *WEB*'
+  adx_name: KnowledgeManagement/NotesFilter
+  adx_sitesettingid: b8142e30-1cfd-f011-8406-7c1e5277b875
+  adx_value: '*WEB*'
+- adx_description: Enable GenAI Forms Assistant for Web - Create Case
+  adx_name: Forms/e9ffbb23-1cfd-f011-8406-7c1e5277b875/EnableGenAIFormsAssistant
+  adx_sitesettingid: bbc81e8b-1cfd-f011-8406-7c1e5277b875
+  adx_value: true
+- adx_description: Enable GenAI Forms Assistant for Contact Us Personal Web Form
+  adx_name: Forms/e7ffbb23-1cfd-f011-8406-7c1e5277b875/EnableGenAIFormsAssistant
+  adx_sitesettingid: bcc81e8b-1cfd-f011-8406-7c1e5277b875
+  adx_value: true
+- adx_description: >-
+    A collection of search logical name filter options. Defining a value here will add dropdown filter options to site-wide search.
+
+
+    This value should be in the form of name/value pairs, with name and value separated by a colon, and pairs separated by a semicolon. For example: "Forums:adx_communityforum,adx_communityforumthread,adx_communityforumpost;Issues:adx_issueforum,adx_issue,adx_issuecomment;".
+  adx_name: search/filters
+  adx_sitesettingid: d5142e30-1cfd-f011-8406-7c1e5277b875
+  adx_value: Content:adx_webpage,adx_webfile;Forums:adx_communityforum,adx_communityforumthread,adx_communityforumpost;Help Desk:incident;Knowledge:knowledgearticle
+- adx_description: Determines if the different ways users access knowledge articles are tracked in a Dynamics 365 portal.
+  adx_name: KnowledgeManagement/Analytics/CaptureKnowledgeArticleReferrer
+  adx_sitesettingid: d6142e30-1cfd-f011-8406-7c1e5277b875
+  adx_value: false
+- adx_description: Setting controls whether attachments will be displayed on Knowledge articles
+  adx_name: KnowledgeManagement/DisplayNotes
+  adx_sitesettingid: db142e30-1cfd-f011-8406-7c1e5277b875
+  adx_value: false
+- adx_name: Authentication/Registration/ExternalLoginEnabled
+  adx_sitesettingid: e1142e30-1cfd-f011-8406-7c1e5277b875
+  adx_value: true
+  importsequencenumber: 2
+- adx_name: Authentication/OpenIdConnect/AzureAD/Caption
+  adx_sitesettingid: ee056592-1cfd-f011-8406-7c1e5277b875
+  adx_value: Microsoft Entra ID
+- adx_name: Authentication/OpenIdConnect/AzureAD/RebrandDisclaimerEnabled
+  adx_sitesettingid: ef056592-1cfd-f011-8406-7c1e5277b875
+  adx_value: false
+- adx_description: A true or false value. If set to true, the portal will display the terms and conditions of the site. Users must agree to the terms and conditions before they are considered authenticated and can use the site.
+  adx_name: Authentication/Registration/TermsAgreementEnabled
+  adx_sitesettingid: f6142e30-1cfd-f011-8406-7c1e5277b875
+  adx_value: false
+- adx_description: Enabling this setting will show all customer activity on the portal timeline.
+  adx_name: CustomerSupport/DisplayAllUserActivitiesOnTimeline
+  adx_sitesettingid: f8142e30-1cfd-f011-8406-7c1e5277b875
+  adx_value: false
+- adx_description: Enable this setting to turn ON out-of-box summarization within Case Entity
+  adx_name: Webapi/adx_portalcomment/enabled
+  adx_sitesettingid: fd142e30-1cfd-f011-8406-7c1e5277b875
+  adx_value: true

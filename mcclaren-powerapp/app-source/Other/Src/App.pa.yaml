@@ -1,0 +1,105 @@
+# ************************************************************************************************
+# Warning: YAML source code for Canvas Apps should only be used to review changes made within Power Apps Studio and for minor edits (Preview).
+# Use the maker portal to create and edit your Power Apps.
+# 
+# The schema file for Canvas Apps is available at https://go.microsoft.com/fwlink/?linkid=2304907
+# 
+# For more information, visit https://go.microsoft.com/fwlink/?linkid=2292623
+# ************************************************************************************************
+App:
+  Properties:
+    OnStart: |-
+      =// Replace with "Energy", "Water" or "Gas" to change theme of app
+      Set(UtilityType, "Energy");
+
+      /* Set Colour Scheme for App */
+
+      // Core Theme Colours
+      Set(Primary, RGBA(44, 62, 80, 1)); // Charcoal Blue
+      Set(Secondary, RGBA(76, 161, 175, 1)); // Ocean Blue
+      Set(Accent, RGBA(189, 195, 199, 1)); // Slate Grey
+
+      // Status Colours
+      Set(Success, RGBA(39, 174, 96, 1));
+      Set(SuccessText, RGBA(255, 255, 255, 1));
+
+      Set(Warning, RGBA(243, 156, 18, 1));
+      Set(WarningText, Primary);
+
+      Set(Error, RGBA(231, 76, 60, 1));
+      Set(ErrorText, RGBA(255, 255, 255, 1));
+
+
+      /* Consumption Chart Data */
+      ClearCollect(WaterConsumption, 
+          { Date: DateAdd(Today(), -6, TimeUnit.Days), Consumption: 150 }, 
+          { Date: DateAdd(Today(), -5, TimeUnit.Days), Consumption: 140 },
+          { Date: DateAdd(Today(), -4, TimeUnit.Days), Consumption: 135 },
+          { Date: DateAdd(Today(), -3, TimeUnit.Days), Consumption: 20}, // Drop due to burst pipe
+          { Date: DateAdd(Today(), -2, TimeUnit.Days), Consumption: 145 },
+          { Date: DateAdd(Today(), -1, TimeUnit.Days), Consumption: 152 },
+          { Date: Today(), Consumption: 155 }
+      );
+
+      ClearCollect(EnergyConsumption, 
+          { Date: DateAdd(Today(), -6, TimeUnit.Days), Consumption: 320 }, 
+          { Date: DateAdd(Today(), -5, TimeUnit.Days), Consumption: 310 },
+          { Date: DateAdd(Today(), -4, TimeUnit.Days), Consumption: 305 },
+          { Date: DateAdd(Today(), -3, TimeUnit.Days), Consumption: 240}, // Drop due to outage
+          { Date: DateAdd(Today(), -2, TimeUnit.Days), Consumption: 315 },
+          { Date: DateAdd(Today(), -1, TimeUnit.Days), Consumption: 325 },
+          { Date: Today(), Consumption: 330 }
+      );
+
+      ClearCollect(GasConsumption, 
+          { Date: DateAdd(Today(), -6, TimeUnit.Days), Consumption: 55 }, 
+          { Date: DateAdd(Today(), -5, TimeUnit.Days), Consumption: 53 },
+          { Date: DateAdd(Today(), -4, TimeUnit.Days), Consumption: 50 },
+          { Date: DateAdd(Today(), -3, TimeUnit.Days), Consumption: 30}, // Drop due to supply issue
+          { Date: DateAdd(Today(), -2, TimeUnit.Days), Consumption: 52 },
+          { Date: DateAdd(Today(), -1, TimeUnit.Days), Consumption: 54 },
+          { Date: Today(), Consumption: 56 }
+      );
+
+      /* Incident Data */
+
+      ClearCollect(WaterIncidents,
+          { Date: DateAdd(Today(), -3, TimeUnit.Days), Type: "Pipeline Burst", Severity: "High", Refund: "Yes", RefundAmount: 20.55, Notes: "Major leak led to pressure drop, affecting multiple households and causing significant water wastage.", Latitude: 51.38082963497187, Longitude: -2.3619700375651083, Location: "Bath" },
+          { Date: DateAdd(Today(), -12, TimeUnit.Days), Type: "Water Main Repair", Severity: "Medium", Refund: "No", Notes: "Temporary disruption due to repairs, with advance notice provided to residents.", Latitude: 50.59753787290658, Longitude: -2.4615236784995784, Location: "Weymouth" },
+          { Date: DateAdd(Today(), -21, TimeUnit.Days), Type: "Contamination Alert", Severity: "High", Refund: "Yes", RefundAmount: 150, Notes: "Emergency flushing caused high usage and potential contamination risk, requiring immediate action.", Latitude: 51.5283, Longitude: -0.3818, Location: "Harrow" },
+          { Date: DateAdd(Today(), -7, TimeUnit.Days), Type: "Pump Station Failure", Severity: "Medium", Refund: "Yes", RefundAmount: 80, Notes: "Reduced supply due to pump malfunction, affecting water pressure in the area.", Latitude: 51.4545, Longitude: -0.9781, Location: "Reading" },
+          { Date: DateAdd(Today(), -30, TimeUnit.Days), Type: "Drought Restrictions", Severity: "Low", Refund: "No", Notes: "Usage limits imposed due to regional drought, encouraging water conservation.", Latitude: 51.5566, Longitude: -0.2795, Location: "Wembley" },
+          { Date: DateAdd(Today(), -15, TimeUnit.Days), Type: "Valve Malfunction", Severity: "Low", Refund: "No", Notes: "Minor pressure fluctuation reported, resolved quickly with minimal impact.", Latitude: 51.5099, Longitude: -0.1181, Location: "South Bank" },
+          { Date: DateAdd(Today(), -5, TimeUnit.Days), Type: "Reservoir Maintenance", Severity: "Medium", Refund: "No", Notes: "Routine maintenance caused brief outage, with prior notice given to residents.", Latitude: 51.5406, Longitude: -0.1432, Location: "Camden" },
+          { Date: DateAdd(Today(), -10, TimeUnit.Days), Type: "Burst Hydrant", Severity: "High", Refund: "Yes", RefundAmount: 120, Notes: "Street flooding reported, emergency response activated to mitigate damage.", Latitude: 51.5010, Longitude: -0.1416, Location: "Westminster" },
+          { Date: DateAdd(Today(), -18, TimeUnit.Days), Type: "Low Pressure Complaint", Severity: "Low", Refund: "No", Notes: "Customer-reported issue, resolved within 24 hours with minimal disruption.", Latitude: 51.4746, Longitude: -0.2219, Location: "Hammersmith" },
+          { Date: DateAdd(Today(), -25, TimeUnit.Days), Type: "Scheduled Upgrade", Severity: "Medium", Refund: "No", Notes: "Infrastructure upgrade with prior notice, aimed at improving long-term service quality.", Latitude: 51.4036, Longitude: -0.1940, Location: "Croydon" },
+          { Date: DateAdd(Today(), -2, TimeUnit.Days), Type: "Water Quality Issue", Severity: "High", Refund: "Yes", RefundAmount: 200, Notes: "Detected contaminants in water supply, immediate action taken to ensure safety.", Latitude: 51.5200, Longitude: -0.1000, Location: "Islington" },
+          { Date: DateAdd(Today(), -8, TimeUnit.Days), Type: "Pipe Blockage", Severity: "Medium", Refund: "No", Notes: "Blockage in main pipeline caused temporary disruption, resolved within hours.", Latitude: 51.5300, Longitude: -0.1200, Location: "Hackney" }
+      );
+
+      ClearCollect(EnergyIncidents,
+          { Date: DateAdd(Today(), -3, TimeUnit.Days), Type: "Power Outage", Severity: "Medium", Refund: "Yes", RefundAmount: 50, Notes: "Grid failure caused reduced consumption, affecting multiple neighborhoods.", Latitude: 50.80965, Longitude: -0.375295, Location: "Worthing" },
+          { Date: DateAdd(Today(), -15, TimeUnit.Days), Type: "Voltage Fluctuation", Severity: "Low", Refund: "No", Notes: "Momentary dips in supply caused inconsistencies in electrical appliances.", Latitude: 51.5074, Longitude: -0.1278, Location: "Central London" },
+          { Date: DateAdd(Today(), -27, TimeUnit.Days), Type: "Transformer Fault", Severity: "High", Refund: "Yes", RefundAmount: 100, Notes: "Local transformer damage led to power loss, requiring immediate repair.", Latitude: 51.5283, Longitude: -0.3818, Location: "Harrow" },
+          { Date: DateAdd(Today(), -10, TimeUnit.Days), Type: "Generator Overload", Severity: "Medium", Refund: "Yes", RefundAmount: 70, Notes: "Overloaded systems led to temporary shutdown, affecting power supply.", Latitude: 51.4545, Longitude: -0.9781, Location: "Reading" },
+          { Date: DateAdd(Today(), -35, TimeUnit.Days), Type: "Storm Damage", Severity: "High", Refund: "Yes", RefundAmount: 150, Notes: "Severe weather disrupted power lines, causing widespread outages.", Latitude: 51.5566, Longitude: -0.2795, Location: "Wembley" },
+          { Date: DateAdd(Today(), -5, TimeUnit.Days), Type: "Cable Fault", Severity: "Medium", Refund: "No", Notes: "Faulty underground cable caused temporary power disruption.", Latitude: 51.5200, Longitude: -0.1000, Location: "Islington" },
+          { Date: DateAdd(Today(), -12, TimeUnit.Days), Type: "Substation Fire", Severity: "High", Refund: "Yes", RefundAmount: 200, Notes: "Fire at local substation led to extended power outage, emergency services responded.", Latitude: 51.5300, Longitude: -0.1200, Location: "Hackney" }
+      );
+
+      ClearCollect(GasIncidents,
+          { Date: DateAdd(Today(), -3, TimeUnit.Days), Type: "Gas Supply Disruption", Severity: "High", Refund: "Yes", RefundAmount: 80, Notes: "Supplier issue led to reduced flow, affecting multiple households.", Latitude: 50.80965, Longitude: -0.375295, Location: "Worthing" },
+          { Date: DateAdd(Today(), -9, TimeUnit.Days), Type: "Pressure Drop", Severity: "Medium", Refund: "Yes", RefundAmount: 60, Notes: "Equipment malfunction caused uneven distribution, resolved promptly.", Latitude: 51.5074, Longitude: -0.1278, Location: "Central London" },
+          { Date: DateAdd(Today(), -19, TimeUnit.Days), Type: "Pipeline Maintenance", Severity: "Low", Refund: "No", Notes: "Routine service checks required brief shutdown, with advance notice.", Latitude: 51.5283, Longitude: -0.3818, Location: "Harrow" },
+          { Date: DateAdd(Today(), -11, TimeUnit.Days), Type: "Gas Leak Detected", Severity: "High", Refund: "Yes", RefundAmount: 100, Notes: "Emergency response required immediate shutdown, ensuring safety.", Latitude: 51.4545, Longitude: -0.9781, Location: "Reading" },
+          { Date: DateAdd(Today(), -40, TimeUnit.Days), Type: "Cold Weather Surge", Severity: "Medium", Refund: "No", Notes: "Increased demand strained supply chains, causing temporary disruption.", Latitude: 51.5566, Longitude: -0.2795, Location: "Wembley" },
+          { Date: DateAdd(Today(), -7, TimeUnit.Days), Type: "Valve Failure", Severity: "High", Refund: "Yes", RefundAmount: 120, Notes: "Critical valve failure led to significant gas leak, emergency services responded.", Latitude: 51.5200, Longitude: -0.1000, Location: "Islington" },
+          { Date: DateAdd(Today(), -14, TimeUnit.Days), Type: "Supply Chain Issue", Severity: "Medium", Refund: "No", Notes: "Disruption in supply chain caused temporary reduction in gas flow.", Latitude: 51.5300, Longitude: -0.1200, Location: "Hackney" }
+      );
+
+
+      Set(openNav, true);
+      Set(SelectedTab, "Overview");
+      Set(ThemePadding, 40);
+    Theme: =PowerAppsTheme

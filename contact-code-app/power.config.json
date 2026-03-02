@@ -1,0 +1,24 @@
+{
+  "appId": "69d080da-4ad0-4719-8698-d475b552fee2",
+  "appDisplayName": "Contact Code App",
+  "description": " ",
+  "environmentId": "08690526-047d-ed9d-ab35-4528a98c0f4f",
+  "buildPath": "./dist",
+  "buildEntryPoint": "index.html",
+  "logoPath": "Default",
+  "localAppUrl": "http://localhost:3000",
+  "region": "prod",
+  "connectionReferences": {},
+  "databaseReferences": {
+    "default.cds": {
+      "dataSources": {
+        "contacts": {
+          "entitySetName": "contacts",
+          "logicalName": "contact"
+        }
+      },
+      "environmentVariableName": ""
+    }
+  },
+  "version": "1.0"
+}

@@ -1,0 +1,458 @@
+{% manifest %} 
+    { 
+    "type": "Functional", 
+    "displayName": "AI Summary", 
+    "description": "This component displays summary of support case", 
+    "params":[{ 
+        "id": "title", 
+        "displayName": "Title", 
+        "description": "Heading for this component" 
+        },
+        { 
+        "id": "url", 
+        "displayName": "Web API", 
+        "description": "Partial path of pages Web API as input for summarization"
+        },
+        { 
+        "id": "instructionIdentifier", 
+        "displayName": "Instruction Identifier", 
+        "description": "This property is optional. If you want to pass any other instructions for summarization, use the site settings to add the prompt. You should always provide the site setting name as it was previously defined."
+        }] 
+    } 
+{% endmanifest %} 
+    <style>
+
+      .collapsible {
+        color: #444;
+        cursor: pointer;
+        padding: 10px;
+        width: 100%;
+        text-align: left;
+        outline: none;
+        font-size: 10px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border: none;
+        background: none;
+      }
+
+      .active,
+      .collapsible:hover {
+        background-color: #ccc;
+      }
+
+      .content {
+        padding: 0 18px;
+        display: none;
+        overflow: hidden;
+      }
+
+      .chevron {
+        border: solid #666;
+        border-width: 0 3px 3px 0;
+        display: inline-block;
+        padding: 5px;
+        transform: rotate(45deg);
+        /* Right-pointing chevron */
+        transition: transform 0.3s ease;
+      }
+
+      .chevron.collapsed {
+        transform: rotate(-135deg);
+        /* Downward-pointing chevron */
+      }
+
+      /* Add overflow hidden to the parent container */
+      .Summarizationcontainer {
+        border: 2px solid transparent;
+        /* Set a transparent border */
+        border-radius: 10px;
+        /* Adjust the value as needed */
+        width: auto;
+        overflow: hidden;
+        /* Ensure content stays within the rounded corners */
+        padding: 5px;
+        background: 
+          linear-gradient(white, white) padding-box,
+          linear-gradient(90deg, rgb(70, 79, 235) 35%, rgb(71, 207, 250) 70%, rgb(180, 124, 248) 92%) border-box;
+        /* background: white;
+        /* Background color of the container 
+        border-image: linear-gradient(90deg, rgb(70, 79, 235) 35%, rgb(71, 207, 250) 70%, rgb(180, 124, 248) 92%) 1; */
+        /* Adjust the slice value */
+        -webkit-mask-image: -webkit-radial-gradient(white, black);
+        /* Ensure the border image respects the border-radius */
+        mask-image: radial-gradient(white, black);
+        /* Ensure compatibility with other browsers */
+      }
+
+      #control {
+        max-width: 100%;
+        height: fit-content;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .flex-container {
+        display: flex;
+        width: 100%;
+        padding-left: 8px;
+        justify-content: space-between;
+        align-items: center;
+        /* Keep this */
+      }
+
+      .flex-container svg {
+        vertical-align: middle;
+        /* Ensure icon is aligned with the text */
+      }
+
+      .ai-icon {
+        width: 16px;
+        height: 16px;
+        margin-right: 8px;
+      }
+
+      .chevron-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100%;
+      }
+
+      .shimmer {
+        height: 10px;
+        background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+        background-size: 200% 100%;
+        animation: shimmer 1.5s infinite;
+      }
+
+      @keyframes shimmer {
+        0% {
+          background-position: -200% 0;
+        }
+
+        100% {
+          background-position: 200% 0;
+        }
+      }
+
+      .feedback-container {
+        display: flex;
+        gap: 16px;
+      }
+
+      .thumb-button {
+        position: relative; 
+        background: none;
+        border: none;
+        cursor: pointer;
+        padding: 8px;
+      }
+
+
+      .thumb-button .icon-filled {
+        display: none;
+        fill: #2A66B8; /* Vivid blue */
+      }
+
+      /* Show the filled icon and apply blue color on hover */
+      .thumb-button:hover .icon-filled {
+          display: inline;
+          fill: #2A66B8; /* Hover blue color */
+      }
+      .thumb-button:hover .icon-outline {
+        display: none;
+      }
+          
+
+      .thumb-button.selected .icon-filled {
+        display: inline;
+        fill: #2A66B8; /* Vivid blue */
+      }
+
+      .thumb-button.selected .icon-outline {
+        display: none;
+      }
+
+      .thumb-button::after {
+        content: attr(data-tooltip);
+        position: absolute;
+        bottom: 120%;
+        left: 50%;
+        transform: translateX(-50%);
+        background-color: white;
+        color: black;
+        padding: 4px 8px;
+        border-radius: 6px;
+        font-size: 12px;
+        white-space: nowrap;
+        box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.15);
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.2s ease;
+      }
+
+      .thumb-button:hover::after {
+        opacity: 1;
+      }
+      .thumb-button.voted {
+      pointer-events: none; /* disables clicks */
+      opacity: 0.7;
+    }
+
+    .thumb-button:hover {
+      /* still allows hover effects */
+      background-color: lightgray;
+    }
+
+    .copy-button {
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 4px;
+    }
+
+    .copy-button:hover svg {
+      color: #007bff; /* blue on hover */
+      fill: #007bff;
+    }
+
+    </style>
+    
+    <script>
+
+      let hasVoted = false;
+
+      function disableVoting() {
+        try {
+          document.querySelectorAll('.thumb-button').forEach(btn => {
+            btn.classList.add('voted');
+            btn.removeEventListener('click', upVoteSummary);
+            btn.removeEventListener('click', downVoteSummary);
+          });
+        } catch (error) {
+          console.error("exception on disabling voting: " + error);
+        }
+      }
+
+      function upVoteSummary() {
+        if (hasVoted) return;
+
+        document.querySelectorAll('.thumb-button').forEach(btn => btn.classList.remove('selected'));
+
+        document.querySelectorAll('.thumb-button')[0].classList.add('selected');
+        hasVoted = true;
+
+        try {
+          console.log("upvote clicked");
+          console.log(ClientLogWrapper.getLogger());
+          ClientLogWrapper.getLogger().traceInfo("TEMPLETED_CONTROL_FEATURE_USAGE", "TEMPLETED_SMMARY_CARD_FEEDBACK", "TEMPLETED_SMMARY_CARD_FEEDBACK_UPVOTE");
+          console.log("upvote event sent");
+        } catch (e) {
+          console.error("exception on upvote: ", e);
+        }
+        //disableVoting();
+      }
+
+      function downVoteSummary() {
+        if (hasVoted) return;
+
+        
+        document.querySelectorAll('.thumb-button').forEach(btn => btn.classList.remove('selected'));
+
+        document.querySelectorAll('.thumb-button')[1].classList.add('selected');
+        hasVoted = true;
+
+        try {
+          console.log("downvote clicked");
+          ClientLogWrapper.getLogger().traceInfo("TEMPLETED_CONTROL_FEATURE_USAGE", "TEMPLETED_SMMARY_CARD_FEEDBACK", "TEMPLETED_SMMARY_CARD_FEEDBACK_DOWNVOTE ")
+        } catch (e) {
+          console.error("exception on downvote: ", e);
+        }
+        disableVoting();
+      }
+
+      window.addEventListener('DOMContentLoaded', () => {
+        // Attach listeners only if not voted yet
+        if (!hasVoted) {
+          document.querySelectorAll('.thumb-button')[0].addEventListener('click', upVoteSummary);
+          document.querySelectorAll('.thumb-button')[1].addEventListener('click', downVoteSummary);
+        }
+      });
+
+      function extractEntityName(message) {
+        let words = message.split(" ");
+        return words[words.length - 2]; // Second-last word before "table."
+      }
+
+      function copyText() {
+        const text = document.getElementById("summary_final").innerText;
+        navigator.clipboard.writeText(text)
+          .then(() => {
+            console.log("Copied!");
+          })
+          .catch(err => {
+            console.error("Copy failed:", err);
+          });
+      }
+      let isLoading = false; // Global flag to track if API call is in progress
+
+      function showResult() {
+          var chevron = document.getElementById('chevron');
+          var content = document.getElementById('Summary_text');
+          var summaryElement = document.getElementById('summary_final');
+          const copyBtn = document.getElementById("copyBtn");
+          let requestBody = {};
+          var instructionIdentifier = "{{ instructionIdentifier }}";
+
+              // Toggle visibility of content and copy button
+            if (copyBtn.style.display === "none") {
+              copyBtn.style.display = "inline-block";
+            } else {
+              copyBtn.style.display = "none";
+            }
+
+          if (instructionIdentifier) {
+              requestBody.InstructionIdentifier = instructionIdentifier;
+          }
+
+          const requestBodyJson = JSON.stringify(requestBody);
+
+          // Don't proceed if API is already in progress
+          if (isLoading) {
+              console.log("API call in progress. Please wait.");
+              return;
+          }
+
+          // Toggle the content display
+          if (content.style.display === 'none' || content.style.display === '') {
+              content.style.display = 'block';
+
+              const previousText = summaryElement.innerText.trim();
+              const genericError = document.getElementById('generic-error-message').innerText.trim();
+              const permissionError = document.getElementById('permission-error-message').innerText.trim();
+              const contentLimitError = document.getElementById('content-limit-error-message').innerText.trim();
+              const isError = (previousText === genericError || previousText === permissionError);
+
+              if (previousText !== "" && !isError) {
+                chevron.classList.add('collapsed');
+                return;
+              }
+              
+              // Mark loading as true before sending API call
+              isLoading = true;
+              document.getElementById('shimmer').style.display = "block";
+
+              shell.ajaxSafePost({
+                type: "POST",
+                url: "{{url}}",
+                body: requestBodyJson
+              }).done(function(response) {
+                console.log("pass", response);
+                summaryElement.innerText = response.Summary;
+                content.style.display = "block";
+                chevron.classList.add('collapsed');
+              }).fail(function(xhr) {
+                  console.log("fail");
+                  try {
+                    let errorResponse = JSON.parse(xhr.responseText);
+
+                    if (errorResponse.error && errorResponse.error.code === "90040120") {
+                      let errorMessage = errorResponse.error.message;
+                      let entityName = extractEntityName(errorMessage);
+                      let localizedErrorMessage = permissionError.replace("{ENTITY_NAME}", entityName);
+                      summaryElement.innerText = localizedErrorMessage;
+                    } else if(errorResponse.error && errorResponse.error.code === "90041004") {
+                      summaryElement.innerText = contentLimitError;
+                    } else {
+                      summaryElement.innerText = genericError;
+                    }
+                  } catch (e) {
+                    console.error("Error parsing response:", e);
+                    summaryElement.innerText = genericError;
+                  }
+              }).always(function () {
+                  // Regardless of success or failure, reset the loading flag
+                  isLoading = false;
+                  document.getElementById('shimmer').style.display = "none";
+              });
+
+          } else {
+              content.style.display = 'none';
+              chevron.classList.remove('collapsed');
+          }
+      }
+
+      </script>
+    <br>
+    <br>
+    <div class="Summarizationcontainer" style="height: fit-content;    ">
+      <div id="generic-error-message" style="display:none;">
+        {% include 'snippet' snippet_name:'SummarizationErrorMessage' %}
+      </div>
+      <div id="permission-error-message" style="display:none;">
+        {% include 'snippet' snippet_name:'PermissionErrorMessage' %}
+      </div>
+      <div id="content-limit-error-message" style="display:none;">
+        {% include 'snippet' snippet_name:'ContentLimitErrorMessage' %}
+      </div>
+      <div id="control">
+        <div class="flex-container">
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <svg width="19" height="19" viewBox="0 0 19 19" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6.16438 13.4806C6.40871 13.6536 6.70094 13.746 7.00032 13.745V13.741C7.2826 13.7416 7.55885 13.6593 7.79476 13.5043C8.03067 13.3492 8.21585 13.1283 8.32732 12.869L8.94032 11.005C9.08189 10.5827 9.31975 10.1992 9.63511 9.88468C9.95046 9.5702 10.3347 9.33339 10.7573 9.19298L12.5353 8.61498C12.8217 8.51436 13.0691 8.32597 13.2422 8.07663C13.4154 7.82729 13.5055 7.5297 13.4997 7.22619C13.494 6.92268 13.3926 6.62872 13.2102 6.38612C13.0277 6.14353 12.7733 5.96467 12.4833 5.87498L10.7283 5.30498C10.3038 5.16372 9.91804 4.92539 9.60175 4.60893C9.28547 4.29247 9.04735 3.9066 8.90632 3.48198L8.32832 1.70498C8.22751 1.42196 8.04106 1.17736 7.79485 1.00517C7.54865 0.832989 7.25492 0.741768 6.95449 0.744188C6.65406 0.746607 6.36184 0.842546 6.11844 1.01867C5.87504 1.1948 5.69255 1.44237 5.59632 1.72698L5.01332 3.51898C4.87273 3.93125 4.64037 4.30621 4.33376 4.61559C4.02715 4.92497 3.6543 5.1607 3.24332 5.30498L1.46632 5.87598C1.25494 5.94991 1.06365 6.07199 0.907572 6.23256C0.751492 6.39314 0.634896 6.58781 0.566998 6.8012C0.499102 7.01459 0.481765 7.24085 0.516357 7.46209C0.55095 7.68334 0.636523 7.8935 0.766316 8.07598C0.943207 8.32496 1.1941 8.51182 1.48332 8.60998L3.23732 9.17898C3.66295 9.32139 4.04951 9.56106 4.36632 9.87898C4.45138 9.96341 4.53088 10.0533 4.60432 10.148C4.80349 10.4058 4.95735 10.6956 5.05932 11.005L5.63732 12.78C5.73579 13.0627 5.92004 13.3076 6.16438 13.4806ZM13.831 18.528C13.6405 18.3922 13.4971 18.2002 13.421 17.979L13.093 16.972C13.0292 16.7805 12.9221 16.6063 12.78 16.463C12.6375 16.3201 12.4635 16.2125 12.272 16.149L11.281 15.826C11.0506 15.7487 10.8507 15.6002 10.71 15.402C10.5727 15.2097 10.4993 14.9792 10.5 14.743C10.5003 14.5052 10.5748 14.2735 10.713 14.08C10.8503 13.8855 11.0456 13.7395 11.271 13.663L12.277 13.337C12.464 13.2706 12.6333 13.1623 12.772 13.0203C12.9107 12.8783 13.015 12.7065 13.077 12.518L13.401 11.526C13.4772 11.3017 13.6212 11.1067 13.8131 10.9679C14.005 10.829 14.2352 10.7532 14.4721 10.7509C14.7089 10.7486 14.9406 10.8199 15.1351 10.955C15.3297 11.0901 15.4774 11.2823 15.558 11.505L15.887 12.519C15.9514 12.7091 16.059 12.8817 16.2012 13.0232C16.3435 13.1648 16.5166 13.2715 16.707 13.335L17.699 13.658C17.9277 13.7295 18.128 13.8712 18.2717 14.063C18.4153 14.2547 18.4949 14.4869 18.4992 14.7264C18.5036 14.966 18.4324 15.2008 18.2957 15.3976C18.1591 15.5945 17.964 15.7433 17.738 15.823L16.724 16.152C16.5339 16.2168 16.3612 16.3242 16.219 16.466C16.0767 16.6088 15.9695 16.7827 15.906 16.974L15.584 17.963C15.5065 18.1933 15.3576 18.393 15.159 18.533C14.967 18.671 14.7365 18.7452 14.5 18.745C14.2597 18.745 14.0256 18.669 13.831 18.528Z" fill="url(#paint0_linear_4522_18394)"></path><defs><linearGradient id="paint0_linear_4522_18394" x1="0.499023" y1="9.74456" x2="18.4994" y2="9.74456" gradientUnits="userSpaceOnUse"><stop offset="0.015" stop-color="#799DFF"></stop><stop offset="1" stop-color="#05B2E9"></stop></linearGradient></defs></svg>
+            <div style="display: inline-block; font-size: larger; font-family: 'Segoe UI', sans-serif; font-weight: 500;">
+              {{title}}
+            </div>
+          </div>
+          <div style="display: flex; justify-content: flex-end; align-items: center; gap: 8px;">
+            <button type="button" aria-label="Copy text" class="copy-button" id="copyBtn" onclick="copyText()" style="display: none;">
+              <span >
+                <svg id="copyIcon" fill="currentColor" width="20" height="20" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M5.5 4.63V17.25c0 1.8 1.46 3.25 3.25 3.25h8.62c-.31.88-1.15 1.5-2.13 1.5H8.75A4.75 4.75 0 0 1 4 17.25V6.75c0-.98.63-1.81 1.5-2.12ZM17.75 2C18.99 2 20 3 20 4.25v13c0 1.24-1 2.25-2.25 2.25h-9c-1.24 0-2.25-1-2.25-2.25v-13C6.5 3.01 7.5 2 8.75 2h9Zm0 1.5h-9a.75.75 0 0 0-.75.75v13c0 .41.34.75.75.75h9c.41 0 .75-.34.75-.75v-13a.75.75 0 0 0-.75-.75Z" fill="currentColor"></path>
+                </svg>
+              </span>
+            </button>
+            <button class="collapsible" id="title" type="button" onclick="showResult()" aria-label="Expand">
+              <div class="chevron-container">
+                <div class="chevron" id="chevron"></div>
+              </div>
+            </button>
+          </div>
+        </div>
+      </div>
+      <br>
+      <div id="Summary_text" style="height: fit-content; display: none; padding-left: 5px;">
+        <div style="width: 100%; overflow: hidden;"></div>
+        <!-- Added to ensure button is above the text -->
+        <div id="summary_final" style="text-align: justify; padding-left: 5px; padding-right: 5px;"></div>
+        <div id="shimmer" style="display: block; width: auto;">
+          <div class="shimmer"></div>
+          <div class="shimmer"></div>
+          <div class="shimmer"></div>
+          <div class="shimmer"></div>
+          <div class="shimmer"></div>
+        </div>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px; min-height: 20px;" id="list-ai-summary-footer">
+          <div id="AIWarning" style="padding: 5px; color: rgb(54, 45, 45); font-size: x-small;">AI-generated content may be incorrect</div>
+          <div id="Feedback" style="display: flex; align-self: start; gap: 8px; align-items: center; margin-left: auto; font-size: smaller;">
+            <span>Did you find this insight helpful?</span>
+            <div class="feedback-container" style="column-gap: 2px;">
+              <button class="thumb-button" data-tooltip="Like" type="button" aria-label="Like" onclick="upVoteSummary()">
+                <span >
+                  <svg class="icon-filled" aria-hidden="true" width="20" height="20" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M12.48 1.7c-.8-.83-2.09-.38-2.43.6-.28.8-.64 1.77-1 2.48C8 6.9 7.38 8.1 5.67 9.63c-.23.2-.52.36-.84.49-1.13.44-2.2 1.61-1.91 3l.35 1.77a2.5 2.5 0 0 0 1.8 1.92l5.6 1.52a4.5 4.5 0 0 0 5.6-3.53l.69-3.76A3 3 0 0 0 14 7.5h-.89l.01-.05c.08-.41.18-.97.24-1.59.07-.6.1-1.28.05-1.9a3.68 3.68 0 0 0-.5-1.74 4.16 4.16 0 0 0-.44-.52Z" ></path></svg>
+                  <svg class="icon-outline" aria-hidden="true" width="20" height="20" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M10.05 2.3c.34-.98 1.63-1.43 2.43-.6.17.17.33.36.44.52.32.48.45 1.12.5 1.73.05.63.02 1.3-.05 1.91-.06.62-.16 1.18-.24 1.59v.05H14a3 3 0 0 1 2.95 3.54l-.69 3.76a4.5 4.5 0 0 1-5.6 3.53l-5.6-1.52a2.5 2.5 0 0 1-1.8-1.92l-.35-1.77c-.28-1.39.78-2.56 1.9-3 .33-.13.62-.3.85-.5 1.7-1.5 2.32-2.72 3.38-4.84.36-.71.72-1.68 1-2.49Zm1.97 5.58v-.04a13.7 13.7 0 0 0 .13-.58c.08-.4.17-.93.23-1.5.06-.58.09-1.18.04-1.73a2.73 2.73 0 0 0-.33-1.25 3.26 3.26 0 0 0-.33-.39c-.2-.2-.63-.16-.76.23-.29.82-.67 1.83-1.05 2.6-1.07 2.14-1.76 3.5-3.62 5.15-.34.3-.74.52-1.13.68-.88.34-1.45 1.14-1.3 1.87l.35 1.77c.11.56.53 1 1.08 1.15l5.6 1.53c1.98.54 4-.73 4.36-2.75l.68-3.76a2 2 0 0 0-1.96-2.36h-1.5a.5.5 0 0 1-.5-.62Z" fill="currentColor"></path></svg>
+                </span>
+              </button>
+              <button class="thumb-button" data-tooltip="Dislike" type="button" aria-label="Dislike" onclick="downVoteSummary()">
+                <span >
+                  <svg class="icon-filled" aria-hidden="true" width="20" height="20" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M12.48 18.3c-.8.83-2.09.38-2.43-.6-.28-.8-.64-1.77-1-2.48C8 13.1 7.38 11.9 5.67 10.37c-.23-.2-.52-.36-.84-.49-1.13-.44-2.2-1.61-1.91-3l.35-1.77a2.5 2.5 0 0 1 1.8-1.92l5.6-1.53a4.5 4.5 0 0 1 5.6 3.54l.69 3.76A3 3 0 0 1 14 12.5h-.89l.01.05c.08.41.18.97.24 1.58.07.62.1 1.29.05 1.92a3.68 3.68 0 0 1-.5 1.73c-.11.16-.27.35-.44.52Z" ></path></svg>
+                  <svg class="icon-outline" aria-hidden="true" width="20" height="20" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M10.05 17.7c.34.98 1.63 1.43 2.43.6.17-.17.33-.36.44-.52.32-.48.45-1.12.5-1.73.05-.63.02-1.3-.05-1.92-.06-.6-.16-1.17-.24-1.58v-.05H14a3 3 0 0 0 2.95-3.54l-.69-3.76a4.5 4.5 0 0 0-5.6-3.54L5.06 3.2c-.92.25-1.62 1-1.8 1.92l-.35 1.77c-.28 1.39.78 2.56 1.9 3 .33.13.62.3.85.5 1.7 1.5 2.32 2.72 3.38 4.84.36.71.72 1.68 1 2.49Zm1.97-5.58v.04a14.2 14.2 0 0 1 .36 2.08c.06.58.09 1.18.04 1.73-.04.55-.15.98-.33 1.25-.06.1-.18.22-.33.39-.2.2-.63.16-.76-.23-.29-.82-.67-1.83-1.05-2.6-1.07-2.14-1.76-3.5-3.62-5.15-.34-.3-.74-.52-1.13-.68-.88-.34-1.45-1.14-1.3-1.87l.35-1.77c.11-.56.53-1 1.08-1.15l5.6-1.53a3.5 3.5 0 0 1 4.36 2.75l.68 3.76a2 2 0 0 1-1.96 2.36h-1.5a.5.5 0 0 0-.5.62Z" fill="currentColor"></path></svg>
+                </span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>

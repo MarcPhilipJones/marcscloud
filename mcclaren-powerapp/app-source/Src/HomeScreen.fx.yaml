@@ -1,0 +1,196 @@
+HomeScreen As screen:
+    Fill: =McLarenBlack
+
+    HeaderContainer As groupContainer.manualLayoutContainer:
+        Fill: =McLarenDarkGrey
+        Height: =120
+        Width: =Parent.Width
+        X: =0
+        Y: =0
+        ZIndex: =1
+
+        AppTitle As label:
+            Color: =McLarenOrange
+            Font: =Font.'Segoe UI'
+            FontWeight: =FontWeight.Bold
+            Height: =60
+            Size: =24
+            Text: ="McLAREN PERSONALISATION SUITE"
+            Width: =500
+            X: =Parent.Width / 2 - Self.Width / 2
+            Y: =30
+            ZIndex: =1
+
+    ProfileCard As groupContainer.manualLayoutContainer:
+        Fill: =McLarenDarkGrey
+        Height: =180
+        RadiusBottomLeft: =8
+        RadiusBottomRight: =8
+        RadiusTopLeft: =8
+        RadiusTopRight: =8
+        Width: =Parent.Width - 80
+        X: =40
+        Y: =160
+        ZIndex: =2
+
+        CustomerIcon As icon:
+            Color: =McLarenSilver
+            Height: =80
+            Icon: =Icon.Person
+            Width: =80
+            X: =50
+            Y: =50
+            ZIndex: =1
+
+        CustomerName As label:
+            Color: =McLarenWhite
+            Font: =Font.'Segoe UI'
+            FontWeight: =FontWeight.Bold
+            Height: =40
+            Size: =24
+            Text: =CurrentCustomer.Name
+            Width: =400
+            X: =160
+            Y: =40
+            ZIndex: =2
+
+        CustomerIdLabel As label:
+            Color: =McLarenSilver
+            Font: =Font.'Segoe UI'
+            Height: =25
+            Size: =14
+            Text: ="Customer ID: " & CurrentCustomer.CustomerId
+            Width: =300
+            X: =160
+            Y: =80
+            ZIndex: =3
+
+        VehicleLabel As label:
+            Color: =McLarenOrange
+            Font: =Font.'Segoe UI'
+            FontWeight: =FontWeight.Semibold
+            Height: =30
+            Size: =16
+            Text: =CurrentCustomer.Vehicle & " - " & CurrentCustomer.VehicleSpec
+            Width: =400
+            X: =160
+            Y: =110
+            ZIndex: =4
+
+    NavigationContainer As groupContainer.manualLayoutContainer:
+        Fill: =Transparent
+        Height: =400
+        Width: =Parent.Width - 80
+        X: =40
+        Y: =380
+        ZIndex: =3
+
+        ClimateTile As button:
+            BorderColor: =McLarenOrange
+            BorderThickness: =2
+            Color: =McLarenWhite
+            Fill: =McLarenDarkGrey
+            Font: =Font.'Segoe UI'
+            FontWeight: =FontWeight.Bold
+            Height: =150
+            HoverFill: =ColorFade(McLarenDarkGrey, -20%)
+            OnSelect: =Navigate(ClimateScreen, ScreenTransition.Fade)
+            PressedFill: =McLarenOrange
+            RadiusbottomLeft: =8
+            RadiusBottomRight: =8
+            RadiusTopLeft: =8
+            RadiusTopRight: =8
+            Size: =16
+            Text: ="CLIMATE"
+            Width: =200
+            X: =0
+            Y: =0
+            ZIndex: =1
+
+        SeatingTile As button:
+            BorderColor: =McLarenOrange
+            BorderThickness: =2
+            Color: =McLarenWhite
+            Fill: =McLarenDarkGrey
+            Font: =Font.'Segoe UI'
+            FontWeight: =FontWeight.Bold
+            Height: =150
+            HoverFill: =ColorFade(McLarenDarkGrey, -20%)
+            OnSelect: =Navigate(SeatingScreen, ScreenTransition.Fade)
+            PressedFill: =McLarenOrange
+            RadiusBottomLeft: =8
+            RadiusBottomRight: =8
+            RadiusTopLeft: =8
+            RadiusTopRight: =8
+            Size: =16
+            Text: ="SEATING"
+            Width: =200
+            X: =220
+            Y: =0
+            ZIndex: =2
+
+        AudioTile As button:
+            BorderColor: =McLarenOrange
+            BorderThickness: =2
+            Color: =McLarenWhite
+            Fill: =McLarenDarkGrey
+            Font: =Font.'Segoe UI'
+            FontWeight: =FontWeight.Bold
+            Height: =150
+            HoverFill: =ColorFade(McLarenDarkGrey, -20%)
+            OnSelect: =Navigate(AudioScreen, ScreenTransition.Fade)
+            PressedFill: =McLarenOrange
+            RadiusBottomLeft: =8
+            RadiusBottomRight: =8
+            RadiusTopLeft: =8
+            RadiusTopRight: =8
+            Size: =16
+            Text: ="AUDIO"
+            Width: =200
+            X: =440
+            Y: =0
+            ZIndex: =3
+
+        DrivingTile As button:
+            BorderColor: =McLarenOrange
+            BorderThickness: =2
+            Color: =McLarenWhite
+            Fill: =McLarenDarkGrey
+            Font: =Font.'Segoe UI'
+            FontWeight: =FontWeight.Bold
+            Height: =150
+            HoverFill: =ColorFade(McLarenDarkGrey, -20%)
+            OnSelect: =Navigate(DrivingScreen, ScreenTransition.Fade)
+            PressedFill: =McLarenOrange
+            RadiusBottomLeft: =8
+            RadiusBottomRight: =8
+            RadiusTopLeft: =8
+            RadiusTopRight: =8
+            Size: =16
+            Text: ="DRIVING"
+            Width: =200
+            X: =660
+            Y: =0
+            ZIndex: =4
+
+        DisplayTile As button:
+            BorderColor: =McLarenOrange
+            BorderThickness: =2
+            Color: =McLarenWhite
+            Fill: =McLarenDarkGrey
+            Font: =Font.'Segoe UI'
+            FontWeight: =FontWeight.Bold
+            Height: =150
+            HoverFill: =ColorFade(McLarenDarkGrey, -20%)
+            OnSelect: =Navigate(DisplayScreen, ScreenTransition.Fade)
+            PressedFill: =McLarenOrange
+            RadiusBottomLeft: =8
+            RadiusBottomRight: =8
+            RadiusTopLeft: =8
+            RadiusTopRight: =8
+            Size: =16
+            Text: ="DISPLAY"
+            Width: =200
+            X: =0
+            Y: =170
+            ZIndex: =5

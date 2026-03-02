@@ -1,0 +1,27 @@
+{
+  "FormatVersion": "1.0.0",
+  "MainApp": "App.pa.yaml",
+  "Properties": {
+    "Name": "McLaren Personalisation Suite",
+    "Author": "McLaren Automotive",
+    "Id": "mclaren-personalisation-suite",
+    "FileID": "1a2b3c4d-5e6f-7a8b-9c0d-e1f2a3b4c5d6",
+    "CreatedTime": "2026-02-17T00:00:00Z",
+    "ModifiedTime": "2026-02-17T00:00:00Z",
+    "AppVersion": "1.0.0",
+    "Description": "McLaren Vehicle Personalisation Suite - Store and manage customer preferences for McLaren vehicles",
+    "DocumentAppType": "DesktopOrTablet"
+  },
+  "LibraryDependencies": [],
+  "ScreenOrder": [
+    "HomeScreen",
+    "ClimateScreen",
+    "SeatingScreen",
+    "AudioScreen",
+    "DrivingScreen",
+    "DisplayScreen"
+  ],
+  "PublishInfo": {
+    "AppName": "McLaren Personalisation Suite"
+  }
+}

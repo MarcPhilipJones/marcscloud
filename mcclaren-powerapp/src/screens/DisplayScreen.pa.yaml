@@ -1,0 +1,365 @@
+DisplayScreen As screen:
+  Fill: =McLarenBlack
+  
+  # Header with Back Button
+  HeaderContainer As container:
+    X: =0
+    Y: =0
+    Width: =Parent.Width
+    Height: =80
+    Fill: =McLarenDarkGrey
+    
+    BackButton As button:
+      X: =20
+      Y: =15
+      Width: =120
+      Height: =50
+      Text: ="◄ BACK"
+      Fill: =Transparent
+      Color: =McLarenWhite
+      OnSelect: =Navigate(HomeScreen, ScreenTransition.Fade)
+      BorderColor: =McLarenOrange
+      BorderThickness: =2
+      BorderRadius: =4
+      
+    ScreenTitle As label:
+      X: =(Parent.Width - 300) / 2
+      Y: =20
+      Width: =300
+      Height: =40
+      Text: ="DISPLAY & LIGHTING"
+      Color: =McLarenOrange
+      Size: =22
+      FontWeight: =FontWeight.Bold
+      Align: =Align.Center
+      
+    SaveButton As button:
+      X: =Parent.Width - 140
+      Y: =15
+      Width: =120
+      Height: =50
+      Text: ="SAVE"
+      Fill: =McLarenOrange
+      Color: =McLarenBlack
+      FontWeight: =FontWeight.Bold
+      BorderRadius: =4
+      OnSelect: |
+        =Patch(CustomerSettings, CustomerSettings, {
+          ClusterTheme: ClusterThemeGallery.Selected.Theme,
+          AmbientLightingColor: AmbientColorRadio.Selected.Value,
+          AmbientLightingIntensity: AmbientIntensitySlider.Value,
+          HeadUpDisplay: HUDToggle.Value,
+          HUDBrightness: HUDBrightnessSlider.Value,
+          WelcomeLighting: WelcomeLightingToggle.Value
+        });
+        Notify("Display settings saved!", NotificationType.Success)
+
+  # Instrument Cluster Theme Section
+  ClusterThemeCard As container:
+    X: =40
+    Y: =120
+    Width: =Parent.Width - 80
+    Height: =180
+    Fill: =McLarenDarkGrey
+    BorderRadius: =8
+    
+    ClusterThemeTitle As label:
+      X: =30
+      Y: =20
+      Width: =300
+      Height: =30
+      Text: ="INSTRUMENT CLUSTER THEME"
+      Color: =McLarenWhite
+      Size: =16
+      FontWeight: =FontWeight.Bold
+      
+    # Cluster Theme Gallery (visual previews)
+    ClusterThemeGallery As gallery:
+      X: =30
+      Y: =60
+      Width: =Parent.Width - 60
+      Height: =100
+      Items: =Table(
+        {Theme: "Dark", Preview: "▓▓▓▓▓▓▓", Description: "Night mode"},
+        {Theme: "Light", Preview: "░░░░░░░", Description: "Day mode"},
+        {Theme: "Track", Preview: "▓░░▓░░▓", Description: "Performance"}
+      )
+      TemplateSize: =180
+      
+      ThemeButton As button:
+        X: =10
+        Y: =5
+        Width: =160
+        Height: =85
+        Fill: =If(ThisItem.IsSelected, McLarenOrange, McLarenBlack)
+        BorderColor: =McLarenOrange
+        BorderThickness: =2
+        BorderRadius: =8
+        Text: =""
+        OnSelect: =Select(Parent)
+        
+      ThemePreviewRect As rectangle:
+        X: =25
+        Y: =15
+        Width: =130
+        Height: =40
+        Fill: =Switch(ThisItem.Theme, "Dark", RGBA(30, 30, 30, 1), "Light", RGBA(220, 220, 220, 1), RGBA(50, 50, 50, 1))
+        BorderRadius: =4
+        
+      ThemeLabel As label:
+        X: =10
+        Y: =60
+        Width: =160
+        Height: =25
+        Text: =ThisItem.Theme
+        Color: =If(ThisItem.IsSelected, McLarenBlack, McLarenWhite)
+        Size: =14
+        FontWeight: =FontWeight.Bold
+        Align: =Align.Center
+
+  # Ambient Lighting Section
+  AmbientLightingCard As container:
+    X: =40
+    Y: =320
+    Width: =Parent.Width - 80
+    Height: =200
+    Fill: =McLarenDarkGrey
+    BorderRadius: =8
+    
+    AmbientTitle As label:
+      X: =30
+      Y: =20
+      Width: =200
+      Height: =30
+      Text: ="AMBIENT LIGHTING"
+      Color: =McLarenWhite
+      Size: =16
+      FontWeight: =FontWeight.Bold
+      
+    # Color Selection
+    ColorLabel As label:
+      X: =30
+      Y: =60
+      Width: =80
+      Height: =30
+      Text: ="COLOR:"
+      Color: =McLarenSilver
+      Size: =14
+      
+    AmbientColorRadio As radio:
+      X: =120
+      Y: =55
+      Width: =Parent.Width - 150
+      Height: =40
+      Items: =["McLaren Orange", "White", "Blue", "Custom"]
+      Default: =CustomerSettings.AmbientLightingColor
+      Layout: =Layout.Horizontal
+      RadioBackgroundFill: =McLarenBlack
+      RadioBorderColor: =McLarenOrange
+      RadioSelectionFill: =McLarenOrange
+      Color: =McLarenWhite
+      Size: =12
+      
+    # Color Preview Swatches
+    OrangeSwatchCircle As circle:
+      X: =130
+      Y: =100
+      Width: =30
+      Height: =30
+      Fill: =McLarenOrange
+      BorderColor: =If(AmbientColorRadio.Selected.Value = "McLaren Orange", McLarenWhite, Transparent)
+      BorderThickness: =3
+      
+    WhiteSwatchCircle As circle:
+      X: =250
+      Y: =100
+      Width: =30
+      Height: =30
+      Fill: =McLarenWhite
+      BorderColor: =If(AmbientColorRadio.Selected.Value = "White", McLarenOrange, Transparent)
+      BorderThickness: =3
+      
+    BlueSwatchCircle As circle:
+      X: =350
+      Y: =100
+      Width: =30
+      Height: =30
+      Fill: =RGBA(0, 100, 200, 1)
+      BorderColor: =If(AmbientColorRadio.Selected.Value = "Blue", McLarenOrange, Transparent)
+      BorderThickness: =3
+      
+    # Intensity Slider
+    IntensityLabel As label:
+      X: =30
+      Y: =145
+      Width: =100
+      Height: =30
+      Text: ="INTENSITY:"
+      Color: =McLarenSilver
+      Size: =14
+      
+    AmbientIntensitySlider As slider:
+      X: =140
+      Y: =145
+      Width: =Parent.Width - 280
+      Height: =40
+      Min: =0
+      Max: =100
+      Default: =CustomerSettings.AmbientLightingIntensity
+      ValueFill: =McLarenOrange
+      HandleFill: =McLarenWhite
+      RailFill: =McLarenSilver
+      ShowValue: =false
+      
+    OffLabel As label:
+      X: =140
+      Y: =185
+      Width: =40
+      Height: =20
+      Text: ="OFF"
+      Color: =McLarenSilver
+      Size: =10
+      
+    BrightLabel As label:
+      X: =Parent.Width - 180
+      Y: =185
+      Width: =60
+      Height: =20
+      Text: ="BRIGHT"
+      Color: =McLarenSilver
+      Size: =10
+      
+    IntensityValue As label:
+      X: =Parent.Width - 100
+      Y: =150
+      Width: =70
+      Height: =30
+      Text: =Text(AmbientIntensitySlider.Value, "0") & "%"
+      Color: =McLarenOrange
+      Size: =16
+      FontWeight: =FontWeight.Bold
+      Align: =Align.Right
+
+  # Head-Up Display Section
+  HUDCard As container:
+    X: =40
+    Y: =540
+    Width: =Parent.Width - 80
+    Height: =160
+    Fill: =McLarenDarkGrey
+    BorderRadius: =8
+    
+    HUDTitle As label:
+      X: =30
+      Y: =20
+      Width: =200
+      Height: =30
+      Text: ="HEAD-UP DISPLAY"
+      Color: =McLarenWhite
+      Size: =16
+      FontWeight: =FontWeight.Bold
+      
+    HUDToggle As toggle:
+      X: =Parent.Width - 150
+      Y: =15
+      Width: =120
+      Height: =40
+      Default: =CustomerSettings.HeadUpDisplay
+      OnText: ="ON"
+      OffText: ="OFF"
+      TrueFill: =McLarenOrange
+      FalseFill: =McLarenSilver
+      TextPosition: =TextPosition.Left
+      
+    # HUD Brightness Slider (only visible when HUD is ON)
+    HUDBrightnessLabel As label:
+      X: =30
+      Y: =70
+      Width: =120
+      Height: =30
+      Text: ="BRIGHTNESS:"
+      Color: =If(HUDToggle.Value, McLarenSilver, RGBA(100, 100, 100, 1))
+      Size: =14
+      
+    HUDBrightnessSlider As slider:
+      X: =160
+      Y: =70
+      Width: =Parent.Width - 300
+      Height: =40
+      Min: =0
+      Max: =100
+      Default: =CustomerSettings.HUDBrightness
+      ValueFill: =If(HUDToggle.Value, McLarenOrange, McLarenSilver)
+      HandleFill: =McLarenWhite
+      RailFill: =McLarenSilver
+      ShowValue: =false
+      DisplayMode: =If(HUDToggle.Value, DisplayMode.Edit, DisplayMode.Disabled)
+      
+    HUDBrightnessValue As label:
+      X: =Parent.Width - 100
+      Y: =75
+      Width: =70
+      Height: =30
+      Text: =Text(HUDBrightnessSlider.Value, "0") & "%"
+      Color: =If(HUDToggle.Value, McLarenOrange, RGBA(100, 100, 100, 1))
+      Size: =16
+      FontWeight: =FontWeight.Bold
+      Align: =Align.Right
+      
+    DimLabel As label:
+      X: =160
+      Y: =110
+      Width: =40
+      Height: =20
+      Text: ="Dim"
+      Color: =McLarenSilver
+      Size: =10
+      
+    BrightHUDLabel As label:
+      X: =Parent.Width - 180
+      Y: =110
+      Width: =50
+      Height: =20
+      Text: ="Bright"
+      Color: =McLarenSilver
+      Size: =10
+
+  # Welcome Lighting Section
+  WelcomeLightingCard As container:
+    X: =40
+    Y: =720
+    Width: =Parent.Width - 80
+    Height: =80
+    Fill: =McLarenDarkGrey
+    BorderRadius: =8
+    
+    WelcomeLightingTitle As label:
+      X: =30
+      Y: =25
+      Width: =250
+      Height: =30
+      Text: ="WELCOME LIGHTING"
+      Color: =McLarenWhite
+      Size: =16
+      FontWeight: =FontWeight.Bold
+      
+    WelcomeLightingDescription As label:
+      X: =290
+      Y: =28
+      Width: =300
+      Height: =25
+      Text: ="(Approach lights on vehicle unlock)"
+      Color: =McLarenSilver
+      Size: =12
+      
+    WelcomeLightingToggle As toggle:
+      X: =Parent.Width - 150
+      Y: =20
+      Width: =120
+      Height: =40
+      Default: =CustomerSettings.WelcomeLighting
+      OnText: ="ON"
+      OffText: ="OFF"
+      TrueFill: =McLarenOrange
+      FalseFill: =McLarenSilver
+      TextPosition: =TextPosition.Left

@@ -1,0 +1,98 @@
+<footer role="contentinfo">
+  <div class="footer-bottom hidden-print">
+    <div class="row" style="display: flex; flex-wrap: wrap; margin: 0px; min-height: auto; padding: 8px;width: 100%;">
+  <div class="container" style="padding: 0px; display: flex; flex-wrap: wrap;">
+    <div class="col-md-5 col-sm-4 col-xs-12" style="flex-grow: 1; display: flex; flex-direction: column; min-width: auto; word-break: break-word;">
+      <div class="row" style="display: flex; flex-wrap: wrap; margin: 0px; min-height: auto; padding: 8px;">
+        <div class="col-md-12 col-sm-12 col-xs-12" style="flex-grow: 1; display: flex; flex-direction: column; min-width: auto; word-break: break-word;"><img src="{{ snippets['Logo URL'] }}" alt="" name="Company.png" style="width: 64px; height: 64px; max-width: 100%;" /></div>
+      </div>
+      <div class="row" style="display: flex; flex-wrap: wrap; padding: 8px; margin: 0px; min-height: 30px;"></div>
+      <div class="row" style="display: flex; flex-wrap: wrap; margin: 0px; min-height: auto; padding: 8px;margin-left: 20px;">
+        {% editable snippets 'Social media logo' type: 'html'%} 
+      </div>
+    </div>
+    <div class="col-md-2 col-sm-1 col-xs-12" style="flex-grow: 1; display: flex; flex-direction: column; min-width: auto; word-break: break-word;"></div>
+    <div class="col-md-5 col-sm-7 col-xs-12" style="flex-grow: 1; display: flex; flex-direction: column; min-width: auto; word-break: break-word;">
+      <div class="row" style="display: flex; flex-wrap: wrap; margin: 0px; min-height: auto; padding: 8px;">
+        {% editable snippets 'Footer button' type: 'html'%} 
+      </div>
+      <div class="row" style="display: flex; flex-wrap: wrap; padding: 8px; margin: 0px; min-height: 60px;"></div>
+      <div class="row" style="display: flex; flex-wrap: wrap; margin: 0px; min-height: auto; padding: 8px;">
+        <div class="col-md-12 col-sm-12 col-xs-12 paddingCopyright" style="flex-grow: 1; display: flex; flex-direction: column; min-width: auto; word-break: break-word;"><p style="color: #E9E9E9; " class="copyrightname">Copyright {% if snippets['Site name'] %}{{ snippets['Site name'] }}{% endif %}</p></div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+ </footer>
+
+
+<style>  
+@media screen and (max-width: 767px) {
+        .copyrightname{
+                text-align: left;
+                font-size: 18px;
+         }
+         .footerbtn{
+            text-align: left;
+        }
+}
+@media screen and (min-width: 768px) {
+        .copyrightname{
+                text-align: right;
+                font-size: 18px;
+                
+        }
+        .footerbtn{
+           text-align: center;
+        }   
+             
+}
+
+@media screen and (min-width: 1201px) {
+  .paddingCopyright{
+          padding-right: 63px;
+         }
+}
+
+.footerbtn{
+    width: 100%;
+    font-family: Segoe UI;
+    font-size: 20px;
+    white-space: nowrap;
+    font-weight: 400;
+    line-height: 32px;
+    letter-spacing: 0em;
+    background-color: transparent;
+    border: none;
+    color: #FFFFFF;
+    
+}
+.removemargin{ 
+    margin-top: 0px ;
+    margin-bottom: 0px ;
+    padding: 0px ;
+}
+
+.rowmarginremove{
+      margin-left: 0px;
+    margin-right: 0px ;
+}
+
+.itemsCenter {
+      justify-content: center;
+      align-items: center;
+}
+
+.socialimage{
+  width: 32px; height: 32px; max-width: 100%;
+}
+.socialmargin{
+  margin-right:30px;
+}
+.footer-bottom {
+ padding: 0px 0 !important;
+}
+
+</style>
+ 

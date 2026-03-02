@@ -1,0 +1,249 @@
+HomeScreen As screen:
+  Fill: =McLarenBlack
+  
+  # Header Container
+  HeaderContainer As container:
+    X: =0
+    Y: =0
+    Width: =Parent.Width
+    Height: =120
+    Fill: =McLarenDarkGrey
+    
+    # McLaren Logo placeholder
+    LogoImage As image:
+      X: =40
+      Y: =20
+      Width: =200
+      Height: =80
+      Image: ="https://cars.mclaren.com/content/dam/mclaren-automotive/headless/home/logos/mclaren-logo-white.svg"
+      ImagePosition: =ImagePosition.Fit
+      
+    # App Title
+    TitleLabel As label:
+      X: =Parent.Width - 400
+      Y: =30
+      Width: =360
+      Height: =60
+      Text: ="PERSONALISATION SUITE"
+      Color: =McLarenOrange
+      Size: =24
+      FontWeight: =FontWeight.Bold
+      Align: =Align.Right
+
+  # Customer Profile Card
+  ProfileCard As container:
+    X: =40
+    Y: =160
+    Width: =Parent.Width - 80
+    Height: =200
+    Fill: =McLarenDarkGrey
+    BorderRadius: =8
+    
+    # Customer Avatar Circle
+    AvatarCircle As circle:
+      X: =30
+      Y: =30
+      Width: =140
+      Height: =140
+      Fill: =McLarenSilver
+      
+    AvatarIcon As icon:
+      X: =55
+      Y: =55
+      Width: =90
+      Height: =90
+      Icon: =Icon.Person
+      Color: =McLarenDarkGrey
+      
+    # Customer Details
+    CustomerNameLabel As label:
+      X: =200
+      Y: =40
+      Width: =400
+      Height: =50
+      Text: =CurrentCustomer.Name
+      Color: =McLarenWhite
+      Size: =28
+      FontWeight: =FontWeight.Bold
+      
+    CustomerIdLabel As label:
+      X: =200
+      Y: =90
+      Width: =300
+      Height: =30
+      Text: ="Customer ID: " & CurrentCustomer.CustomerId
+      Color: =McLarenSilver
+      Size: =14
+      
+    VehicleLabel As label:
+      X: =200
+      Y: =120
+      Width: =400
+      Height: =30
+      Text: =CurrentCustomer.Vehicle & " - " & CurrentCustomer.VehicleSpec
+      Color: =McLarenOrange
+      Size: =16
+      FontWeight: =FontWeight.Semibold
+
+  # Navigation Tiles Container
+  NavTilesContainer As container:
+    X: =40
+    Y: =400
+    Width: =Parent.Width - 80
+    Height: =400
+    Fill: =Transparent
+    
+    # Climate Tile
+    ClimateTile As button:
+      X: =0
+      Y: =0
+      Width: =220
+      Height: =180
+      Text: =""
+      Fill: =McLarenDarkGrey
+      BorderRadius: =8
+      OnSelect: =Navigate(ClimateScreen, ScreenTransition.Fade)
+      HoverFill: =ColorFade(McLarenDarkGrey, -10%)
+      
+    ClimateIcon As icon:
+      X: =70
+      Y: =30
+      Width: =80
+      Height: =80
+      Icon: =Icon.Sunny
+      Color: =McLarenOrange
+      
+    ClimateLabel As label:
+      X: =0
+      Y: =120
+      Width: =220
+      Height: =40
+      Text: ="CLIMATE"
+      Color: =McLarenWhite
+      Size: =18
+      FontWeight: =FontWeight.Bold
+      Align: =Align.Center
+
+    # Seating Tile
+    SeatingTile As button:
+      X: =240
+      Y: =0
+      Width: =220
+      Height: =180
+      Text: =""
+      Fill: =McLarenDarkGrey
+      BorderRadius: =8
+      OnSelect: =Navigate(SeatingScreen, ScreenTransition.Fade)
+      HoverFill: =ColorFade(McLarenDarkGrey, -10%)
+      
+    SeatingIcon As icon:
+      X: =310
+      Y: =30
+      Width: =80
+      Height: =80
+      Icon: =Icon.People
+      Color: =McLarenOrange
+      
+    SeatingLabel As label:
+      X: =240
+      Y: =120
+      Width: =220
+      Height: =40
+      Text: ="SEATING"
+      Color: =McLarenWhite
+      Size: =18
+      FontWeight: =FontWeight.Bold
+      Align: =Align.Center
+
+    # Audio Tile
+    AudioTile As button:
+      X: =480
+      Y: =0
+      Width: =220
+      Height: =180
+      Text: =""
+      Fill: =McLarenDarkGrey
+      BorderRadius: =8
+      OnSelect: =Navigate(AudioScreen, ScreenTransition.Fade)
+      HoverFill: =ColorFade(McLarenDarkGrey, -10%)
+      
+    AudioIcon As icon:
+      X: =550
+      Y: =30
+      Width: =80
+      Height: =80
+      Icon: =Icon.Microphone
+      Color: =McLarenOrange
+      
+    AudioLabel As label:
+      X: =480
+      Y: =120
+      Width: =220
+      Height: =40
+      Text: ="AUDIO"
+      Color: =McLarenWhite
+      Size: =18
+      FontWeight: =FontWeight.Bold
+      Align: =Align.Center
+
+    # Driving Tile
+    DrivingTile As button:
+      X: =720
+      Y: =0
+      Width: =220
+      Height: =180
+      Text: =""
+      Fill: =McLarenDarkGrey
+      BorderRadius: =8
+      OnSelect: =Navigate(DrivingScreen, ScreenTransition.Fade)
+      HoverFill: =ColorFade(McLarenDarkGrey, -10%)
+      
+    DrivingIcon As icon:
+      X: =790
+      Y: =30
+      Width: =80
+      Height: =80
+      Icon: =Icon.Car
+      Color: =McLarenOrange
+      
+    DrivingLabel As label:
+      X: =720
+      Y: =120
+      Width: =220
+      Height: =40
+      Text: ="DRIVING"
+      Color: =McLarenWhite
+      Size: =18
+      FontWeight: =FontWeight.Bold
+      Align: =Align.Center
+
+    # Display Tile
+    DisplayTile As button:
+      X: =0
+      Y: =200
+      Width: =220
+      Height: =180
+      Text: =""
+      Fill: =McLarenDarkGrey
+      BorderRadius: =8
+      OnSelect: =Navigate(DisplayScreen, ScreenTransition.Fade)
+      HoverFill: =ColorFade(McLarenDarkGrey, -10%)
+      
+    DisplayIcon As icon:
+      X: =70
+      Y: =230
+      Width: =80
+      Height: =80
+      Icon: =Icon.Lightbulb
+      Color: =McLarenOrange
+      
+    DisplayLabel As label:
+      X: =0
+      Y: =320
+      Width: =220
+      Height: =40
+      Text: ="DISPLAY"
+      Color: =McLarenWhite
+      Size: =18
+      FontWeight: =FontWeight.Bold
+      Align: =Align.Center

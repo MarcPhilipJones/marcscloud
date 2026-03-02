@@ -1,0 +1,722 @@
+{
+  "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "dataverseBaseUrl": {
+      "type": "String",
+      "metadata": {
+        "description": "Base URL of the Dataverse environment, e.g. https://<org>.crm4.dynamics.com"
+      }
+    },
+    "dataverseTenantId": {
+      "type": "String",
+      "metadata": {
+        "description": "Azure AD Tenant ID"
+      }
+    },
+    "dataverseClientId": {
+      "type": "String",
+      "metadata": {
+        "description": "Application (client) ID"
+      }
+    },
+    "dataverseClientSecret": {
+      "type": "SecureString",
+      "metadata": {
+        "description": "Client secret for the app registration"
+      }
+    },
+    "$connections": {
+      "type": "Object",
+      "defaultValue": {}
+    }
+  },
+  "triggers": {
+    "When_a_conversation_ends": {
+      "type": "ApiConnectionWebhook",
+      "inputs": {
+        "host": {
+          "connection": {
+            "name": "@parameters('$connections')['commondataservice']['connectionId']"
+          }
+        },
+        "body": {
+          "entityname": "msdyn_ocliveworkitem",
+          "message": 3,
+          "scope": 4,
+          "version": 1,
+          "filterexpression": "statecode eq 1 or statecode eq 2 or statuscode eq 4 or statuscode eq 5 or statuscode eq 6",
+          "url": "@listCallbackUrl()"
+        },
+        "headers": {
+          "organization": "@{parameters('dataverseBaseUrl')}",
+          "Consistency": "Strong",
+          "catalog": "all",
+          "category": "all"
+        },
+        "path": "/api/data/v9.1/callbackregistrations"
+      },
+      "description": "Dataverse trigger that fires when a conversation (msdyn_ocliveworkitem) is modified to a closed state: Closed (statecode=1), Resolved (statecode=2), Wrap-up (statuscode=4), Waiting (statuscode=5), or Resolved (statuscode=6)"
+    }
+  },
+  "actions": {
+    "Initialize_CaseID": {
+      "runAfter": {},
+      "type": "InitializeVariable",
+      "inputs": {
+        "variables": [
+          {
+            "name": "CaseID",
+            "type": "String",
+            "value": ""
+          }
+        ]
+      }
+    },
+    "Initialize_TranscriptionSummary": {
+      "runAfter": {
+        "Initialize_CaseID": ["Succeeded"]
+      },
+      "type": "InitializeVariable",
+      "inputs": {
+        "variables": [
+          {
+            "name": "TranscriptionSummary",
+            "type": "String",
+            "value": ""
+          }
+        ]
+      }
+    },
+    "Initialize_ConversationMessages": {
+      "runAfter": {
+        "Initialize_TranscriptionSummary": ["Succeeded"]
+      },
+      "type": "InitializeVariable",
+      "inputs": {
+        "variables": [
+          {
+            "name": "ConversationMessages",
+            "type": "Array",
+            "value": []
+          }
+        ]
+      }
+    },
+    "Initialize_ConversationId": {
+      "runAfter": {
+        "Initialize_ConversationMessages": ["Succeeded"]
+      },
+      "type": "InitializeVariable",
+      "inputs": {
+        "variables": [
+          {
+            "name": "ConversationId",
+            "type": "String",
+            "value": "@{triggerBody()?['msdyn_ocliveworkitemid']}"
+          }
+        ]
+      }
+    },
+    "Initialize_PreviousSpeaker": {
+      "runAfter": {
+        "Initialize_ConversationId": ["Succeeded"]
+      },
+      "type": "InitializeVariable",
+      "inputs": {
+        "variables": [
+          {
+            "name": "PreviousSpeaker",
+            "type": "String",
+            "value": ""
+          }
+        ]
+      },
+      "description": "Track previous speaker for formatting"
+    },
+    "Initialize_PreviousMessage": {
+      "runAfter": {
+        "Initialize_PreviousSpeaker": ["Succeeded"]
+      },
+      "type": "InitializeVariable",
+      "inputs": {
+        "variables": [
+          {
+            "name": "PreviousMessage",
+            "type": "String",
+            "value": ""
+          }
+        ]
+      },
+      "description": "Track previous message for deduplication"
+    },
+    "Initialize_SeenMessages": {
+      "runAfter": {
+        "Initialize_PreviousMessage": ["Succeeded"]
+      },
+      "type": "InitializeVariable",
+      "inputs": {
+        "variables": [
+          {
+            "name": "SeenMessages",
+            "type": "String",
+            "value": ""
+          }
+        ]
+      },
+      "description": "Track all seen messages for complete deduplication"
+    },
+    "Get_Conversation": {
+      "runAfter": {
+        "Initialize_SeenMessages": [
+          "Succeeded"
+        ]
+      },
+      "type": "Http",
+      "inputs": {
+        "uri": "@{concat(parameters('dataverseBaseUrl'), '/api/data/v9.2/msdyn_ocliveworkitems(', variables('ConversationId'), ')?$select=msdyn_ocliveworkitemid,msdyn_title,statecode,statuscode,msdyn_transcriptcontrol,_msdyn_customer_value,_msdyn_lastsessionid_value,_regardingobjectid_value')}",
+        "method": "GET",
+        "headers": {
+          "OData-MaxVersion": "4.0",
+          "OData-Version": "4.0",
+          "Accept": "application/json",
+          "Content-Type": "application/json; charset=utf-8",
+          "Prefer": "odata.include-annotations=*"
+        },
+        "authentication": {
+          "type": "ActiveDirectoryOAuth",
+          "tenant": "@{parameters('dataverseTenantId')}",
+          "audience": "@{parameters('dataverseBaseUrl')}",
+          "clientId": "@{parameters('dataverseClientId')}",
+          "secret": "@{parameters('dataverseClientSecret')}"
+        }
+      }
+    },
+    "Check_Conversation_Status": {
+      "runAfter": {
+        "Get_Conversation": [
+          "Succeeded"
+        ]
+      },
+      "type": "If",
+      "expression": "@or(equals(body('Get_Conversation')?['statecode'], 1), equals(body('Get_Conversation')?['statecode'], 2), contains(createArray(4, 5, 6), body('Get_Conversation')?['statuscode']))",
+      "actions": {
+        "Set_CaseID": {
+          "runAfter": {},
+          "type": "SetVariable",
+          "inputs": {
+            "name": "CaseID",
+            "value": "@{coalesce(body('Get_Conversation')?['_regardingobjectid_value'], '')}"
+          },
+          "description": "Set CaseID from regardingobjectid"
+        },
+        "Check_CaseID_Exists": {
+          "runAfter": {
+            "Set_CaseID": [
+              "Succeeded"
+            ]
+          },
+          "type": "If",
+          "expression": "@not(equals(variables('CaseID'), ''))",
+          "actions": {
+            "Get_Transcript_From_msdyn_transcripts": {
+              "runAfter": {},
+              "type": "Http",
+              "inputs": {
+                "uri": "@{concat(parameters('dataverseBaseUrl'), '/api/data/v9.2/msdyn_transcripts?$select=msdyn_transcriptid&$filter=_msdyn_liveworkitemidid_value eq ', variables('ConversationId'), '&$orderby=createdon desc&$top=1')}",
+                "method": "GET",
+                "headers": {
+                  "OData-MaxVersion": "4.0",
+                  "OData-Version": "4.0",
+                  "Accept": "application/json;odata.metadata=none",
+                  "Content-Type": "application/json; charset=utf-8"
+                },
+                "authentication": {
+                  "type": "ActiveDirectoryOAuth",
+                  "tenant": "@{parameters('dataverseTenantId')}",
+                  "audience": "@{parameters('dataverseBaseUrl')}",
+                  "clientId": "@{parameters('dataverseClientId')}",
+                  "secret": "@{parameters('dataverseClientSecret')}"
+                }
+              }
+            },
+            "If_Transcript_Record_Found": {
+              "runAfter": {
+                "Get_Transcript_From_msdyn_transcripts": [
+                  "Succeeded"
+                ]
+              },
+              "type": "If",
+              "expression": "@greater(length(body('Get_Transcript_From_msdyn_transcripts')?['value']), 0)",
+              "actions": {
+                "Get_Transcript_Annotation": {
+                  "runAfter": {},
+                  "type": "Http",
+                  "inputs": {
+                    "uri": "@{concat(parameters('dataverseBaseUrl'), '/api/data/v9.2/msdyn_transcripts(', first(body('Get_Transcript_From_msdyn_transcripts')?['value'])?['msdyn_transcriptid'], ')/msdyn_transcript_Annotations?$select=annotationid,isdocument,notetext,documentbody&$orderby=createdon desc&$top=1')}",
+                    "method": "GET",
+                    "headers": {
+                      "OData-MaxVersion": "4.0",
+                      "OData-Version": "4.0",
+                      "Accept": "application/json;odata.metadata=none",
+                      "Content-Type": "application/json; charset=utf-8"
+                    },
+                    "authentication": {
+                      "type": "ActiveDirectoryOAuth",
+                      "tenant": "@{parameters('dataverseTenantId')}",
+                      "audience": "@{parameters('dataverseBaseUrl')}",
+                      "clientId": "@{parameters('dataverseClientId')}",
+                      "secret": "@{parameters('dataverseClientSecret')}"
+                    }
+                  }
+                },
+                "If_Annotation_Has_DocumentBody": {
+                  "runAfter": {
+                    "Get_Transcript_Annotation": [
+                      "Succeeded"
+                    ]
+                  },
+                  "type": "If",
+                  "expression": "@and(greater(length(body('Get_Transcript_Annotation')?['value']), 0), equals(first(body('Get_Transcript_Annotation')?['value'])?['isdocument'], true))",
+                  "actions": {
+                    "Get_Full_Annotation_DocumentBody": {
+                      "runAfter": {},
+                      "type": "Http",
+                      "inputs": {
+                        "uri": "@{concat(parameters('dataverseBaseUrl'), '/api/data/v9.2/annotations(', first(body('Get_Transcript_Annotation')?['value'])?['annotationid'], ')?$select=documentbody')}",
+                        "method": "GET",
+                        "headers": {
+                          "OData-MaxVersion": "4.0",
+                          "OData-Version": "4.0",
+                          "Accept": "application/json;odata.metadata=none",
+                          "Content-Type": "application/json; charset=utf-8"
+                        },
+                        "authentication": {
+                          "type": "ActiveDirectoryOAuth",
+                          "tenant": "@{parameters('dataverseTenantId')}",
+                          "audience": "@{parameters('dataverseBaseUrl')}",
+                          "clientId": "@{parameters('dataverseClientId')}",
+                          "secret": "@{parameters('dataverseClientSecret')}"
+                        }
+                      }
+                    },
+                    "Parse_Transcript_JSON": {
+                      "runAfter": {
+                        "Get_Full_Annotation_DocumentBody": [
+                          "Succeeded"
+                        ]
+                      },
+                      "type": "ParseJson",
+                      "inputs": {
+                        "content": "@base64ToString(body('Get_Full_Annotation_DocumentBody')?['documentbody'])",
+                        "schema": {
+                          "type": "array",
+                          "items": {
+                            "type": "object"
+                          }
+                        }
+                      }
+                    },
+                    "Extract_Content_Array": {
+                      "runAfter": {
+                        "Parse_Transcript_JSON": [
+                          "Succeeded"
+                        ]
+                      },
+                      "type": "SetVariable",
+                      "inputs": {
+                        "name": "ConversationMessages",
+                        "value": "@if(greater(length(body('Parse_Transcript_JSON')), 0), json(coalesce(first(body('Parse_Transcript_JSON'))?['Content'], '[]')), json('[]'))"
+                      }
+                    },
+                    "Reverse_Messages_Order": {
+                      "runAfter": {
+                        "Extract_Content_Array": ["Succeeded"]
+                      },
+                      "type": "Compose",
+                      "inputs": "@reverse(variables('ConversationMessages'))"
+                    },
+                    "Set_Reversed_Messages": {
+                      "runAfter": {
+                        "Reverse_Messages_Order": ["Succeeded"]
+                      },
+                      "type": "SetVariable",
+                      "inputs": {
+                        "name": "ConversationMessages",
+                        "value": "@outputs('Reverse_Messages_Order')"
+                      }
+                    },
+                    "Build_Transcript_Summary": {
+                      "runAfter": {
+                        "Set_Reversed_Messages": [
+                          "Succeeded"
+                        ]
+                      },
+                      "type": "Foreach",
+                      "foreach": "@variables('ConversationMessages')",
+                      "actions": {
+                        "Compose_Current_Speaker": {
+                          "runAfter": {},
+                          "type": "Compose",
+                          "inputs": "@coalesce(item()?['from']?['user']?['displayName'], item()?['from']?['application']?['displayName'], 'Unknown')"
+                        },
+                        "Compose_Current_Message": {
+                          "runAfter": {
+                            "Compose_Current_Speaker": ["Succeeded"]
+                          },
+                          "type": "Compose",
+                          "inputs": "@coalesce(item()?['content'], '')"
+                        },
+                        "If_Not_Control_Or_Duplicate": {
+                          "runAfter": {
+                            "Compose_Current_Message": ["Succeeded"]
+                          },
+                          "type": "If",
+                          "expression": "@and(not(equals(item()?['isControlMessage'], true)), greater(length(outputs('Compose_Current_Message')), 0), not(startsWith(trim(outputs('Compose_Current_Message')), '{')), not(startsWith(outputs('Compose_Current_Message'), '__customer__')), not(contains(outputs('Compose_Current_Message'), 'EventName')), not(contains(variables('SeenMessages'), concat('|||', take(outputs('Compose_Current_Message'), 150), '|||'))))",
+                          "actions": {
+                            "Check_Speaker_Changed": {
+                              "runAfter": {},
+                              "type": "If",
+                              "expression": "@not(equals(outputs('Compose_Current_Speaker'), variables('PreviousSpeaker')))",
+                              "actions": {
+                                "Append_Speaker_Header": {
+                                  "runAfter": {},
+                                  "type": "AppendToStringVariable",
+                                  "inputs": {
+                                    "name": "TranscriptionSummary",
+                                    "value": "@{if(equals(variables('PreviousSpeaker'), ''), '', '<br/>')}<div style=\"background-color:#0078d4;color:white;padding:8px 12px;border-radius:4px;margin:12px 0 8px 0;font-weight:bold;\">@{outputs('Compose_Current_Speaker')}</div>"
+                                  },
+                                  "description": "Add visual separator with speaker name when speaker changes"
+                                },
+                                "Update_PreviousSpeaker": {
+                                  "runAfter": {
+                                    "Append_Speaker_Header": ["Succeeded"]
+                                  },
+                                  "type": "SetVariable",
+                                  "inputs": {
+                                    "name": "PreviousSpeaker",
+                                    "value": "@{outputs('Compose_Current_Speaker')}"
+                                  }
+                                }
+                              },
+                              "else": {
+                                "actions": {}
+                              }
+                            },
+                            "Append_Message_Content": {
+                              "runAfter": {
+                                "Check_Speaker_Changed": ["Succeeded"]
+                              },
+                              "type": "AppendToStringVariable",
+                              "inputs": {
+                                "name": "TranscriptionSummary",
+                                "value": "<p style=\"margin:4px 0 8px 12px;\">@{outputs('Compose_Current_Message')}</p>"
+                              }
+                            },
+                            "Update_SeenMessages": {
+                              "runAfter": {
+                                "Append_Message_Content": ["Succeeded"]
+                              },
+                              "type": "AppendToStringVariable",
+                              "inputs": {
+                                "name": "SeenMessages",
+                                "value": "|||@{take(outputs('Compose_Current_Message'), 150)}|||"
+                              }
+                            }
+                          },
+                          "else": {
+                            "actions": {}
+                          }
+                        }
+                      },
+                      "runtimeConfiguration": {
+                        "concurrency": {
+                          "repetitions": 1
+                        }
+                      }
+                    }
+                  },
+                  "else": {
+                    "actions": {
+                      "Use_NoteText_If_Available": {
+                        "runAfter": {},
+                        "type": "SetVariable",
+                        "inputs": {
+                          "name": "TranscriptionSummary",
+                          "value": "@if(greater(length(body('Get_Transcript_Annotation')?['value']), 0), coalesce(first(body('Get_Transcript_Annotation')?['value'])?['notetext'], 'No transcript content available'), 'No transcript annotation found')"
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "else": {
+                "actions": {
+                  "Try_Session_Message_Blocks": {
+                    "runAfter": {},
+                    "type": "If",
+                    "expression": "@not(equals(body('Get_Conversation')?['_msdyn_lastsessionid_value'], null))",
+                    "actions": {
+                      "Get_All_Message_Blocks": {
+                        "runAfter": {},
+                        "type": "Http",
+                        "inputs": {
+                          "uri": "@{concat(parameters('dataverseBaseUrl'), '/api/data/v9.2/msdyn_conversationmessageblocks?$select=msdyn_message,msdyn_sendername,msdyn_senderrole,createdon&$filter=_msdyn_conversationid_value eq ', variables('ConversationId'), '&$orderby=createdon asc')}",
+                          "method": "GET",
+                          "headers": {
+                            "OData-MaxVersion": "4.0",
+                            "OData-Version": "4.0",
+                            "Accept": "application/json;odata.metadata=none",
+                            "Content-Type": "application/json; charset=utf-8"
+                          },
+                          "authentication": {
+                            "type": "ActiveDirectoryOAuth",
+                            "tenant": "@{parameters('dataverseTenantId')}",
+                            "audience": "@{parameters('dataverseBaseUrl')}",
+                            "clientId": "@{parameters('dataverseClientId')}",
+                            "secret": "@{parameters('dataverseClientSecret')}"
+                          }
+                        }
+                      },
+                      "Build_Summary_From_Blocks": {
+                        "runAfter": {
+                          "Get_All_Message_Blocks": [
+                            "Succeeded"
+                          ]
+                        },
+                        "type": "Foreach",
+                        "foreach": "@body('Get_All_Message_Blocks')?['value']",
+                        "actions": {
+                          "Compose_Block_Speaker": {
+                            "runAfter": {},
+                            "type": "Compose",
+                            "inputs": "@coalesce(item()?['msdyn_sendername'], item()?['msdyn_senderrole'], 'Unknown')"
+                          },
+                          "Compose_Block_Message": {
+                            "runAfter": {
+                              "Compose_Block_Speaker": ["Succeeded"]
+                            },
+                            "type": "Compose",
+                            "inputs": "@coalesce(item()?['msdyn_message'], '')"
+                          },
+                          "If_Block_Not_Duplicate": {
+                            "runAfter": {
+                              "Compose_Block_Message": ["Succeeded"]
+                            },
+                            "type": "If",
+                            "expression": "@and(greater(length(outputs('Compose_Block_Message')), 0), not(contains(variables('SeenMessages'), concat('|||', take(outputs('Compose_Block_Message'), 150), '|||'))))",
+                            "actions": {
+                              "Check_Block_Speaker_Changed": {
+                                "runAfter": {},
+                                "type": "If",
+                                "expression": "@not(equals(outputs('Compose_Block_Speaker'), variables('PreviousSpeaker')))",
+                                "actions": {
+                                  "Append_Block_Speaker_Header": {
+                                    "runAfter": {},
+                                    "type": "AppendToStringVariable",
+                                    "inputs": {
+                                      "name": "TranscriptionSummary",
+                                      "value": "@{if(equals(variables('PreviousSpeaker'), ''), '', '<br/>')}<div style=\"background-color:#0078d4;color:white;padding:8px 12px;border-radius:4px;margin:12px 0 8px 0;font-weight:bold;\">@{outputs('Compose_Block_Speaker')}</div>"
+                                    }
+                                  },
+                                  "Update_Block_PreviousSpeaker": {
+                                    "runAfter": {
+                                      "Append_Block_Speaker_Header": ["Succeeded"]
+                                    },
+                                    "type": "SetVariable",
+                                    "inputs": {
+                                      "name": "PreviousSpeaker",
+                                      "value": "@{outputs('Compose_Block_Speaker')}"
+                                    }
+                                  }
+                                },
+                                "else": {
+                                  "actions": {}
+                                }
+                              },
+                              "Append_Block_Message_Content": {
+                                "runAfter": {
+                                  "Check_Block_Speaker_Changed": ["Succeeded"]
+                                },
+                                "type": "AppendToStringVariable",
+                                "inputs": {
+                                  "name": "TranscriptionSummary",
+                                  "value": "<p style=\"margin:4px 0 8px 12px;\">@{outputs('Compose_Block_Message')}</p>"
+                                }
+                              },
+                              "Update_Block_SeenMessages": {
+                                "runAfter": {
+                                  "Append_Block_Message_Content": ["Succeeded"]
+                                },
+                                "type": "AppendToStringVariable",
+                                "inputs": {
+                                  "name": "SeenMessages",
+                                  "value": "|||@{take(outputs('Compose_Block_Message'), 150)}|||"
+                                }
+                              }
+                            },
+                            "else": {
+                              "actions": {}
+                            }
+                          }
+                        },
+                        "runtimeConfiguration": {
+                          "concurrency": {
+                            "repetitions": 1
+                          }
+                        }
+                      }
+                    },
+                    "else": {
+                      "actions": {
+                        "Set_No_Transcript_Available": {
+                          "runAfter": {},
+                          "type": "SetVariable",
+                          "inputs": {
+                            "name": "TranscriptionSummary",
+                            "value": "No transcript available for this conversation"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "Compose_Trimmed_Summary": {
+              "runAfter": {
+                "If_Transcript_Record_Found": [
+                  "Succeeded",
+                  "Failed",
+                  "Skipped",
+                  "TimedOut"
+                ]
+              },
+              "type": "Compose",
+              "inputs": "@trim(variables('TranscriptionSummary'))"
+            },
+            "Compose_Truncated_For_Case": {
+              "runAfter": {
+                "Compose_Trimmed_Summary": [
+                  "Succeeded"
+                ]
+              },
+              "type": "Compose",
+              "inputs": "@if(greater(length(outputs('Compose_Trimmed_Summary')), 1048576), substring(outputs('Compose_Trimmed_Summary'), 0, 1048576), outputs('Compose_Trimmed_Summary'))",
+              "description": "Truncate transcript to max field length of 1048576 characters"
+            },
+            "Update_Case_With_Transcript": {
+              "runAfter": {
+                "Compose_Truncated_For_Case": [
+                  "Succeeded"
+                ]
+              },
+              "type": "Http",
+              "inputs": {
+                "uri": "@{concat(parameters('dataverseBaseUrl'), '/api/data/v9.2/incidents(', variables('CaseID'), ')')}",
+                "method": "PATCH",
+                "headers": {
+                  "OData-MaxVersion": "4.0",
+                  "OData-Version": "4.0",
+                  "Accept": "application/json",
+                  "Content-Type": "application/json; charset=utf-8"
+                },
+                "body": {
+                  "mj_lasttranscript": "@{outputs('Compose_Truncated_For_Case')}"
+                },
+                "authentication": {
+                  "type": "ActiveDirectoryOAuth",
+                  "tenant": "@{parameters('dataverseTenantId')}",
+                  "audience": "@{parameters('dataverseBaseUrl')}",
+                  "clientId": "@{parameters('dataverseClientId')}",
+                  "secret": "@{parameters('dataverseClientSecret')}"
+                }
+              }
+            },
+            "Return_Success_Response": {
+              "runAfter": {
+                "Update_Case_With_Transcript": [
+                  "Succeeded"
+                ]
+              },
+              "type": "Response",
+              "inputs": {
+                "statusCode": 200,
+                "headers": {
+                  "Content-Type": "application/json"
+                },
+                "body": {
+                  "success": true,
+                  "conversationId": "@{variables('ConversationId')}",
+                  "conversationStatus": {
+                    "statecode": "@{body('Get_Conversation')?['statecode']}",
+                    "stateLabel": "@{body('Get_Conversation')?['statecode@OData.Community.Display.V1.FormattedValue']}",
+                    "statuscode": "@{body('Get_Conversation')?['statuscode']}",
+                    "statusLabel": "@{body('Get_Conversation')?['statuscode@OData.Community.Display.V1.FormattedValue']}"
+                  },
+                  "CaseID": "@{variables('CaseID')}",
+                  "TranscriptionSummary": "@{outputs('Compose_Trimmed_Summary')}"
+                }
+              }
+            }
+          },
+          "else": {
+            "actions": {
+              "Return_No_Case_Response": {
+                "runAfter": {},
+                "type": "Response",
+                "inputs": {
+                  "statusCode": 200,
+                  "headers": {
+                    "Content-Type": "application/json"
+                  },
+                  "body": {
+                    "success": false,
+                    "conversationId": "@{variables('ConversationId')}",
+                    "conversationStatus": {
+                      "statecode": "@{body('Get_Conversation')?['statecode']}",
+                      "stateLabel": "@{body('Get_Conversation')?['statecode@OData.Community.Display.V1.FormattedValue']}",
+                      "statuscode": "@{body('Get_Conversation')?['statuscode']}",
+                      "statusLabel": "@{body('Get_Conversation')?['statuscode@OData.Community.Display.V1.FormattedValue']}"
+                    },
+                    "CaseID": "",
+                    "TranscriptionSummary": "",
+                    "error": "No related case found for this conversation"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "else": {
+        "actions": {
+          "Return_Not_Closed_Response": {
+            "runAfter": {},
+            "type": "Response",
+            "inputs": {
+              "statusCode": 200,
+              "headers": {
+                "Content-Type": "application/json"
+              },
+              "body": {
+                "success": false,
+                "conversationId": "@{variables('ConversationId')}",
+                "conversationStatus": {
+                  "statecode": "@{body('Get_Conversation')?['statecode']}",
+                  "stateLabel": "@{body('Get_Conversation')?['statecode@OData.Community.Display.V1.FormattedValue']}",
+                  "statuscode": "@{body('Get_Conversation')?['statuscode']}",
+                  "statusLabel": "@{body('Get_Conversation')?['statuscode@OData.Community.Display.V1.FormattedValue']}"
+                },
+                "CaseID": "",
+                "TranscriptionSummary": "",
+                "error": "Conversation is not in a closed state (Closed, Wrap-up, or Resolved)"
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "outputs": {}
+}

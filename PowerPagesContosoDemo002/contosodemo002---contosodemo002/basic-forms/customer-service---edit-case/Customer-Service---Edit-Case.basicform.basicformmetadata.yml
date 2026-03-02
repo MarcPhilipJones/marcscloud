@@ -1,0 +1,252 @@
+- adx_adddescription: false
+  adx_descriptionposition: 100000000
+  adx_entityform: e8ffbb23-1cfd-f011-8406-7c1e5277b875
+  adx_entityformmetadataid: 4b52d025-639f-41e0-8a93-516ea4fa11c0
+  adx_fieldisrequired: false
+  adx_ignoredefaultvalue: false
+  adx_notes_settings: >-
+    {
+      "Type": "CrmEntityFormView-NotesMetadata",
+      "AddNoteButtonLabel": [
+        {
+          "Type": "LanguageResources",
+          "LCID": 1033,
+          "Value": ""
+        }
+      ],
+      "CreateEnabled": true,
+      "EditEnabled": true,
+      "DeleteEnabled": true,
+      "CreateDialog": {
+        "Type": "CrmEntityFormView-NoteModal",
+        "NoteFieldLabel": [
+          {
+            "Type": "LanguageResources",
+            "LCID": 1033,
+            "Value": ""
+          }
+        ],
+        "DisplayPrivacyOptionField": false,
+        "PrivacyOptionFieldLabel": [
+          {
+            "Type": "LanguageResources",
+            "LCID": 1033,
+            "Value": ""
+          }
+        ],
+        "PrivacyOptionFieldDefaultValue": false,
+        "DisplayAttachFile": true,
+        "AttachFileLabel": [
+          {
+            "Type": "LanguageResources",
+            "LCID": 1033,
+            "Value": ""
+          }
+        ],
+        "AttachFileAccept": "image/*,video/*",
+        "AttachFileAcceptExtensions": "xlsx,.xls,.doc,.docx,.ppt,.pptx,.txt,.pdf,.csv,.pps,.zip,.rar,.xml,.rtf,.log,.xps",
+        "LeftColumnCSSClass": "",
+        "RightColumnCSSClass": "",
+        "NoteFieldColumns": 0,
+        "NoteFieldRows": 0,
+        "Size": 0,
+        "CssClass": "",
+        "Title": [
+          {
+            "Type": "LanguageResources",
+            "LCID": 1033,
+            "Value": ""
+          }
+        ],
+        "TitleCssClass": "",
+        "PrimaryButtonText": [
+          {
+            "Type": "LanguageResources",
+            "LCID": 1033,
+            "Value": ""
+          }
+        ],
+        "DismissButtonSrText": [
+          {
+            "Type": "LanguageResources",
+            "LCID": 1033,
+            "Value": ""
+          }
+        ],
+        "CloseButtonText": [
+          {
+            "Type": "LanguageResources",
+            "LCID": 1033,
+            "Value": ""
+          }
+        ],
+        "PrimaryButtonCssClass": "",
+        "CloseButtonCssClass": ""
+      },
+      "EditDialog": {
+        "Type": "CrmEntityFormView-NoteModal",
+        "NoteFieldLabel": [
+          {
+            "Type": "LanguageResources",
+            "LCID": 1033,
+            "Value": ""
+          }
+        ],
+        "DisplayPrivacyOptionField": false,
+        "PrivacyOptionFieldLabel": [
+          {
+            "Type": "LanguageResources",
+            "LCID": 1033,
+            "Value": ""
+          }
+        ],
+        "PrivacyOptionFieldDefaultValue": false,
+        "DisplayAttachFile": true,
+        "AttachFileLabel": [
+          {
+            "Type": "LanguageResources",
+            "LCID": 1033,
+            "Value": ""
+          }
+        ],
+        "AttachFileAccept": "",
+        "LeftColumnCSSClass": "",
+        "RightColumnCSSClass": "",
+        "NoteFieldColumns": 0,
+        "NoteFieldRows": 0,
+        "Size": 0,
+        "CssClass": "",
+        "Title": [
+          {
+            "Type": "LanguageResources",
+            "LCID": 1033,
+            "Value": ""
+          }
+        ],
+        "TitleCssClass": "",
+        "PrimaryButtonText": [
+          {
+            "Type": "LanguageResources",
+            "LCID": 1033,
+            "Value": ""
+          }
+        ],
+        "DismissButtonSrText": [
+          {
+            "Type": "LanguageResources",
+            "LCID": 1033,
+            "Value": ""
+          }
+        ],
+        "CloseButtonText": [
+          {
+            "Type": "LanguageResources",
+            "LCID": 1033,
+            "Value": ""
+          }
+        ],
+        "PrimaryButtonCssClass": "",
+        "CloseButtonCssClass": ""
+      },
+      "DeleteDialog": {
+        "Type": "CrmEntityFormView-NotesDeleteModal",
+        "Confirmation": [
+          {
+            "Type": "LanguageResources",
+            "LCID": 1033,
+            "Value": ""
+          }
+        ],
+        "Size": 0,
+        "CssClass": "",
+        "Title": [
+          {
+            "Type": "LanguageResources",
+            "LCID": 1033,
+            "Value": ""
+          }
+        ],
+        "TitleCssClass": "",
+        "PrimaryButtonText": [
+          {
+            "Type": "LanguageResources",
+            "LCID": 1033,
+            "Value": ""
+          }
+        ],
+        "DismissButtonSrText": [
+          {
+            "Type": "LanguageResources",
+            "LCID": 1033,
+            "Value": ""
+          }
+        ],
+        "CloseButtonText": [
+          {
+            "Type": "LanguageResources",
+            "LCID": 1033,
+            "Value": ""
+          }
+        ],
+        "PrimaryButtonCssClass": "",
+        "CloseButtonCssClass": ""
+      },
+      "LoadingMessage": [
+        {
+          "Type": "LanguageResources",
+          "LCID": 1033,
+          "Value": ""
+        }
+      ],
+      "ErrorMessage": [
+        {
+          "Type": "LanguageResources",
+          "LCID": 1033,
+          "Value": ""
+        }
+      ],
+      "AccessDeniedMessage": [
+        {
+          "Type": "LanguageResources",
+          "LCID": 1033,
+          "Value": ""
+        }
+      ],
+      "EmptyMessage": [
+        {
+          "Type": "LanguageResources",
+          "LCID": 1033,
+          "Value": ""
+        }
+      ],
+      "ListTitle": [
+        {
+          "Type": "LanguageResources",
+          "LCID": 1033,
+          "Value": ""
+        }
+      ],
+      "ListOrders": [],
+      "NotePrivacyLabel": [
+        {
+          "Type": "LanguageResources",
+          "LCID": 1033,
+          "Value": ""
+        }
+      ]
+    }
+  adx_randomizeoptionsetvalues: false
+  adx_setvalueonsave: false
+  adx_type: 100000005
+  adx_useattributedescriptionproperty: true
+- adx_adddescription: false
+  adx_descriptionposition: 100000000
+  adx_entityform: e8ffbb23-1cfd-f011-8406-7c1e5277b875
+  adx_entityformmetadataid: da2ce316-8545-4363-82ab-e342aa22c6fd
+  adx_fieldisrequired: false
+  adx_ignoredefaultvalue: false
+  adx_randomizeoptionsetvalues: false
+  adx_setvalueonsave: false
+  adx_timeline_settings: '{"$type":"Adxstudio.Xrm.Web.UI.JsonConfiguration.TimelineMetadata, Adxstudio.Xrm","AddNoteButtonLabel":[{"$type":"Adxstudio.Xrm.Web.UI.WebForms.LanguageResources, Adxstudio.Xrm","LCID":1033,"Value":"Add Comment"}],"CreateEnabled":true,"CreateDialog":{"$type":"Adxstudio.Xrm.Web.UI.JsonConfiguration.TimelineModal, Adxstudio.Xrm","NoteFieldLabel":[{"$type":"Adxstudio.Xrm.Web.UI.WebForms.LanguageResources, Adxstudio.Xrm","LCID":1033,"Value":""}],"DisplayAttachFile":true,"AttachFileLocation":756150000,"AttachFileLabel":[{"$type":"Adxstudio.Xrm.Web.UI.WebForms.LanguageResources, Adxstudio.Xrm","LCID":1033,"Value":""}],"AttachFileAccept":"image/*,video/*","AttachFileAcceptExtensions":"xlsx,.xls,.doc,.docx,.ppt,.pptx,.txt,.pdf,.csv,.pps,.zip,.rar,.xml,.rtf,.log,.xps","AttachFileRestrictAccept":false,"AttachFileMaximumSize":null,"LeftColumnCSSClass":"","RightColumnCSSClass":"","NoteFieldColumns":0,"NoteFieldRows":0,"Size":0,"CssClass":"","Title":[{"$type":"Adxstudio.Xrm.Web.UI.WebForms.LanguageResources, Adxstudio.Xrm","LCID":1033,"Value":""}],"TitleCssClass":"","PrimaryButtonText":[{"$type":"Adxstudio.Xrm.Web.UI.WebForms.LanguageResources, Adxstudio.Xrm","LCID":1033,"Value":""}],"DismissButtonSrText":[{"$type":"Adxstudio.Xrm.Web.UI.WebForms.LanguageResources, Adxstudio.Xrm","LCID":1033,"Value":""}],"CloseButtonText":[{"$type":"Adxstudio.Xrm.Web.UI.WebForms.LanguageResources, Adxstudio.Xrm","LCID":1033,"Value":""}],"PrimaryButtonCssClass":"","CloseButtonCssClass":""},"LoadingMessage":[{"$type":"Adxstudio.Xrm.Web.UI.WebForms.LanguageResources, Adxstudio.Xrm","LCID":1033,"Value":""}],"ErrorMessage":[{"$type":"Adxstudio.Xrm.Web.UI.WebForms.LanguageResources, Adxstudio.Xrm","LCID":1033,"Value":""}],"AccessDeniedMessage":[{"$type":"Adxstudio.Xrm.Web.UI.WebForms.LanguageResources, Adxstudio.Xrm","LCID":1033,"Value":""}],"EmptyMessage":[{"$type":"Adxstudio.Xrm.Web.UI.WebForms.LanguageResources, Adxstudio.Xrm","LCID":1033,"Value":""}],"ListTitle":[{"$type":"Adxstudio.Xrm.Web.UI.WebForms.LanguageResources, Adxstudio.Xrm","LCID":1033,"Value":""}],"ListOrders":[],"AttachFileLocation":756150000,"AttachFileAccept":"*/*","AttachFileRestrictAccept":false,"AttachFileRestrictErrorMessage":[{"$type":"Adxstudio.Xrm.Web.UI.WebForms.LanguageResources, Adxstudio.Xrm","LCID":1033,"Value":""}],"AttachFileMaximumSize":null,"AttachFileMaximumSizeErrorMessage":[{"$type":"Adxstudio.Xrm.Web.UI.WebForms.LanguageResources, Adxstudio.Xrm","LCID":1033,"Value":""}],"LoadMoreButtonLabel":[{"$type":"Adxstudio.Xrm.Web.UI.WebForms.LanguageResources, Adxstudio.Xrm","LCID":1033,"Value":""}]}'
+  adx_type: 756150000
+  adx_useattributedescriptionproperty: true

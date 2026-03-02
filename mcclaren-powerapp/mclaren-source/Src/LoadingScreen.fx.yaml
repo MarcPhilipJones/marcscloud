@@ -1,0 +1,51 @@
+LoadingScreen As screen:
+    Fill: =McLarenBlack
+    Height: =App.Height
+    Width: =App.Width
+
+    GradientBackground As htmlViewer:
+        Height: =Parent.Height
+        HtmlText: |-
+            ="<div style='position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(to bottom right, #000000, #1A1A1A, #FF8000); display: flex; justify-content: center; align-items: center;'></div>"
+        Width: =Parent.Width
+        Y: =0
+        ZIndex: =1
+
+    WelcomeTitle As label:
+        Align: =Align.Center
+        Color: =McLarenOrange
+        Font: =Font.'Segoe UI'
+        FontWeight: =FontWeight.Bold
+        Height: =80
+        Size: =42
+        Text: ="McLAREN"
+        Width: =Parent.Width
+        X: =0
+        Y: =Parent.Height / 2 - 80
+        ZIndex: =2
+
+    WelcomeSubtitle As label:
+        Align: =Align.Center
+        Color: =McLarenWhite
+        Font: =Font.'Segoe UI'
+        FontWeight: =FontWeight.Semibold
+        Height: =40
+        Size: =18
+        Text: ="PERSONALISATION SUITE"
+        Width: =Parent.Width
+        X: =0
+        Y: =Parent.Height / 2
+        ZIndex: =3
+
+    LoadingTimer As timer:
+        AutoPause: =false
+        AutoStart: =true
+        Duration: =2500
+        Fill: =RGBA(0, 0, 0, 1)
+        OnTimerEnd: =Navigate(HomeScreen, ScreenTransition.Fade)
+        Visible: =false
+        X: =40
+        Y: =40
+        ZIndex: =4
+
+

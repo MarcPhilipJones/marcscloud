@@ -1,0 +1,27 @@
+<div class="wrapper-body">
+  <div class="container">
+    <div class="page-heading">
+     {% block breadcrumbs %}
+         {% include 'Breadcrumbs' %}
+       {% endblock %}
+     {% block title %}
+       {% include 'Page Header' %}
+     {% endblock %}
+    </div>
+    <div class="row">
+     <div class="col-md-4 left-column">
+      {% block left_aside %}{% endblock %}
+     </div>
+     <div class="col-md-4 middle-column">
+       <div id="mainContent">
+         {% block main %}
+           {% include 'Page Copy' %}
+         {% endblock %}
+       </div>
+     </div>
+     <div class="col-md-4 right-column">
+      {% block right_aside %}{% endblock %}
+     </div>
+    </div>
+   </div>
+</div>

@@ -11,6 +11,9 @@
     "analyseCustomerVersion2LogicAppName": {
       "value": "AnalyseCustomerVersion2"
     },
+    "summariseTranscriptLogicAppName": {
+      "value": "SummariseTranscriptonRelatedCase"
+    },
     "location": {
       "value": "westeurope"
     },

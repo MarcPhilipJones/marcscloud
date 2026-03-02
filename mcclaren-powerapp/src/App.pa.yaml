@@ -1,0 +1,65 @@
+App As appinfo:
+  BackEnabled: =false
+  
+  # McLaren Brand Colors
+  Theme: |
+    =ColorValue("#FF8000") # McLaren Papaya Orange
+    
+  OnStart: |
+    =// Initialize global variables for McLaren branding
+    Set(McLarenOrange, ColorValue("#FF8000"));
+    Set(McLarenBlack, ColorValue("#000000"));
+    Set(McLarenDarkGrey, ColorValue("#1A1A1A"));
+    Set(McLarenSilver, ColorValue("#C0C0C0"));
+    Set(McLarenWhite, ColorValue("#FFFFFF"));
+    
+    // Customer context (would come from logged-in user or lookup)
+    Set(CurrentCustomer, {
+        Name: "James Harrison",
+        CustomerId: "MCL-2026-0847",
+        Vehicle: "750S Spider",
+        VehicleSpec: "Volcanic Red"
+    });
+    
+    // Initialize default settings
+    Set(CustomerSettings, {
+        // Climate
+        Temperature: 22,
+        HeatedSeats: "Medium",
+        VentilatedSeats: "Off",
+        HeatedSteeringWheel: true,
+        
+        // Seating
+        DriverHeightCategory: "Average",
+        SeatPosition: 45,
+        SeatHeight: 70,
+        BackrestAngle: 55,
+        LumbarSupport: "Medium",
+        
+        // Audio
+        RadioStation1: "BBC Radio 2",
+        RadioStation2: "Classic FM", 
+        RadioStation3: "Absolute Radio",
+        DefaultAudioSource: "Radio",
+        BassLevel: 4,
+        TrebleLevel: 6,
+        NavVoiceVolume: "Medium",
+        
+        // Driving
+        DefaultDriveMode: "Sport",
+        SteeringWeight: "Standard",
+        SuspensionSetting: "Sport",
+        ESCSetting: "Dynamic",
+        LaunchControl: true,
+        ActiveAero: "Auto",
+        
+        // Display
+        ClusterTheme: "Dark",
+        AmbientLightingColor: "McLaren Orange",
+        AmbientLightingIntensity: 50,
+        HeadUpDisplay: true,
+        HUDBrightness: 65,
+        WelcomeLighting: false
+    })
+
+  StartScreen: =HomeScreen

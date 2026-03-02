@@ -1,0 +1,92 @@
+{
+  "ComponentIndexes": {},
+  "ControlUniqueGuids": {},
+  "ControlUniqueIds": {
+    "App": 1,
+    "AppSubtitle": 6,
+    "AppTitle": 5,
+    "AudioInfo": 15,
+    "ClimateInfo": 12,
+    "CustomerIdLabel": 8,
+    "CustomerNameLabel": 7,
+    "Divider": 10,
+    "DrivingInfo": 14,
+    "FooterLabel": 16,
+    "HomeScreen": 4,
+    "Host": 3,
+    "SeatingInfo": 13,
+    "SettingsLabel": 11,
+    "VehicleLabel": 9
+  },
+  "FunctionParamsInvariantScripts": {},
+  "FunctionParamsInvariantScriptsOnInstances": {},
+  "HeaderLastSavedDateTimeUTC": "02/17/2026 16:47:48",
+  "IsLegacyComponentAllowGlobalScopeCase": false,
+  "LocalConnectionIDReferences": {},
+  "LocalDatabaseReferencesAsEmpty": false,
+  "LocalResourceFileNames": {},
+  "LocalResourceRootPaths": {},
+  "OrderComponentMetadata": {},
+  "OrderComponentTemplate": {},
+  "OrderDataSource": {
+    "CustomGallerySample": 4,
+    "Table1S": 3,
+    "Table1S\\cr8c9_table1_statecode": 0,
+    "Table1S\\cr8c9_table1_statuscode": 1,
+    "Table1S\\default.cds_cr8c9_table1_views": 2
+  },
+  "OrderGroupControls": {},
+  "OrderPcfTemplate": {},
+  "OrderTemplate": {},
+  "OrderXMLTemplate": {
+    "label": 0
+  },
+  "OverridablePropertiesEntry": {
+    "App": {},
+    "AppSubtitle": {},
+    "AppTitle": {},
+    "AudioInfo": {},
+    "ClimateInfo": {},
+    "CustomerIdLabel": {},
+    "CustomerNameLabel": {},
+    "Divider": {},
+    "DrivingInfo": {},
+    "FooterLabel": {},
+    "HomeScreen": {},
+    "Host": {},
+    "SeatingInfo": {},
+    "SettingsLabel": {},
+    "VehicleLabel": {}
+  },
+  "PCFDynamicSchemaForIRRetrievalEntry": {},
+  "PCFTemplateEntry": {},
+  "PublishOrderIndices": {
+    "App": 0,
+    "AppSubtitle": 1,
+    "AppTitle": 0,
+    "AudioInfo": 10,
+    "ClimateInfo": 7,
+    "CustomerIdLabel": 3,
+    "CustomerNameLabel": 2,
+    "Divider": 5,
+    "DrivingInfo": 9,
+    "FooterLabel": 11,
+    "HomeScreen": 38,
+    "Host": 0,
+    "SeatingInfo": 8,
+    "SettingsLabel": 6,
+    "VehicleLabel": 4
+  },
+  "ResourcesJsonIndices": {},
+  "RuleScreenIdWithoutScreen": {},
+  "TemplateVersions": {},
+  "VolatileProperties": {
+    "AnalysisLoadTime": 0.17424200000000001,
+    "ControlCount": {
+      "label": 12,
+      "screen": 1
+    },
+    "DeserializationLoadTime": 1.4051419999999999
+  },
+  "WasLocalDatabaseReferencesEmpty": false
+}

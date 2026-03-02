@@ -1,0 +1,40 @@
+{% assign showdescription = showdescription | default: false %}
+{% assign count = recentKBCount |integer  %}
+{% assign languagecode = website.selected_language.code %}
+  <div class="row">
+    <div class="col-md-12">
+        <div style="font-family: Segoe UI;font-size: 24px;font-weight: 700;line-height: 36px;letter-spacing: 0px;text-align: left;color:#234B94;margin: 15px;margin-left: 40px;">{% editable snippets 'KnowledgeMgmt/MostRecentArticles' type: 'text' %}</div>
+    </div>
+ 
+    {% assign recent_articles = knowledge.articles | recent: count,languagecode  %}
+    {%assign var1=recent_articles.size %}
+    {% if recent_articles %}   
+      <div class="col-md-12" style="padding-left: 55px;margin-bottom:5px;margin-top:7px">
+        {% for article in recent_articles limit:count %}
+        {% assign var1 = var1 | minus:1 %}
+          <a style="font-family: Segoe UI;font-size: 14px;font-weight: 600;line-height: 32px;letter-spacing: 0px;color:black;"  href="{{ article.url | escape }}">
+            <img src="/Shape.png" alt="" name="Shape.png" style="width: 12px; height: 14px; max-width: 100%;margin:6px" />{{ article.title | escape }}
+            <div style="font-family: Arial;font-size: 14px;font-weight: 400;line-height: 36px;letter-spacing: 0px;color:#7D7D7D;">{{ article.modifiedon | date: 'MMM d, yyyy' | escape }}</div>
+          </a> 
+          {% if var1 != 0 %}
+          <hr style="border-width: 1.5px;border-color: #9FB8EB;margin-right:20px;" />
+          {% endif %}
+        {% endfor %}
+       </div>
+    {% endif %}
+  </div>
+ 
+{% manifest %} 
+{
+  "type": "Functional",
+  "displayName": "Category",
+  "description": "recent categories",
+  "params": [
+    {
+      "id": "recentKBCount",
+      "displayName": "recentKBCount",
+      "description": "No. of recent knowledge article"
+    }
+  ]
+}
+{% endmanifest %} 

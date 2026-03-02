@@ -75,7 +75,7 @@ Navigate to: **http://localhost:3000**
 | `DATAVERSE_BASE_URL` | Your Dataverse environment URL (no trailing slash) | `https://org6cb3e9fb.crm4.dynamics.com` |
 | `TENANT_ID` | Azure AD tenant ID | `996f568a-cc69-450a-b684-ae784069e679` |
 | `CLIENT_ID` | App registration client ID | `beb6cb7d-3328-4c2f-be9a-aab746be614a` |
-| `CLIENT_SECRET` | App registration client secret | `mVc8Q~...` |
+| `CLIENT_SECRET` | App registration client secret | `(from .env)` |
 | `CONTRACTOR_RESOURCE_ID` | The Bookable Resource GUID for the contractor | `303c022d-6cfb-f011-8406-7ced8d4279eb` |
 | `PORT` | Server port (optional, default 3000) | `3000` |
 

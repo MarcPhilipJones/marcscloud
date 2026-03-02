@@ -1,0 +1,153 @@
+HomeScreen As screen:
+    Fill: =McLarenBlack
+
+    AppTitle As label:
+        Align: =Align.Center
+        Color: =McLarenOrange
+        Font: =Font.'Segoe UI'
+        FontWeight: =FontWeight.Bold
+        Height: =80
+        Size: =32
+        Text: ="McLAREN"
+        Width: =Parent.Width
+        X: =0
+        Y: =80
+        ZIndex: =1
+
+    AppSubtitle As label:
+        Align: =Align.Center
+        Color: =McLarenWhite
+        Font: =Font.'Segoe UI'
+        FontWeight: =FontWeight.Semibold
+        Height: =40
+        Size: =18
+        Text: ="PERSONALISATION SUITE"
+        Width: =Parent.Width
+        X: =0
+        Y: =160
+        ZIndex: =2
+
+    CustomerNameLabel As label:
+        Align: =Align.Center
+        Color: =McLarenWhite
+        Font: =Font.'Segoe UI'
+        FontWeight: =FontWeight.Bold
+        Height: =50
+        Size: =24
+        Text: =CurrentCustomer.Name
+        Width: =Parent.Width
+        X: =0
+        Y: =260
+        ZIndex: =3
+
+    CustomerIdLabel As label:
+        Align: =Align.Center
+        Color: =McLarenSilver
+        Font: =Font.'Segoe UI'
+        Height: =30
+        Size: =14
+        Text: ="Customer ID: " & CurrentCustomer.CustomerId
+        Width: =Parent.Width
+        X: =0
+        Y: =310
+        ZIndex: =4
+
+    VehicleLabel As label:
+        Align: =Align.Center
+        Color: =McLarenOrange
+        Font: =Font.'Segoe UI'
+        FontWeight: =FontWeight.Semibold
+        Height: =40
+        Size: =18
+        Text: =CurrentCustomer.Vehicle & " - " & CurrentCustomer.VehicleSpec
+        Width: =Parent.Width
+        X: =0
+        Y: =350
+        ZIndex: =5
+
+    Divider As label:
+        Align: =Align.Center
+        Color: =McLarenDarkGrey
+        Font: =Font.'Segoe UI'
+        Height: =2
+        Text: =""
+        Width: =Parent.Width - 200
+        X: =100
+        Y: =420
+        ZIndex: =6
+        Fill: =McLarenDarkGrey
+
+    SettingsLabel As label:
+        Align: =Align.Center
+        Color: =McLarenWhite
+        Font: =Font.'Segoe UI'
+        FontWeight: =FontWeight.Semibold
+        Height: =30
+        Size: =14
+        Text: ="YOUR PERSONALISATION SETTINGS"
+        Width: =Parent.Width
+        X: =0
+        Y: =450
+        ZIndex: =7
+
+    ClimateInfo As label:
+        Align: =Align.Center
+        Color: =McLarenSilver
+        Font: =Font.'Segoe UI'
+        Height: =25
+        Size: =12
+        Text: ="🌡️ Climate: " & Text(varTemperature, "0") & "°C  |  Heated Seats: " & varHeatedSeats
+        Width: =Parent.Width
+        X: =0
+        Y: =500
+        ZIndex: =8
+
+    SeatingInfo As label:
+        Align: =Align.Center
+        Color: =McLarenSilver
+        Font: =Font.'Segoe UI'
+        Height: =25
+        Size: =12
+        Text: ="💺 Seating: " & varDriverHeight & "  |  Lumbar: " & varLumbarSupport
+        Width: =Parent.Width
+        X: =0
+        Y: =530
+        ZIndex: =9
+
+    DrivingInfo As label:
+        Align: =Align.Center
+        Color: =McLarenSilver
+        Font: =Font.'Segoe UI'
+        Height: =25
+        Size: =12
+        Text: ="🏎️ Drive Mode: " & varDriveMode & "  |  ESC: " & varESC
+        Width: =Parent.Width
+        X: =0
+        Y: =560
+        ZIndex: =10
+
+    AudioInfo As label:
+        Align: =Align.Center
+        Color: =McLarenSilver
+        Font: =Font.'Segoe UI'
+        Height: =25
+        Size: =12
+        Text: ="🎵 Radio: " & varRadioStation1 & "  |  Cluster: " & varClusterTheme & " Theme"
+        Width: =Parent.Width
+        X: =0
+        Y: =590
+        ZIndex: =11
+
+    FooterLabel As label:
+        Align: =Align.Center
+        Color: =McLarenSilver
+        Font: =Font.'Segoe UI'
+        Height: =30
+        Size: =11
+        Text: ="Your preferences will be applied to your vehicle at delivery"
+        Width: =Parent.Width
+        X: =0
+        Y: =Parent.Height - 60
+        ZIndex: =12
+
+

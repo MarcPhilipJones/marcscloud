@@ -1,0 +1,303 @@
+SeatingScreen As screen:
+  Fill: =McLarenBlack
+  
+  # Header with Back Button
+  HeaderContainer As container:
+    X: =0
+    Y: =0
+    Width: =Parent.Width
+    Height: =80
+    Fill: =McLarenDarkGrey
+    
+    BackButton As button:
+      X: =20
+      Y: =15
+      Width: =120
+      Height: =50
+      Text: ="◄ BACK"
+      Fill: =Transparent
+      Color: =McLarenWhite
+      OnSelect: =Navigate(HomeScreen, ScreenTransition.Fade)
+      BorderColor: =McLarenOrange
+      BorderThickness: =2
+      BorderRadius: =4
+      
+    ScreenTitle As label:
+      X: =(Parent.Width - 300) / 2
+      Y: =20
+      Width: =300
+      Height: =40
+      Text: ="SEATING POSITION"
+      Color: =McLarenOrange
+      Size: =22
+      FontWeight: =FontWeight.Bold
+      Align: =Align.Center
+      
+    SaveButton As button:
+      X: =Parent.Width - 140
+      Y: =15
+      Width: =120
+      Height: =50
+      Text: ="SAVE"
+      Fill: =McLarenOrange
+      Color: =McLarenBlack
+      FontWeight: =FontWeight.Bold
+      BorderRadius: =4
+      OnSelect: |
+        =Patch(CustomerSettings, CustomerSettings, {
+          DriverHeightCategory: HeightCategoryRadio.Selected.Value,
+          SeatPosition: SeatPositionSlider.Value,
+          SeatHeight: SeatHeightSlider.Value,
+          BackrestAngle: BackrestSlider.Value,
+          LumbarSupport: LumbarRadio.Selected.Value
+        });
+        Notify("Seating settings saved!", NotificationType.Success)
+
+  # Driver Height Category Section
+  HeightCategoryCard As container:
+    X: =40
+    Y: =120
+    Width: =Parent.Width - 80
+    Height: =160
+    Fill: =McLarenDarkGrey
+    BorderRadius: =8
+    
+    HeightCategoryTitle As label:
+      X: =30
+      Y: =20
+      Width: =300
+      Height: =30
+      Text: ="DRIVER HEIGHT CATEGORY"
+      Color: =McLarenWhite
+      Size: =16
+      FontWeight: =FontWeight.Bold
+      
+    HeightCategoryRadio As radio:
+      X: =30
+      Y: =60
+      Width: =Parent.Width - 60
+      Height: =80
+      Items: =Table({Value: "Petite", Description: "< 170cm"}, {Value: "Average", Description: "170-185cm"}, {Value: "Tall", Description: "> 185cm"})
+      Default: =CustomerSettings.DriverHeightCategory
+      Layout: =Layout.Horizontal
+      RadioBackgroundFill: =McLarenBlack
+      RadioBorderColor: =McLarenOrange
+      RadioSelectionFill: =McLarenOrange
+      Color: =McLarenWhite
+      Size: =16
+
+  # Seat Position Slider
+  SeatPositionCard As container:
+    X: =40
+    Y: =300
+    Width: =Parent.Width - 80
+    Height: =130
+    Fill: =McLarenDarkGrey
+    BorderRadius: =8
+    
+    SeatPositionTitle As label:
+      X: =30
+      Y: =20
+      Width: =200
+      Height: =30
+      Text: ="SEAT POSITION"
+      Color: =McLarenWhite
+      Size: =16
+      FontWeight: =FontWeight.Bold
+      
+    SeatPositionValue As label:
+      X: =Parent.Width - 100
+      Y: =20
+      Width: =70
+      Height: =30
+      Text: =Text(SeatPositionSlider.Value, "0") & "%"
+      Color: =McLarenOrange
+      Size: =16
+      FontWeight: =FontWeight.Bold
+      Align: =Align.Right
+      
+    SeatPositionSlider As slider:
+      X: =80
+      Y: =60
+      Width: =Parent.Width - 160
+      Height: =50
+      Min: =0
+      Max: =100
+      Default: =CustomerSettings.SeatPosition
+      ValueFill: =McLarenOrange
+      HandleFill: =McLarenWhite
+      RailFill: =McLarenSilver
+      ShowValue: =false
+      
+    ForwardLabel As label:
+      X: =30
+      Y: =70
+      Width: =50
+      Height: =30
+      Text: ="FWD"
+      Color: =McLarenSilver
+      Size: =11
+      
+    BackLabel As label:
+      X: =Parent.Width - 80
+      Y: =70
+      Width: =50
+      Height: =30
+      Text: ="BACK"
+      Color: =McLarenSilver
+      Size: =11
+
+  # Seat Height Slider
+  SeatHeightCard As container:
+    X: =40
+    Y: =450
+    Width: =Parent.Width - 80
+    Height: =130
+    Fill: =McLarenDarkGrey
+    BorderRadius: =8
+    
+    SeatHeightTitle As label:
+      X: =30
+      Y: =20
+      Width: =200
+      Height: =30
+      Text: ="SEAT HEIGHT"
+      Color: =McLarenWhite
+      Size: =16
+      FontWeight: =FontWeight.Bold
+      
+    SeatHeightValue As label:
+      X: =Parent.Width - 100
+      Y: =20
+      Width: =70
+      Height: =30
+      Text: =Text(SeatHeightSlider.Value, "0") & "%"
+      Color: =McLarenOrange
+      Size: =16
+      FontWeight: =FontWeight.Bold
+      Align: =Align.Right
+      
+    SeatHeightSlider As slider:
+      X: =80
+      Y: =60
+      Width: =Parent.Width - 160
+      Height: =50
+      Min: =0
+      Max: =100
+      Default: =CustomerSettings.SeatHeight
+      ValueFill: =McLarenOrange
+      HandleFill: =McLarenWhite
+      RailFill: =McLarenSilver
+      ShowValue: =false
+      
+    LowLabel As label:
+      X: =30
+      Y: =70
+      Width: =50
+      Height: =30
+      Text: ="LOW"
+      Color: =McLarenSilver
+      Size: =11
+      
+    HighLabel As label:
+      X: =Parent.Width - 80
+      Y: =70
+      Width: =50
+      Height: =30
+      Text: ="HIGH"
+      Color: =McLarenSilver
+      Size: =11
+
+  # Backrest Angle Slider
+  BackrestCard As container:
+    X: =40
+    Y: =600
+    Width: =(Parent.Width - 100) / 2
+    Height: =130
+    Fill: =McLarenDarkGrey
+    BorderRadius: =8
+    
+    BackrestTitle As label:
+      X: =20
+      Y: =15
+      Width: =200
+      Height: =25
+      Text: ="BACKREST ANGLE"
+      Color: =McLarenWhite
+      Size: =14
+      FontWeight: =FontWeight.Bold
+      
+    BackrestValue As label:
+      X: =Parent.Width - 70
+      Y: =15
+      Width: =50
+      Height: =25
+      Text: =Text(BackrestSlider.Value, "0") & "°"
+      Color: =McLarenOrange
+      Size: =14
+      FontWeight: =FontWeight.Bold
+      Align: =Align.Right
+      
+    BackrestSlider As slider:
+      X: =20
+      Y: =55
+      Width: =Parent.Width - 40
+      Height: =40
+      Min: =0
+      Max: =90
+      Default: =CustomerSettings.BackrestAngle
+      ValueFill: =McLarenOrange
+      HandleFill: =McLarenWhite
+      RailFill: =McLarenSilver
+      ShowValue: =false
+
+    UprightLabel As label:
+      X: =20
+      Y: =95
+      Width: =60
+      Height: =20
+      Text: ="Upright"
+      Color: =McLarenSilver
+      Size: =10
+
+    ReclinedLabel As label:
+      X: =Parent.Width - 80
+      Y: =95
+      Width: =60
+      Height: =20
+      Text: ="Reclined"
+      Color: =McLarenSilver
+      Size: =10
+
+  # Lumbar Support Section
+  LumbarCard As container:
+    X: =(Parent.Width + 20) / 2
+    Y: =600
+    Width: =(Parent.Width - 100) / 2
+    Height: =130
+    Fill: =McLarenDarkGrey
+    BorderRadius: =8
+    
+    LumbarTitle As label:
+      X: =20
+      Y: =15
+      Width: =200
+      Height: =25
+      Text: ="LUMBAR SUPPORT"
+      Color: =McLarenWhite
+      Size: =14
+      FontWeight: =FontWeight.Bold
+      
+    LumbarRadio As radio:
+      X: =20
+      Y: =50
+      Width: =Parent.Width - 40
+      Height: =60
+      Items: =["Off", "Low", "Medium", "High"]
+      Default: =CustomerSettings.LumbarSupport
+      Layout: =Layout.Horizontal
+      RadioBackgroundFill: =McLarenBlack
+      RadioBorderColor: =McLarenOrange
+      RadioSelectionFill: =McLarenOrange
+      Color: =McLarenWhite
+      Size: =12

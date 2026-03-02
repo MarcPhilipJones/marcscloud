@@ -1,0 +1,341 @@
+SeatingScreen As screen:
+    Fill: =McLarenBlack
+
+    SeatingHeaderBar As groupContainer.manualLayoutContainer:
+        Fill: =McLarenDarkGrey
+        Height: =80
+        Width: =Parent.Width
+        X: =0
+        Y: =0
+        ZIndex: =1
+
+        SeatingBackButton As button:
+            BorderColor: =McLarenOrange
+            BorderThickness: =2
+            Color: =McLarenWhite
+            Fill: =Transparent
+            Font: =Font.'Segoe UI'
+            Height: =50
+            OnSelect: =Navigate(HomeScreen, ScreenTransition.Fade)
+            RadiusBottomLeft: =4
+            RadiusBottomRight: =4
+            RadiusTopLeft: =4
+            RadiusTopRight: =4
+            Text: ="◄ BACK"
+            Width: =120
+            X: =20
+            Y: =15
+            ZIndex: =1
+
+        SeatingScreenTitle As label:
+            Align: =Align.Center
+            Color: =McLarenOrange
+            Font: =Font.'Segoe UI'
+            FontWeight: =FontWeight.Bold
+            Height: =40
+            Size: =22
+            Text: ="SEATING POSITION"
+            Width: =300
+            X: =Parent.Width / 2 - Self.Width / 2
+            Y: =20
+            ZIndex: =2
+
+        SeatingSaveButton As button:
+            Color: =McLarenBlack
+            Fill: =McLarenOrange
+            Font: =Font.'Segoe UI'
+            FontWeight: =FontWeight.Bold
+            Height: =50
+            OnSelect: |-
+                =Set(varDriverHeight, HeightRadio.Selected.Value);
+                Set(varSeatPosition, SeatPositionSlider.Value);
+                Set(varSeatHeight, SeatHeightSlider.Value);
+                Set(varBackrestAngle, BackrestSlider.Value);
+                Set(varLumbarSupport, LumbarRadio.Selected.Value);
+                Notify("Seating settings saved!", NotificationType.Success)
+            RadiusBottomLeft: =4
+            RadiusBottomRight: =4
+            RadiusTopLeft: =4
+            RadiusTopRight: =4
+            Text: ="SAVE"
+            Width: =120
+            X: =Parent.Width - 140
+            Y: =15
+            ZIndex: =3
+
+    HeightCategoryCard As groupContainer.manualLayoutContainer:
+        Fill: =McLarenDarkGrey
+        Height: =130
+        RadiusBottomLeft: =8
+        RadiusBottomRight: =8
+        RadiusTopLeft: =8
+        RadiusTopRight: =8
+        Width: =Parent.Width - 80
+        X: =40
+        Y: =120
+        ZIndex: =2
+
+        HeightTitle As label:
+            Color: =McLarenWhite
+            Font: =Font.'Segoe UI'
+            FontWeight: =FontWeight.Bold
+            Height: =30
+            Size: =16
+            Text: ="DRIVER HEIGHT CATEGORY"
+            Width: =300
+            X: =30
+            Y: =20
+            ZIndex: =1
+
+        HeightRadio As radio:
+            Color: =McLarenWhite
+            Default: =varDriverHeight
+            Height: =60
+            Items: =["Petite (<170cm)", "Average (170-185cm)", "Tall (>185cm)"]
+            Layout: =Layout.Horizontal
+            RadioBackgroundFill: =McLarenBlack
+            RadioBorderColor: =McLarenOrange
+            RadioSelectionFill: =McLarenOrange
+            Size: =14
+            Width: =Parent.Width - 60
+            X: =30
+            Y: =55
+            ZIndex: =2
+
+    SeatPositionCard As groupContainer.manualLayoutContainer:
+        Fill: =McLarenDarkGrey
+        Height: =110
+        RadiusBottomLeft: =8
+        RadiusBottomRight: =8
+        RadiusTopLeft: =8
+        RadiusTopRight: =8
+        Width: =Parent.Width - 80
+        X: =40
+        Y: =270
+        ZIndex: =3
+
+        SeatPositionTitle As label:
+            Color: =McLarenWhite
+            Font: =Font.'Segoe UI'
+            FontWeight: =FontWeight.Bold
+            Height: =30
+            Size: =16
+            Text: ="SEAT POSITION"
+            Width: =200
+            X: =30
+            Y: =15
+            ZIndex: =1
+
+        SeatPositionValue As label:
+            Align: =Align.Right
+            Color: =McLarenOrange
+            Font: =Font.'Segoe UI'
+            FontWeight: =FontWeight.Bold
+            Height: =30
+            Size: =16
+            Text: =Text(SeatPositionSlider.Value, "0") & "%"
+            Width: =70
+            X: =Parent.Width - 100
+            Y: =15
+            ZIndex: =2
+
+        SeatPositionSlider As slider:
+            Default: =varSeatPosition
+            HandleFill: =McLarenWhite
+            Height: =40
+            Max: =100
+            Min: =0
+            RailFill: =McLarenSilver
+            ShowValue: =false
+            ValueFill: =McLarenOrange
+            Width: =Parent.Width - 180
+            X: =90
+            Y: =55
+            ZIndex: =3
+
+        ForwardLabel As label:
+            Color: =McLarenSilver
+            Font: =Font.'Segoe UI'
+            Height: =25
+            Size: =11
+            Text: ="FWD"
+            Width: =50
+            X: =30
+            Y: =60
+            ZIndex: =4
+
+        BackLabel As label:
+            Align: =Align.Right
+            Color: =McLarenSilver
+            Font: =Font.'Segoe UI'
+            Height: =25
+            Size: =11
+            Text: ="BACK"
+            Width: =50
+            X: =Parent.Width - 80
+            Y: =60
+            ZIndex: =5
+
+    SeatHeightCard As groupContainer.manualLayoutContainer:
+        Fill: =McLarenDarkGrey
+        Height: =110
+        RadiusBottomLeft: =8
+        RadiusBottomRight: =8
+        RadiusTopLeft: =8
+        RadiusTopRight: =8
+        Width: =Parent.Width - 80
+        X: =40
+        Y: =400
+        ZIndex: =4
+
+        SeatHeightTitle As label:
+            Color: =McLarenWhite
+            Font: =Font.'Segoe UI'
+            FontWeight: =FontWeight.Bold
+            Height: =30
+            Size: =16
+            Text: ="SEAT HEIGHT"
+            Width: =200
+            X: =30
+            Y: =15
+            ZIndex: =1
+
+        SeatHeightValue As label:
+            Align: =Align.Right
+            Color: =McLarenOrange
+            Font: =Font.'Segoe UI'
+            FontWeight: =FontWeight.Bold
+            Height: =30
+            Size: =16
+            Text: =Text(SeatHeightSlider.Value, "0") & "%"
+            Width: =70
+            X: =Parent.Width - 100
+            Y: =15
+            ZIndex: =2
+
+        SeatHeightSlider As slider:
+            Default: =varSeatHeight
+            HandleFill: =McLarenWhite
+            Height: =40
+            Max: =100
+            Min: =0
+            RailFill: =McLarenSilver
+            ShowValue: =false
+            ValueFill: =McLarenOrange
+            Width: =Parent.Width - 180
+            X: =90
+            Y: =55
+            ZIndex: =3
+
+        LowLabel As label:
+            Color: =McLarenSilver
+            Font: =Font.'Segoe UI'
+            Height: =25
+            Size: =11
+            Text: ="LOW"
+            Width: =50
+            X: =30
+            Y: =60
+            ZIndex: =4
+
+        HighLabel As label:
+            Align: =Align.Right
+            Color: =McLarenSilver
+            Font: =Font.'Segoe UI'
+            Height: =25
+            Size: =11
+            Text: ="HIGH"
+            Width: =50
+            X: =Parent.Width - 80
+            Y: =60
+            ZIndex: =5
+
+    BackrestCard As groupContainer.manualLayoutContainer:
+        Fill: =McLarenDarkGrey
+        Height: =110
+        RadiusBottomLeft: =8
+        RadiusBottomRight: =8
+        RadiusTopLeft: =8
+        RadiusTopRight: =8
+        Width: =(Parent.Width - 100) / 2
+        X: =40
+        Y: =530
+        ZIndex: =5
+
+        BackrestTitle As label:
+            Color: =McLarenWhite
+            Font: =Font.'Segoe UI'
+            FontWeight: =FontWeight.Bold
+            Height: =25
+            Size: =14
+            Text: ="BACKREST ANGLE"
+            Width: =180
+            X: =20
+            Y: =15
+            ZIndex: =1
+
+        BackrestValue As label:
+            Align: =Align.Right
+            Color: =McLarenOrange
+            Font: =Font.'Segoe UI'
+            FontWeight: =FontWeight.Bold
+            Height: =25
+            Size: =14
+            Text: =Text(BackrestSlider.Value, "0") & "°"
+            Width: =50
+            X: =Parent.Width - 70
+            Y: =15
+            ZIndex: =2
+
+        BackrestSlider As slider:
+            Default: =varBackrestAngle
+            HandleFill: =McLarenWhite
+            Height: =40
+            Max: =90
+            Min: =0
+            RailFill: =McLarenSilver
+            ShowValue: =false
+            ValueFill: =McLarenOrange
+            Width: =Parent.Width - 40
+            X: =20
+            Y: =50
+            ZIndex: =3
+
+    LumbarCard As groupContainer.manualLayoutContainer:
+        Fill: =McLarenDarkGrey
+        Height: =110
+        RadiusBottomLeft: =8
+        RadiusBottomRight: =8
+        RadiusTopLeft: =8
+        RadiusTopRight: =8
+        Width: =(Parent.Width - 100) / 2
+        X: =(Parent.Width + 20) / 2
+        Y: =530
+        ZIndex: =6
+
+        LumbarTitle As label:
+            Color: =McLarenWhite
+            Font: =Font.'Segoe UI'
+            FontWeight: =FontWeight.Bold
+            Height: =25
+            Size: =14
+            Text: ="LUMBAR SUPPORT"
+            Width: =180
+            X: =20
+            Y: =15
+            ZIndex: =1
+
+        LumbarRadio As radio:
+            Color: =McLarenWhite
+            Default: =varLumbarSupport
+            Height: =50
+            Items: =["Off", "Low", "Medium", "High"]
+            Layout: =Layout.Horizontal
+            RadioBackgroundFill: =McLarenBlack
+            RadioBorderColor: =McLarenOrange
+            RadioSelectionFill: =McLarenOrange
+            Size: =12
+            Width: =Parent.Width - 40
+            X: =20
+            Y: =50
+            ZIndex: =2

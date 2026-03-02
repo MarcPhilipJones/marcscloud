@@ -1,0 +1,16 @@
+{
+  "9fa41bff-8e65-4a8f-9bb7-1b9b6bf87b45": {
+    "connectionRef": {
+      "displayName": "Spatial Services",
+      "iconUri": "https://conn-afd-prod-endpoint-bmc9bqahasf3grgk.b01.azurefd.net/v1.0.1778/1.0.1778.4417/microsoftspatialservices/icon.png",
+      "id": "/providers/microsoft.powerapps/apis/shared_microsoftspatialservices"
+    },
+    "datasets": {},
+    "dataSources": [
+      "SpatialServices"
+    ],
+    "dependencies": {},
+    "dependents": [],
+    "id": "9fa41bff-8e65-4a8f-9bb7-1b9b6bf87b45"
+  }
+}

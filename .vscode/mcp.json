@@ -1,0 +1,16 @@
+{
+  "servers": {
+    "homeassistant": {
+      "command": "C:\\Program Files\\nodejs\\npx.cmd",
+      "args": ["-y", "@jango-blockchained/homeassistant-mcp@latest"],
+      "env": {
+        "HASS_HOST": "http://192.168.0.111:8123",
+        "HASS_TOKEN": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJmMzE4NmJjNDU4Yzk0YThkOTljNjJjZjNjYTI3MGYxZiIsImlhdCI6MTc3MDAyOTc0NCwiZXhwIjoyMDg1Mzg5NzQ0fQ.27vsNq4Q6tDQRsbofnTDCrrkJQPTw8V4IoEQc7Jmp04"
+      }
+    },
+    "dataverse-mcp-preview": {
+      "type": "http",
+      "url": "https://org6cb3e9fb.crm4.dynamics.com/api/mcp_preview"
+    }
+  }
+}

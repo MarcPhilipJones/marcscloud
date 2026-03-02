@@ -1,0 +1,10 @@
+#!/bin/bash
+echo ""
+echo "🍓 Raspberry Pi 5 Status"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "Uptime:    $(uptime -p | sed 's/up //')"
+echo "CPU Temp:  $(vcgencmd measure_temp | cut -d= -f2)"
+echo "Memory:    $(free -m | awk '/Mem:/ {printf "%d/%d MB (%.1f%%)", $3, $2, $3/$2*100}')"
+echo "Disk:      $(df -h / | awk 'NR==2 {print $3 "/" $2 " (" $5 " used)"}')"
+echo "Docker:    $(docker ps -q 2>/dev/null | wc -l) containers running"
+echo ""

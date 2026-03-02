@@ -1,0 +1,55 @@
+{% assign count = topKBCount |integer  %}
+{% assign languagecode = website.selected_language.code %}
+{%assign var1=count%}
+  <div class="row">
+    <div class="col-md-12">
+      <div style="font-family: Segoe UI;font-size: 24px;font-weight: 700;line-height: 36px;letter-spacing: 0px;text-align: left;color:#234B94;margin: 15px;margin-left: 40px;">{% editable snippets 'KnowledgeMgmt/TopRatedArticles' type: 'text', default: resx["Top_Rated_Articles"], escape: true, tag: 'span' %}</div>
+    </div>
+  </div>
+  {% assign top_articles = knowledge.articles | top: count,languagecode  %}
+  <div class="row">
+  {% if top_articles %}
+   
+    <div class="col-md-12" style="padding-left: 55px;margin-bottom:5px;margin-top:7px">
+      {% for article in top_articles limit:count%}
+        {% assign var1 = var1 | minus:1 %}
+        <a style="font-family: Segoe UI;font-size: 14px;font-weight: 600;line-height: 32px;letter-spacing: 0px;color:black;"  href="{{ article.url | escape }}">
+          <img src="/Shape.png" alt="" name="Shape.png" style="width: 12px; height: 14px; max-width: 100%;margin:6px" />{{ article.title | escape }}
+          <div class="kbDate">{{ article.modifiedon | date: 'MMM d, yyyy' | escape }}</div>
+        </a>
+        {% if var1 != 0 %}
+         <hr style="border-width: 1.5px;border-color: #9FB8EB;margin-right:20px;" />
+         {% endif %}
+      {% endfor %}
+    </div>
+  {% endif %}
+  </div>
+
+
+{% manifest %} 
+{
+  "type": "Functional",
+  "displayName": "Category",
+  "description": "top categories",
+   "params": [
+    {
+      "id": "topKBCount",
+      "displayName": "topKBCount",
+      "description": "No. of top knowledge article"
+    }
+  ]
+}
+{% endmanifest %} 
+
+
+<style>
+.kbDate{
+  font-family: Arial;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 36px;
+  letter-spacing: 0px;
+  color:#767676;
+}
+</style>
+

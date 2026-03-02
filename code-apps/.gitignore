@@ -1,0 +1,29 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+node_modules
+dist
+dist-ssr
+*.local
+
+# Power Apps Code Apps
+# power.config.json contains environment-specific metadata (connection IDs, etc.)
+# Include it in source control for team collaboration, but be aware it has env-specific values
+# src/generated/ contains auto-generated models/services - include for team access
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?

@@ -1,0 +1,72 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Open Presenter (Simple Browser)",
+            "type": "shell",
+            "command": "powershell",
+            "args": [
+                "-ExecutionPolicy", "Bypass",
+                "-File", "${workspaceFolder}/scripts/Start-Presenter.ps1",
+                "-Browser", "vscode"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "problemMatcher": [],
+            "presentation": {
+                "reveal": "silent"
+            }
+        },
+        {
+            "label": "Open Presenter (Chrome)",
+            "type": "shell",
+            "command": "powershell",
+            "args": [
+                "-ExecutionPolicy", "Bypass",
+                "-File", "${workspaceFolder}/scripts/Start-Presenter.ps1",
+                "-Browser", "chrome"
+            ],
+            "problemMatcher": [],
+            "presentation": {
+                "reveal": "silent"
+            }
+        },
+        {
+            "label": "Start PPT Controller",
+            "type": "shell",
+            "command": "powershell",
+            "args": [
+                "-ExecutionPolicy", "Bypass",
+                "-File", "${workspaceFolder}/scripts/Start-PptController.ps1"
+            ],
+            "group": "none",
+            "isBackground": true,
+            "problemMatcher": [],
+            "presentation": {
+                "reveal": "always",
+                "panel": "dedicated"
+            }
+        },
+        {
+            "label": "Stop PPT Controller",
+            "type": "shell",
+            "command": "powershell",
+            "args": [
+                "-Command",
+                "$port = 8080; $pids = @(Get-NetTCPConnection -LocalPort $port -ErrorAction SilentlyContinue | Where-Object { $_.State -eq 'Listen' } | Select-Object -ExpandProperty OwningProcess -Unique); if ($pids) { $pids | ForEach-Object { Stop-Process -Id $_ -Force -ErrorAction SilentlyContinue; Write-Host \"Stopped PID $_\" }; Write-Host 'PPT Controller stopped.' } else { Write-Host 'No PPT Controller running.' }"
+            ],
+            "problemMatcher": []
+        },
+        {
+            "label": "Start Everything (Presenter + PPT)",
+            "dependsOn": [
+                "Start PPT Controller",
+                "Open Presenter (Simple Browser)"
+            ],
+            "dependsOrder": "sequence",
+            "problemMatcher": []
+        }
+    ]
+}

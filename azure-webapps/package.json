@@ -1,0 +1,26 @@
+{
+  "name": "azure-webapps",
+  "version": "1.0.0",
+  "description": "Minimal multi-customer Node.js demo for Azure App Service",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "keywords": [
+    "azure",
+    "webapps",
+    "node",
+    "express"
+  ],
+  "author": "Marc Jones",
+  "license": "ISC",
+  "dependencies": {
+    "@azure/msal-node": "^3.8.8",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

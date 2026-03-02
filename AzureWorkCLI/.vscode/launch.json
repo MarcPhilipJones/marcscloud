@@ -1,0 +1,48 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "AzureWorkCLI: Check",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "azureworkcli.cli",
+            "args": ["check"],
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}/src"
+            }
+        },
+        {
+            "name": "AzureWorkCLI: Run Command",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "azureworkcli.cli",
+            "args": ["run", "group", "list"],
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}/src"
+            }
+        },
+        {
+            "name": "AzureWorkCLI: Custom Args",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "azureworkcli.cli",
+            "args": ["${input:cliArgs}"],
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}/src"
+            }
+        }
+    ],
+    "inputs": [
+        {
+            "id": "cliArgs",
+            "type": "promptString",
+            "description": "Enter CLI arguments (e.g., 'run group list')"
+        }
+    ]
+}

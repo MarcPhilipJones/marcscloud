@@ -1,0 +1,339 @@
+DrivingScreen As screen:
+  Fill: =McLarenBlack
+  
+  # Header with Back Button
+  HeaderContainer As container:
+    X: =0
+    Y: =0
+    Width: =Parent.Width
+    Height: =80
+    Fill: =McLarenDarkGrey
+    
+    BackButton As button:
+      X: =20
+      Y: =15
+      Width: =120
+      Height: =50
+      Text: ="◄ BACK"
+      Fill: =Transparent
+      Color: =McLarenWhite
+      OnSelect: =Navigate(HomeScreen, ScreenTransition.Fade)
+      BorderColor: =McLarenOrange
+      BorderThickness: =2
+      BorderRadius: =4
+      
+    ScreenTitle As label:
+      X: =(Parent.Width - 300) / 2
+      Y: =20
+      Width: =300
+      Height: =40
+      Text: ="DRIVING MODES"
+      Color: =McLarenOrange
+      Size: =22
+      FontWeight: =FontWeight.Bold
+      Align: =Align.Center
+      
+    SaveButton As button:
+      X: =Parent.Width - 140
+      Y: =15
+      Width: =120
+      Height: =50
+      Text: ="SAVE"
+      Fill: =McLarenOrange
+      Color: =McLarenBlack
+      FontWeight: =FontWeight.Bold
+      BorderRadius: =4
+      OnSelect: |
+        =Patch(CustomerSettings, CustomerSettings, {
+          DefaultDriveMode: DriveModeGallery.Selected.Mode,
+          SteeringWeight: SteeringSlider.Value,
+          SuspensionSetting: SuspensionSlider.Value,
+          ESCSetting: ESCRadio.Selected.Value,
+          LaunchControl: LaunchControlToggle.Value,
+          ActiveAero: ActiveAeroRadio.Selected.Value
+        });
+        Notify("Driving settings saved!", NotificationType.Success)
+
+  # Drive Mode Selection Section
+  DriveModeCard As container:
+    X: =40
+    Y: =120
+    Width: =Parent.Width - 80
+    Height: =180
+    Fill: =McLarenDarkGrey
+    BorderRadius: =8
+    
+    DriveModeTitle As label:
+      X: =30
+      Y: =20
+      Width: =250
+      Height: =30
+      Text: ="DEFAULT DRIVE MODE"
+      Color: =McLarenWhite
+      Size: =16
+      FontWeight: =FontWeight.Bold
+      
+    # Drive Mode Gallery (visual icons)
+    DriveModeGallery As gallery:
+      X: =30
+      Y: =60
+      Width: =Parent.Width - 60
+      Height: =100
+      Items: =Table(
+        {Mode: "Comfort", Icon: Icon.Car, Description: "Relaxed"},
+        {Mode: "Sport", Icon: Icon.Flash, Description: "Responsive"},
+        {Mode: "Track", Icon: Icon.Ribbon, Description: "Maximum"},
+        {Mode: "Wet", Icon: Icon.Cloud, Description: "Cautious"}
+      )
+      TemplateFill: =If(ThisItem.IsSelected, McLarenOrange, McLarenBlack)
+      TemplateSize: =150
+      
+      ModeButton As button:
+        X: =10
+        Y: =5
+        Width: =130
+        Height: =85
+        Fill: =If(ThisItem.IsSelected, McLarenOrange, McLarenBlack)
+        BorderColor: =McLarenOrange
+        BorderThickness: =2
+        BorderRadius: =8
+        Text: =""
+        OnSelect: =Select(Parent)
+        
+      ModeIcon As icon:
+        X: =45
+        Y: =15
+        Width: =50
+        Height: =40
+        Icon: =ThisItem.Icon
+        Color: =If(ThisItem.IsSelected, McLarenBlack, McLarenOrange)
+        
+      ModeLabel As label:
+        X: =10
+        Y: =55
+        Width: =130
+        Height: =25
+        Text: =ThisItem.Mode
+        Color: =If(ThisItem.IsSelected, McLarenBlack, McLarenWhite)
+        Size: =14
+        FontWeight: =FontWeight.Bold
+        Align: =Align.Center
+
+  # Steering Weight Slider
+  SteeringCard As container:
+    X: =40
+    Y: =320
+    Width: =Parent.Width - 80
+    Height: =110
+    Fill: =McLarenDarkGrey
+    BorderRadius: =8
+    
+    SteeringTitle As label:
+      X: =30
+      Y: =15
+      Width: =200
+      Height: =30
+      Text: ="STEERING WEIGHT"
+      Color: =McLarenWhite
+      Size: =16
+      FontWeight: =FontWeight.Bold
+      
+    SteeringValueLabel As label:
+      X: =Parent.Width - 120
+      Y: =15
+      Width: =90
+      Height: =30
+      Text: =Switch(Round(SteeringSlider.Value, 0), 0, "LIGHT", 1, "STANDARD", 2, "HEAVY", "STANDARD")
+      Color: =McLarenOrange
+      Size: =14
+      FontWeight: =FontWeight.Bold
+      Align: =Align.Right
+      
+    SteeringSlider As slider:
+      X: =80
+      Y: =55
+      Width: =Parent.Width - 160
+      Height: =40
+      Min: =0
+      Max: =2
+      Default: =Switch(CustomerSettings.SteeringWeight, "Light", 0, "Standard", 1, "Heavy", 2, 1)
+      ValueFill: =McLarenOrange
+      HandleFill: =McLarenWhite
+      RailFill: =McLarenSilver
+      ShowValue: =false
+      
+    LightLabel As label:
+      X: =30
+      Y: =60
+      Width: =50
+      Height: =25
+      Text: ="Light"
+      Color: =McLarenSilver
+      Size: =10
+      
+    HeavyLabel As label:
+      X: =Parent.Width - 80
+      Y: =60
+      Width: =50
+      Height: =25
+      Text: ="Heavy"
+      Color: =McLarenSilver
+      Size: =10
+
+  # Suspension Slider
+  SuspensionCard As container:
+    X: =40
+    Y: =450
+    Width: =Parent.Width - 80
+    Height: =110
+    Fill: =McLarenDarkGrey
+    BorderRadius: =8
+    
+    SuspensionTitle As label:
+      X: =30
+      Y: =15
+      Width: =200
+      Height: =30
+      Text: ="SUSPENSION"
+      Color: =McLarenWhite
+      Size: =16
+      FontWeight: =FontWeight.Bold
+      
+    SuspensionValueLabel As label:
+      X: =Parent.Width - 100
+      Y: =15
+      Width: =70
+      Height: =30
+      Text: =Switch(Round(SuspensionSlider.Value, 0), 0, "COMFORT", 1, "SPORT", 2, "TRACK", "SPORT")
+      Color: =McLarenOrange
+      Size: =14
+      FontWeight: =FontWeight.Bold
+      Align: =Align.Right
+      
+    SuspensionSlider As slider:
+      X: =80
+      Y: =55
+      Width: =Parent.Width - 160
+      Height: =40
+      Min: =0
+      Max: =2
+      Default: =Switch(CustomerSettings.SuspensionSetting, "Comfort", 0, "Sport", 1, "Track", 2, 1)
+      ValueFill: =McLarenOrange
+      HandleFill: =McLarenWhite
+      RailFill: =McLarenSilver
+      ShowValue: =false
+      
+    ComfortLabel As label:
+      X: =30
+      Y: =60
+      Width: =60
+      Height: =25
+      Text: ="Comfort"
+      Color: =McLarenSilver
+      Size: =10
+      
+    TrackLabel As label:
+      X: =Parent.Width - 80
+      Y: =60
+      Width: =50
+      Height: =25
+      Text: ="Track"
+      Color: =McLarenSilver
+      Size: =10
+
+  # ESC Setting Section
+  ESCCard As container:
+    X: =40
+    Y: =580
+    Width: =(Parent.Width - 100) / 2
+    Height: =120
+    Fill: =McLarenDarkGrey
+    BorderRadius: =8
+    
+    ESCTitle As label:
+      X: =20
+      Y: =15
+      Width: =150
+      Height: =30
+      Text: ="ESC SETTING"
+      Color: =McLarenWhite
+      Size: =14
+      FontWeight: =FontWeight.Bold
+      
+    ESCRadio As radio:
+      X: =20
+      Y: =50
+      Width: =Parent.Width - 40
+      Height: =60
+      Items: =["On", "Dynamic", "Track"]
+      Default: =CustomerSettings.ESCSetting
+      Layout: =Layout.Horizontal
+      RadioBackgroundFill: =McLarenBlack
+      RadioBorderColor: =McLarenOrange
+      RadioSelectionFill: =McLarenOrange
+      Color: =McLarenWhite
+      Size: =12
+
+  # Launch Control Toggle
+  LaunchControlCard As container:
+    X: =(Parent.Width + 20) / 2
+    Y: =580
+    Width: =(Parent.Width - 100) / 2
+    Height: =120
+    Fill: =McLarenDarkGrey
+    BorderRadius: =8
+    
+    LaunchControlTitle As label:
+      X: =20
+      Y: =15
+      Width: =180
+      Height: =30
+      Text: ="LAUNCH CONTROL"
+      Color: =McLarenWhite
+      Size: =14
+      FontWeight: =FontWeight.Bold
+      
+    LaunchControlToggle As toggle:
+      X: =(Parent.Width - 120) / 2
+      Y: =55
+      Width: =120
+      Height: =45
+      Default: =CustomerSettings.LaunchControl
+      OnText: ="ENABLED"
+      OffText: ="DISABLED"
+      TrueFill: =McLarenOrange
+      FalseFill: =McLarenSilver
+      TextPosition: =TextPosition.Right
+
+  # Active Aero Section
+  ActiveAeroCard As container:
+    X: =40
+    Y: =720
+    Width: =Parent.Width - 80
+    Height: =100
+    Fill: =McLarenDarkGrey
+    BorderRadius: =8
+    
+    ActiveAeroTitle As label:
+      X: =30
+      Y: =15
+      Width: =150
+      Height: =30
+      Text: ="ACTIVE AERO"
+      Color: =McLarenWhite
+      Size: =16
+      FontWeight: =FontWeight.Bold
+      
+    ActiveAeroRadio As radio:
+      X: =30
+      Y: =50
+      Width: =Parent.Width - 60
+      Height: =40
+      Items: =["Auto", "Low Drag", "High Downforce"]
+      Default: =CustomerSettings.ActiveAero
+      Layout: =Layout.Horizontal
+      RadioBackgroundFill: =McLarenBlack
+      RadioBorderColor: =McLarenOrange
+      RadioSelectionFill: =McLarenOrange
+      Color: =McLarenWhite
+      Size: =14

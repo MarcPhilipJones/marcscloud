@@ -1,0 +1,238 @@
+ClimateScreen As screen:
+  Fill: =McLarenBlack
+  
+  # Header with Back Button
+  HeaderContainer As container:
+    X: =0
+    Y: =0
+    Width: =Parent.Width
+    Height: =80
+    Fill: =McLarenDarkGrey
+    
+    BackButton As button:
+      X: =20
+      Y: =15
+      Width: =120
+      Height: =50
+      Text: ="◄ BACK"
+      Fill: =Transparent
+      Color: =McLarenWhite
+      OnSelect: =Navigate(HomeScreen, ScreenTransition.Fade)
+      BorderColor: =McLarenOrange
+      BorderThickness: =2
+      BorderRadius: =4
+      
+    ScreenTitle As label:
+      X: =(Parent.Width - 300) / 2
+      Y: =20
+      Width: =300
+      Height: =40
+      Text: ="CLIMATE CONTROL"
+      Color: =McLarenOrange
+      Size: =22
+      FontWeight: =FontWeight.Bold
+      Align: =Align.Center
+      
+    SaveButton As button:
+      X: =Parent.Width - 140
+      Y: =15
+      Width: =120
+      Height: =50
+      Text: ="SAVE"
+      Fill: =McLarenOrange
+      Color: =McLarenBlack
+      FontWeight: =FontWeight.Bold
+      BorderRadius: =4
+      OnSelect: |
+        =Patch(CustomerSettings, CustomerSettings, {
+          Temperature: TemperatureSlider.Value,
+          HeatedSeats: HeatedSeatsRadio.Selected.Value,
+          VentilatedSeats: VentilatedSeatsRadio.Selected.Value,
+          HeatedSteeringWheel: HeatedWheelToggle.Value
+        });
+        Notify("Climate settings saved!", NotificationType.Success)
+
+  # Temperature Section
+  TemperatureCard As container:
+    X: =40
+    Y: =120
+    Width: =Parent.Width - 80
+    Height: =250
+    Fill: =McLarenDarkGrey
+    BorderRadius: =8
+    
+    TemperatureTitle As label:
+      X: =30
+      Y: =20
+      Width: =200
+      Height: =40
+      Text: ="TEMPERATURE"
+      Color: =McLarenWhite
+      Size: =18
+      FontWeight: =FontWeight.Bold
+      
+    # Temperature Value Display (circular gauge appearance)
+    TemperatureGaugeBackground As circle:
+      X: =(Parent.Width - 200) / 2
+      Y: =70
+      Width: =200
+      Height: =200
+      Fill: =McLarenBlack
+      BorderColor: =McLarenOrange
+      BorderThickness: =4
+      
+    TemperatureValueLabel As label:
+      X: =(Parent.Width - 200) / 2
+      Y: =140
+      Width: =200
+      Height: =60
+      Text: =Text(TemperatureSlider.Value, "0") & "°C"
+      Color: =McLarenOrange
+      Size: =36
+      FontWeight: =FontWeight.Bold
+      Align: =Align.Center
+      
+    # Temperature Slider (horizontal)
+    TemperatureSlider As slider:
+      X: =40
+      Y: =300
+      Width: =Parent.Width - 80
+      Height: =60
+      Min: =16
+      Max: =28
+      Default: =CustomerSettings.Temperature
+      ValueFill: =McLarenOrange
+      HandleFill: =McLarenWhite
+      RailFill: =McLarenSilver
+      ShowValue: =false
+      
+    MinTempLabel As label:
+      X: =40
+      Y: =360
+      Width: =60
+      Height: =30
+      Text: ="16°C"
+      Color: =McLarenSilver
+      Size: =12
+
+    MaxTempLabel As label:
+      X: =Parent.Width - 100
+      Y: =360
+      Width: =60
+      Height: =30
+      Text: ="28°C"
+      Color: =McLarenSilver
+      Size: =12
+
+  # Heated Seats Section
+  HeatedSeatsCard As container:
+    X: =40
+    Y: =420
+    Width: =(Parent.Width - 100) / 2
+    Height: =180
+    Fill: =McLarenDarkGrey
+    BorderRadius: =8
+    
+    HeatedSeatsTitle As label:
+      X: =20
+      Y: =20
+      Width: =200
+      Height: =30
+      Text: ="HEATED SEATS"
+      Color: =McLarenWhite
+      Size: =16
+      FontWeight: =FontWeight.Bold
+      
+    HeatedSeatsIcon As icon:
+      X: =Parent.Width - 60
+      Y: =15
+      Width: =40
+      Height: =40
+      Icon: =Icon.Waypoint
+      Color: =McLarenOrange
+      
+    HeatedSeatsRadio As radio:
+      X: =20
+      Y: =60
+      Width: =Parent.Width - 40
+      Height: =100
+      Items: =["Off", "Low", "Medium", "High"]
+      Default: =CustomerSettings.HeatedSeats
+      Layout: =Layout.Horizontal
+      RadioBackgroundFill: =McLarenBlack
+      RadioBorderColor: =McLarenOrange
+      RadioSelectionFill: =McLarenOrange
+      Color: =McLarenWhite
+      Size: =14
+
+  # Ventilated Seats Section
+  VentilatedSeatsCard As container:
+    X: =(Parent.Width + 20) / 2
+    Y: =420
+    Width: =(Parent.Width - 100) / 2
+    Height: =180
+    Fill: =McLarenDarkGrey
+    BorderRadius: =8
+    
+    VentilatedSeatsTitle As label:
+      X: =20
+      Y: =20
+      Width: =220
+      Height: =30
+      Text: ="VENTILATED SEATS"
+      Color: =McLarenWhite
+      Size: =16
+      FontWeight: =FontWeight.Bold
+      
+    VentilatedSeatsIcon As icon:
+      X: =Parent.Width - 60
+      Y: =15
+      Width: =40
+      Height: =40
+      Icon: =Icon.Refresh
+      Color: =McLarenOrange
+      
+    VentilatedSeatsRadio As radio:
+      X: =20
+      Y: =60
+      Width: =Parent.Width - 40
+      Height: =100
+      Items: =["Off", "Low", "Medium", "High"]
+      Default: =CustomerSettings.VentilatedSeats
+      Layout: =Layout.Horizontal
+      RadioBackgroundFill: =McLarenBlack
+      RadioBorderColor: =McLarenOrange
+      RadioSelectionFill: =McLarenOrange
+      Color: =McLarenWhite
+      Size: =14
+
+  # Heated Steering Wheel Section
+  HeatedWheelCard As container:
+    X: =40
+    Y: =620
+    Width: =Parent.Width - 80
+    Height: =80
+    Fill: =McLarenDarkGrey
+    BorderRadius: =8
+    
+    HeatedWheelTitle As label:
+      X: =30
+      Y: =25
+      Width: =300
+      Height: =30
+      Text: ="HEATED STEERING WHEEL"
+      Color: =McLarenWhite
+      Size: =16
+      FontWeight: =FontWeight.Bold
+      
+    HeatedWheelToggle As toggle:
+      X: =Parent.Width - 150
+      Y: =20
+      Width: =120
+      Height: =40
+      Default: =CustomerSettings.HeatedSteeringWheel
+      OnText: ="ON"
+      OffText: ="OFF"
+      TrueFill: =McLarenOrange
+      FalseFill: =McLarenSilver
+      TextPosition: =TextPosition.Left
