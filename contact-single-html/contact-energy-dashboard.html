@@ -1,0 +1,1176 @@
+<!doctype html>
+<!--
+  Contact Energy Dashboard — D365 Web Resource
+  =============================================
+  Single-file HTML web resource that replicates the Contact Code App
+  (contact-code-app) functionality as a native D365 web resource.
+
+  Uses Xrm.WebApi for data access — no external servers, no secrets,
+  no CSP configuration required.
+
+  Designed to be embedded on the Contact form as a web resource or
+  loaded inside a form tab.
+
+  Version: 1.4.0
+  Date:    March 2026
+-->
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Contact Energy Dashboard</title>
+    <!-- Chart.js for energy usage charts (CDN — D365 allows this) -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+    <style>
+      /* ── Reset & Base ─────────────────────────────────────── */
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        font-family:
+          "Segoe UI",
+          -apple-system,
+          BlinkMacSystemFont,
+          sans-serif;
+        font-size: 13px;
+        color: #242424;
+        background: #fafafa;
+        overflow: hidden;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+
+      /* ── Loading / Error States ───────────────────────────── */
+      .loading-state,
+      .error-state {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+        gap: 12px;
+      }
+      .loading-state .spinner {
+        width: 32px;
+        height: 32px;
+        border: 3px solid #e0e0e0;
+        border-top: 3px solid #0078d4;
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+      }
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+      .loading-state span {
+        color: #616161;
+        font-size: 14px;
+      }
+      .error-state {
+        color: #d13438;
+        padding: 20px;
+        text-align: center;
+      }
+      .error-state .error-icon {
+        font-size: 32px;
+      }
+      .error-state .error-msg {
+        font-size: 14px;
+        max-width: 400px;
+      }
+      .error-state .debug-panel {
+        margin-top: 12px;
+        text-align: left;
+        width: 100%;
+        max-width: 600px;
+      }
+      .error-state .debug-panel summary {
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 12px;
+        color: #616161;
+      }
+      .error-state .debug-panel pre {
+        background: #f5f5f5;
+        padding: 12px;
+        border-radius: 4px;
+        overflow: auto;
+        max-height: 300px;
+        font-size: 11px;
+        color: #333;
+        margin-top: 8px;
+      }
+
+      /* ── Version Badge (floating bottom-right) ────────────── */
+      .version-badge {
+        position: fixed;
+        bottom: 4px;
+        right: 8px;
+        font-size: 10px;
+        color: #999;
+        font-weight: 400;
+        z-index: 10;
+        pointer-events: none;
+      }
+
+      /* ── Auto-Save Status (floating top-right overlay) ─────── */
+      .autosave-status {
+        position: fixed;
+        top: 6px;
+        right: 12px;
+        font-size: 12px;
+        font-weight: 500;
+        color: #616161;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        min-height: 20px;
+        transition: opacity 0.3s;
+        z-index: 20;
+        background: rgba(255, 255, 255, 0.9);
+        padding: 2px 10px;
+        border-radius: 4px;
+        opacity: 0;
+      }
+      .autosave-status.saving,
+      .autosave-status.saved,
+      .autosave-status.error {
+        opacity: 1;
+      }
+      .autosave-status .save-spinner {
+        width: 14px;
+        height: 14px;
+        border: 2px solid #e0e0e0;
+        border-top: 2px solid #0078d4;
+        border-radius: 50%;
+        animation: spin 0.6s linear infinite;
+        display: none;
+      }
+      .autosave-status.saving .save-spinner {
+        display: inline-block;
+      }
+      .autosave-status.saving .status-text {
+        color: #616161;
+      }
+      .autosave-status.saved .status-text {
+        color: #107c10;
+      }
+      .autosave-status.error .status-text {
+        color: #d13438;
+      }
+
+      /* ── Fields Section ───────────────────────────────────── */
+      .fields-section {
+        flex-shrink: 0;
+        background: #fff;
+        padding: 12px 20px 8px;
+        border-bottom: 1px solid #e0e0e0;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+      }
+      .fields-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 1px 20px;
+      }
+      .field-item {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        min-height: 30px;
+        font-size: 12px;
+      }
+      .field-label {
+        color: #707070;
+        min-width: 95px;
+        flex-shrink: 0;
+        font-size: 12px;
+      }
+      .field-value {
+        color: #242424;
+        font-weight: 500;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .conversation-row {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        min-height: 30px;
+        font-size: 12px;
+        grid-column: span 2;
+      }
+
+      /* ── Editable Controls ────────────────────────────────── */
+      .compact-input {
+        font-family: inherit;
+        font-size: 12px;
+        padding: 2px 8px;
+        border: 1px solid #d1d1d1;
+        border-radius: 4px;
+        outline: none;
+        min-width: 0;
+        max-width: 160px;
+        height: 26px;
+        transition: border-color 0.15s;
+      }
+      .compact-input:focus {
+        border-color: #0078d4;
+      }
+      .conversation-input {
+        flex: 1;
+        max-width: none;
+      }
+      .compact-select {
+        font-family: inherit;
+        font-size: 12px;
+        padding: 2px 6px;
+        border: 1px solid #d1d1d1;
+        border-radius: 4px;
+        outline: none;
+        min-width: 110px;
+        max-width: 160px;
+        height: 26px;
+        background: #fff;
+        cursor: pointer;
+      }
+      .compact-select:focus {
+        border-color: #0078d4;
+      }
+
+      /* ── Toggle Switch (CSS-only) ─────────────────────────── */
+      .toggle-wrap {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        cursor: pointer;
+      }
+      .toggle-track {
+        width: 36px;
+        height: 20px;
+        border-radius: 10px;
+        background: #d1d1d1;
+        position: relative;
+        transition: background 0.2s;
+        flex-shrink: 0;
+      }
+      .toggle-track.on {
+        background: #0078d4;
+      }
+      .toggle-thumb {
+        width: 14px;
+        height: 14px;
+        border-radius: 50%;
+        background: #fff;
+        position: absolute;
+        top: 3px;
+        left: 3px;
+        transition: left 0.2s;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+      }
+      .toggle-track.on .toggle-thumb {
+        left: 19px;
+      }
+      .toggle-label {
+        font-size: 12px;
+        color: #242424;
+        user-select: none;
+      }
+
+      /* ── Charts Section ───────────────────────────────────── */
+      .charts-section {
+        padding: 8px 16px 8px;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+      .chart-card {
+        background: #fff;
+        border-radius: 8px;
+        padding: 12px 16px 4px 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+      }
+      .chart-header {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 4px;
+        padding-left: 8px;
+      }
+      .chart-title {
+        font-size: 13px;
+        font-weight: 600;
+        color: #242424;
+      }
+      .chart-badge {
+        font-size: 10px;
+        font-weight: 600;
+        padding: 1px 8px;
+        border-radius: 10px;
+        color: #fff;
+      }
+      .chart-badge.elec {
+        background: #0078d4;
+      }
+      .chart-badge.gas {
+        background: #e67700;
+      }
+      .ev-hint {
+        font-size: 11px;
+        color: #707070;
+        margin-left: auto;
+        font-style: italic;
+      }
+      .chart-container {
+        position: relative;
+        overflow: hidden;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- ── Loading State ──────────────────────────────────── -->
+    <div id="loading" class="loading-state">
+      <div class="spinner"></div>
+      <span>Loading contact details…</span>
+    </div>
+
+    <!-- ── Error State (hidden by default) ────────────────── -->
+    <div id="error" class="error-state" style="display: none">
+      <div class="error-icon">⚠️</div>
+      <div class="error-msg" id="errorMessage"></div>
+      <details class="debug-panel" id="debugPanel" style="display: none">
+        <summary>Debug Information</summary>
+        <pre id="debugContent"></pre>
+      </details>
+    </div>
+
+    <!-- Auto-save status overlay -->
+    <div class="autosave-status" id="autosaveStatus">
+      <div class="save-spinner"></div>
+      <span class="status-text" id="statusText"></span>
+    </div>
+
+    <!-- Version badge -->
+    <span class="version-badge">v1.4.0</span>
+
+    <!-- ── Main Content (hidden until loaded) ──────────────── -->
+    <div id="content" style="display: none">
+      <!-- Editable Fields Grid -->
+      <div class="fields-section">
+        <div class="fields-grid" id="fieldsGrid">
+          <!-- Populated by JavaScript -->
+        </div>
+      </div>
+
+      <!-- Energy Usage Charts -->
+      <div class="charts-section">
+        <div class="chart-card">
+          <div class="chart-header">
+            <span class="chart-badge elec">⚡</span>
+            <span class="chart-title">Electricity Usage (kWh) — 12 Months</span>
+            <span class="ev-hint">📈 Recent uptick — possible EV charging</span>
+          </div>
+          <div class="chart-container" id="elecChartContainer">
+            <canvas id="elecChart"></canvas>
+          </div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-header">
+            <span class="chart-badge gas">🔥</span>
+            <span class="chart-title">Gas Usage (kWh) — 12 Months</span>
+          </div>
+          <div class="chart-container" id="gasChartContainer">
+            <canvas id="gasChart"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      /* ══════════════════════════════════════════════════════════════
+       Contact Energy Dashboard — D365 Web Resource
+       ══════════════════════════════════════════════════════════════ */
+
+      "use strict";
+
+      // ── App Version ──────────────────────────────────────────────
+      var APP_VERSION = "1.4.0";
+
+      // ── Choice field option maps (must match Dataverse optionset) ─
+      var BOILER_MAKE_OPTIONS = [
+        { value: 124610000, label: "Worcester Bosch" },
+        { value: 124610001, label: "Vaillant" },
+        { value: 124610002, label: "Ideal" },
+        { value: 124610003, label: "Baxi" },
+        { value: 124610004, label: "Other/Unknown" },
+      ];
+
+      var ENERGY_TARIFF_OPTIONS = [
+        { value: 124610000, label: "Fixed" },
+        { value: 124610001, label: "Variable" },
+        { value: 124610002, label: "EV Tariff" },
+        { value: 124610003, label: "Other" },
+      ];
+
+      var HOMECARE_TYPE_OPTIONS = [
+        { value: 124610000, label: "Boiler Only" },
+        { value: 124610001, label: "Complete" },
+        { value: 124610002, label: "Plumbing & Drain" },
+        { value: 124610003, label: "Electrical" },
+      ];
+
+      // ── Dataverse field selection ────────────────────────────────
+      var SELECT_FIELDS = [
+        "contactid",
+        "firstname",
+        "lastname",
+        "fullname",
+        "jobtitle",
+        "department",
+        "company",
+        "mj_boilermake",
+        "mj_boilermodel",
+        "mj_installationdate",
+        "mj_homecarecover",
+        "mj_homecaretypeofcover",
+        "mj_energytariff",
+        "mj_smartmeter",
+        "mj_doyouhaveahivethermostat",
+        "mj_doyouhaveasmartmeter",
+        "mj_doyouhavesmartradiatorvalves",
+        "mj_utility_ev_owner",
+        "mj_homeevcharger",
+        "mj_priorityregister",
+        "mj_repairedrecently",
+        "mj_conversationpoints",
+        "mj_conversationlogic",
+        "statecode",
+        "statuscode",
+        "createdon",
+        "modifiedon",
+      ].join(",");
+
+      // ── State ────────────────────────────────────────────────────
+      var contact = null; // Raw Dataverse record
+      var formState = {}; // Current editable field values
+      var saveQueue = Promise.resolve(); // Sequential save queue
+      var activeSaves = 0; // Number of in-flight saves
+      var saveStatusTimer = null; // Timer to clear "Saved" message
+      var elecChartInstance = null;
+      var gasChartInstance = null;
+
+      // ── Contact ID resolution ────────────────────────────────────
+
+      function getContactId() {
+        var debug = {};
+
+        // Method 1: Xrm.Page from parent (web resource on a form)
+        try {
+          if (window.parent && window.parent.Xrm && window.parent.Xrm.Page) {
+            var entityId = window.parent.Xrm.Page.data.entity.getId();
+            if (entityId) {
+              debug.source = "parent.Xrm.Page";
+              debug.rawId = entityId;
+              return { id: entityId.replace(/[{}]/g, ""), debug: debug };
+            }
+          }
+        } catch (e) {
+          debug.xrmPageError = e.message;
+        }
+
+        // Method 2: URL query parameters (IFrame "Pass Parameters")
+        try {
+          var params = new URLSearchParams(window.location.search);
+          var id =
+            params.get("id") ||
+            params.get("Id") ||
+            params.get("ID") ||
+            params.get("data");
+          if (id) {
+            debug.source = "URLSearchParams";
+            debug.rawId = id;
+            return { id: id.replace(/[{}]/g, ""), debug: debug };
+          }
+          debug.urlSearch = window.location.search;
+        } catch (e) {
+          debug.urlParamsError = e.message;
+        }
+
+        // Method 3: Fallback to Chris Walker for development/testing
+        debug.source = "fallback";
+        debug.note = "No contact ID found — using Chris Walker for development";
+        return { id: "7fba73b9-2461-ef11-bfe2-002248a36d0e", debug: debug };
+      }
+
+      // ── Xrm.WebApi accessor ─────────────────────────────────────
+
+      function getXrmWebApi() {
+        // Try parent first (web resource embedded on a form)
+        if (window.parent && window.parent.Xrm && window.parent.Xrm.WebApi) {
+          return window.parent.Xrm.WebApi;
+        }
+        // Try self (standalone web resource page)
+        if (typeof Xrm !== "undefined" && Xrm.WebApi) {
+          return Xrm.WebApi;
+        }
+        return null;
+      }
+
+      // ── Load contact ─────────────────────────────────────────────
+
+      async function loadContact() {
+        var loadingEl = document.getElementById("loading");
+        var errorEl = document.getElementById("error");
+        var contentEl = document.getElementById("content");
+
+        var resolved = getContactId();
+        var contactId = resolved.id;
+
+        try {
+          var webApi = getXrmWebApi();
+          if (!webApi) {
+            throw new Error(
+              "Xrm.WebApi is not available. This web resource must be opened " +
+                "from within a Dynamics 365 form.",
+            );
+          }
+
+          var result = await webApi.retrieveRecord(
+            "contact",
+            contactId,
+            "?$select=" + SELECT_FIELDS,
+          );
+
+          contact = result;
+          formState = buildFormState(result);
+
+          loadingEl.style.display = "none";
+          contentEl.style.display = "flex";
+          contentEl.style.flexDirection = "column";
+          contentEl.style.height = "100%";
+
+          renderFields();
+          sizeAndRenderCharts();
+          window.addEventListener("resize", sizeAndRenderCharts);
+        } catch (err) {
+          loadingEl.style.display = "none";
+          showError(err.message || String(err), resolved.debug);
+        }
+      }
+
+      function showError(message, debugObj) {
+        var errorEl = document.getElementById("error");
+        var msgEl = document.getElementById("errorMessage");
+        var panelEl = document.getElementById("debugPanel");
+        var preEl = document.getElementById("debugContent");
+
+        msgEl.textContent = message;
+        errorEl.style.display = "flex";
+
+        if (debugObj) {
+          preEl.textContent = JSON.stringify(debugObj, null, 2);
+          panelEl.style.display = "block";
+        }
+      }
+
+      // ── Form state builder ───────────────────────────────────────
+
+      function buildFormState(c) {
+        return {
+          mj_boilermake: c.mj_boilermake ?? null,
+          mj_boilermodel: c.mj_boilermodel ?? "",
+          mj_installationdate: c.mj_installationdate ?? "",
+          mj_homecarecover: c.mj_homecarecover ?? false,
+          mj_homecaretypeofcover: c.mj_homecaretypeofcover ?? null,
+          mj_energytariff: c.mj_energytariff ?? null,
+          mj_smartmeter: c.mj_smartmeter ?? c.mj_doyouhaveasmartmeter ?? false,
+          mj_doyouhaveahivethermostat: c.mj_doyouhaveahivethermostat ?? false,
+          mj_doyouhavesmartradiatorvalves:
+            c.mj_doyouhavesmartradiatorvalves ?? false,
+          mj_utility_ev_owner: c.mj_utility_ev_owner ?? false,
+          mj_homeevcharger: c.mj_homeevcharger ?? false,
+          mj_priorityregister: c.mj_priorityregister ?? false,
+          mj_repairedrecently: c.mj_repairedrecently ?? false,
+          mj_conversationpoints: c.mj_conversationpoints ?? "",
+        };
+      }
+
+      // ── Auto-save status UI ──────────────────────────────────────
+
+      function showSaveStatus(state, message) {
+        var el = document.getElementById("autosaveStatus");
+        var text = document.getElementById("statusText");
+        if (saveStatusTimer) {
+          clearTimeout(saveStatusTimer);
+          saveStatusTimer = null;
+        }
+
+        el.className = "autosave-status " + state;
+        text.textContent = message || "";
+
+        if (state === "saved") {
+          saveStatusTimer = setTimeout(function () {
+            el.className = "autosave-status";
+            text.textContent = "";
+          }, 3000);
+        }
+      }
+
+      // ── Per-field auto-save ──────────────────────────────────────
+
+      function setField(key, value) {
+        formState[key] = value;
+      }
+
+      function setFieldAndSave(key, value) {
+        formState[key] = value;
+        autoSaveField(key, value);
+      }
+
+      function autoSaveField(key, value) {
+        if (!contact) return;
+
+        var payload = {};
+        payload[key] = value;
+
+        // Smart Meter is stored in two fields
+        if (key === "mj_smartmeter") {
+          payload["mj_doyouhaveasmartmeter"] = value;
+        }
+
+        // Normalise empty strings to null for optional fields
+        var nullableFields = [
+          "mj_boilermodel",
+          "mj_installationdate",
+          "mj_conversationpoints",
+        ];
+        for (var f in payload) {
+          if (nullableFields.indexOf(f) !== -1 && payload[f] === "") {
+            payload[f] = null;
+          }
+        }
+
+        activeSaves++;
+        showSaveStatus("saving", "Saving…");
+
+        saveQueue = saveQueue
+          .then(function () {
+            var webApi = getXrmWebApi();
+            if (!webApi) throw new Error("Xrm.WebApi not available");
+            return webApi.updateRecord("contact", contact.contactid, payload);
+          })
+          .then(function () {
+            activeSaves--;
+            if (activeSaves === 0) {
+              showSaveStatus("saved", "✓ Saved");
+              refreshParentForm();
+            }
+          })
+          .catch(function (err) {
+            activeSaves--;
+            showSaveStatus("error", "Save failed: " + (err.message || err));
+          });
+      }
+
+      // ── Render editable fields ───────────────────────────────────
+
+      function renderFields() {
+        var grid = document.getElementById("fieldsGrid");
+
+        grid.innerHTML =
+          /* Column 1 — Boiler & Heating */
+          renderChoiceField(
+            "Boiler Make",
+            "mj_boilermake",
+            BOILER_MAKE_OPTIONS,
+          ) +
+          renderTextField("Boiler Model", "mj_boilermodel") +
+          renderDateField("Installation", "mj_installationdate") +
+          renderBoolField("HomeCare", "mj_homecarecover") +
+          renderChoiceField(
+            "Cover Type",
+            "mj_homecaretypeofcover",
+            HOMECARE_TYPE_OPTIONS,
+          ) +
+          /* Column 2 — Energy & Smart Home */
+          renderChoiceField(
+            "Energy Tariff",
+            "mj_energytariff",
+            ENERGY_TARIFF_OPTIONS,
+          ) +
+          renderBoolField("Smart Meter", "mj_smartmeter") +
+          renderBoolField("Hive Thermostat", "mj_doyouhaveahivethermostat") +
+          renderBoolField("Smart TRVs", "mj_doyouhavesmartradiatorvalves") +
+          renderBoolField("EV Owner", "mj_utility_ev_owner") +
+          /* Column 3 — EV & Service */
+          renderBoolField("EV Charger", "mj_homeevcharger") +
+          renderBoolField("Priority Register", "mj_priorityregister") +
+          renderBoolField("Repaired Recently", "mj_repairedrecently") +
+          /* Conversation Points — spans 2 columns */
+          '<div class="conversation-row">' +
+          '<span class="field-label">Conversation Pts</span>' +
+          '<input type="text" class="compact-input conversation-input" ' +
+          'id="field_mj_conversationpoints" ' +
+          'value="' +
+          escHtml(formState.mj_conversationpoints) +
+          '" ' +
+          'placeholder="Enter conversation points…" ' +
+          "oninput=\"setField('mj_conversationpoints', this.value)\" " +
+          "onblur=\"autoSaveField('mj_conversationpoints', this.value)\" />" +
+          "</div>";
+      }
+
+      function renderTextField(label, key) {
+        return (
+          '<div class="field-item">' +
+          '<span class="field-label">' +
+          label +
+          "</span>" +
+          '<input type="text" class="compact-input" ' +
+          'id="field_' +
+          key +
+          '" ' +
+          'value="' +
+          escHtml(formState[key] || "") +
+          '" ' +
+          'placeholder="' +
+          label +
+          '" ' +
+          "oninput=\"setField('" +
+          key +
+          "', this.value)\" " +
+          "onblur=\"autoSaveField('" +
+          key +
+          "', this.value)\" />" +
+          "</div>"
+        );
+      }
+
+      function renderDateField(label, key) {
+        var raw = formState[key] || "";
+        var isoVal = raw.includes("T") ? raw.split("T")[0] : raw;
+        var displayVal = "";
+        if (isoVal) {
+          var parts = isoVal.split("-");
+          if (parts.length === 3) {
+            var dt = new Date(+parts[0], +parts[1] - 1, +parts[2]);
+            displayVal = dt.toLocaleDateString("en-GB", {
+              day: "2-digit",
+              month: "long",
+              year: "numeric",
+            });
+          }
+        }
+
+        return (
+          '<div class="field-item" id="dateWrap_' +
+          key +
+          '">' +
+          '<span class="field-label">' +
+          label +
+          "</span>" +
+          '<span class="field-value date-display" ' +
+          "onclick=\"showDateInput('" +
+          key +
+          "')\" " +
+          'style="cursor:pointer;font-size:12px;">' +
+          (displayVal || '<span style="color:#999;">Click to set date</span>') +
+          "</span>" +
+          '<input type="date" class="compact-input" ' +
+          'id="field_' +
+          key +
+          '" ' +
+          'value="' +
+          isoVal +
+          '" ' +
+          'style="display:none;" ' +
+          "onchange=\"setFieldAndSave('" +
+          key +
+          "', this.value); hideDateInput('" +
+          key +
+          "');\" " +
+          "onblur=\"hideDateInput('" +
+          key +
+          "');\" />" +
+          "</div>"
+        );
+      }
+
+      function showDateInput(key) {
+        var wrap = document.getElementById("dateWrap_" + key);
+        wrap.querySelector(".date-display").style.display = "none";
+        var input = document.getElementById("field_" + key);
+        input.style.display = "block";
+        input.focus();
+      }
+
+      function hideDateInput(key) {
+        var wrap = document.getElementById("dateWrap_" + key);
+        var input = document.getElementById("field_" + key);
+        var val = input.value;
+
+        // Update display text
+        var display = wrap.querySelector(".date-display");
+        if (val) {
+          var parts = val.split("-");
+          var dt = new Date(+parts[0], +parts[1] - 1, +parts[2]);
+          display.textContent = dt.toLocaleDateString("en-GB", {
+            day: "2-digit",
+            month: "long",
+            year: "numeric",
+          });
+        } else {
+          display.innerHTML =
+            '<span style="color:#999;">Click to set date</span>';
+        }
+        display.style.display = "";
+        input.style.display = "none";
+      }
+
+      function renderBoolField(label, key) {
+        var val = !!formState[key];
+        var id = "toggle_" + key;
+        return (
+          '<div class="field-item">' +
+          '<span class="field-label">' +
+          label +
+          "</span>" +
+          '<div class="toggle-wrap" onclick="toggleBool(\'' +
+          key +
+          '\')" id="' +
+          id +
+          '">' +
+          '<div class="toggle-track' +
+          (val ? " on" : "") +
+          '">' +
+          '<div class="toggle-thumb"></div>' +
+          "</div>" +
+          '<span class="toggle-label">' +
+          (val ? "Yes" : "No") +
+          "</span>" +
+          "</div>" +
+          "</div>"
+        );
+      }
+
+      function toggleBool(key) {
+        formState[key] = !formState[key];
+        var wrap = document.getElementById("toggle_" + key);
+        var track = wrap.querySelector(".toggle-track");
+        var label = wrap.querySelector(".toggle-label");
+        if (formState[key]) {
+          track.classList.add("on");
+          label.textContent = "Yes";
+        } else {
+          track.classList.remove("on");
+          label.textContent = "No";
+        }
+        autoSaveField(key, formState[key]);
+      }
+
+      function renderChoiceField(label, key, options) {
+        var html =
+          '<div class="field-item">' +
+          '<span class="field-label">' +
+          label +
+          "</span>" +
+          '<select class="compact-select" ' +
+          'id="field_' +
+          key +
+          '" ' +
+          "onchange=\"setFieldAndSave('" +
+          key +
+          "', this.value ? parseInt(this.value) : null)\">" +
+          '<option value="">Select ' +
+          label +
+          "</option>";
+        for (var i = 0; i < options.length; i++) {
+          var sel = formState[key] === options[i].value ? " selected" : "";
+          html +=
+            '<option value="' +
+            options[i].value +
+            '"' +
+            sel +
+            ">" +
+            escHtml(options[i].label) +
+            "</option>";
+        }
+        html += "</select></div>";
+        return html;
+      }
+
+      function escHtml(str) {
+        if (!str) return "";
+        return String(str)
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;");
+      }
+
+      // ── Energy Usage Charts (Chart.js) ───────────────────────────
+
+      var MONTH_NAMES = [
+        "Jan",
+        "Feb",
+        "Mar",
+        "Apr",
+        "May",
+        "Jun",
+        "Jul",
+        "Aug",
+        "Sep",
+        "Oct",
+        "Nov",
+        "Dec",
+      ];
+
+      var ELEC_SEASONAL = {
+        0: 370,
+        1: 355,
+        2: 310,
+        3: 275,
+        4: 240,
+        5: 210,
+        6: 195,
+        7: 205,
+        8: 260,
+        9: 305,
+        10: 340,
+        11: 385,
+      };
+      var GAS_SEASONAL = {
+        0: 1340,
+        1: 1180,
+        2: 980,
+        3: 720,
+        4: 410,
+        5: 180,
+        6: 120,
+        7: 130,
+        8: 380,
+        9: 680,
+        10: 1050,
+        11: 1280,
+      };
+
+      function generateChartData(seasonal, evUplift) {
+        var now = new Date();
+        var labels = [];
+        var values = [];
+        for (var i = 11; i >= 0; i--) {
+          var d = new Date(now.getFullYear(), now.getMonth() - 1 - i, 1);
+          var m = d.getMonth();
+          var yy = String(d.getFullYear()).slice(-2);
+          labels.push(MONTH_NAMES[m] + " " + yy);
+          var kWh = seasonal[m];
+          if (evUplift) {
+            var pos = 11 - i;
+            if (pos >= 10) kWh += 120;
+            else if (pos === 9) kWh += 50;
+          }
+          // Slight jitter for realism (deterministic)
+          var jitter = 1 + (((m * 7 + 3) % 11) - 5) / 100;
+          kWh = Math.round(kWh * jitter);
+          values.push(kWh);
+        }
+        return { labels: labels, values: values };
+      }
+
+      function sizeAndRenderCharts() {
+        var fieldsSection = document.querySelector(".fields-section");
+        var fieldsH = fieldsSection ? fieldsSection.offsetHeight : 0;
+        var vh = Math.min(window.innerHeight, 700);
+        var available = vh - fieldsH - 40;
+        var perChart = Math.max(120, Math.floor(available / 2));
+        perChart = Math.min(perChart, 200);
+
+        document.querySelectorAll(".chart-container").forEach(function (c) {
+          c.style.height = perChart + "px";
+        });
+        document
+          .querySelectorAll(".chart-container canvas")
+          .forEach(function (cv) {
+            cv.style.height = perChart + "px";
+            cv.style.maxHeight = perChart + "px";
+          });
+
+        renderElecChart(perChart);
+        renderGasChart(perChart);
+      }
+
+      function renderElecChart(height) {
+        var data = generateChartData(ELEC_SEASONAL, true);
+        if (elecChartInstance) elecChartInstance.destroy();
+
+        var ctx = document.getElementById("elecChart").getContext("2d");
+        var gradient = ctx.createLinearGradient(0, 0, 0, height);
+        gradient.addColorStop(0, "rgba(0, 120, 212, 0.3)");
+        gradient.addColorStop(1, "rgba(0, 120, 212, 0.02)");
+
+        elecChartInstance = new Chart(ctx, {
+          type: "line",
+          data: {
+            labels: data.labels,
+            datasets: [
+              {
+                label: "kWh",
+                data: data.values,
+                borderColor: "#0078d4",
+                backgroundColor: gradient,
+                borderWidth: 2,
+                fill: true,
+                tension: 0.3,
+                pointRadius: 3,
+                pointBackgroundColor: "#0078d4",
+                pointHoverRadius: 5,
+              },
+            ],
+          },
+          options: chartOptions(height),
+        });
+      }
+
+      function renderGasChart(height) {
+        var data = generateChartData(GAS_SEASONAL, false);
+        if (gasChartInstance) gasChartInstance.destroy();
+
+        var ctx = document.getElementById("gasChart").getContext("2d");
+        var gradient = ctx.createLinearGradient(0, 0, 0, height);
+        gradient.addColorStop(0, "rgba(230, 119, 0, 0.3)");
+        gradient.addColorStop(1, "rgba(230, 119, 0, 0.02)");
+
+        gasChartInstance = new Chart(ctx, {
+          type: "line",
+          data: {
+            labels: data.labels,
+            datasets: [
+              {
+                label: "kWh",
+                data: data.values,
+                borderColor: "#e67700",
+                backgroundColor: gradient,
+                borderWidth: 2,
+                fill: true,
+                tension: 0.3,
+                pointRadius: 3,
+                pointBackgroundColor: "#e67700",
+                pointHoverRadius: 5,
+              },
+            ],
+          },
+          options: chartOptions(height),
+        });
+      }
+
+      function chartOptions(height) {
+        return {
+          responsive: true,
+          maintainAspectRatio: false,
+          animation: { duration: 600 },
+          layout: { padding: { left: 0, right: 12, top: 4, bottom: 0 } },
+          scales: {
+            x: {
+              ticks: { font: { size: 11 } },
+              grid: { color: "#e0e0e0", drawBorder: false },
+            },
+            y: {
+              ticks: { font: { size: 11 } },
+              grid: { color: "#e0e0e0", drawBorder: false },
+            },
+          },
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                label: function (ctx) {
+                  return ctx.parsed.y.toLocaleString() + " kWh";
+                },
+              },
+            },
+          },
+        };
+      }
+
+      // ── Refresh parent form data ────────────────────────────────
+      // After saving via Xrm.WebApi, the parent form data layer is
+      // stale. This refreshes it so other tabs/controls see the change
+      // without a full page reload.
+
+      function refreshParentForm() {
+        try {
+          if (
+            window.parent &&
+            window.parent.Xrm &&
+            window.parent.Xrm.Page &&
+            window.parent.Xrm.Page.data
+          ) {
+            window.parent.Xrm.Page.data.refresh(false);
+          }
+        } catch (e) {
+          // Silently ignore — standalone/dev mode won't have parent Xrm
+        }
+      }
+
+      // ── Init ─────────────────────────────────────────────────────
+      document.addEventListener("DOMContentLoaded", function () {
+        loadContact();
+        registerFormSaveHandler();
+      });
+
+      // ── Listen for parent form save events ─────────────────────────
+      // When the user saves on another tab of the D365 form,
+      // reload our data so fields stay in sync.
+
+      function registerFormSaveHandler() {
+        try {
+          if (
+            window.parent &&
+            window.parent.Xrm &&
+            window.parent.Xrm.Page &&
+            window.parent.Xrm.Page.data &&
+            window.parent.Xrm.Page.data.entity
+          ) {
+            window.parent.Xrm.Page.data.entity.addOnSave(onParentFormSaved);
+          }
+        } catch (e) {
+          // Silently ignore — standalone/dev mode
+        }
+      }
+
+      function onParentFormSaved() {
+        // Small delay to let Dataverse commit the save
+        setTimeout(function () {
+          reloadContactData();
+        }, 500);
+      }
+
+      async function reloadContactData() {
+        if (!contact) return;
+        try {
+          var webApi = getXrmWebApi();
+          if (!webApi) return;
+
+          var result = await webApi.retrieveRecord(
+            "contact",
+            contact.contactid,
+            "?$select=" + SELECT_FIELDS,
+          );
+
+          contact = result;
+          formState = buildFormState(result);
+          renderFields();
+        } catch (e) {
+          // Silently ignore reload failures
+        }
+      }
+    </script>
+  </body>
+</html>

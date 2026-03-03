@@ -2734,16 +2734,16 @@ The generated model types (`Contactsmj_homecarecover = keyof typeof {0: 'No', 1:
 const result = await ContactsService.update(id, payload);
 const res = result as Record<string, unknown>;
 if (res?.success === false && res?.error) {
-  throw new Error(`Dataverse update failed: ${(res.error as any).message}`);
+    throw new Error(`Dataverse update failed: ${(res.error as any).message}`);
 }
 ```
 
 ### 4. Field Name Mismatches — Generated Model vs Dataverse
 
-| Dataverse logical name | Generated SDK field | Notes                                     |
-| ---------------------- | ------------------- | ----------------------------------------- |
+| Dataverse logical name | Generated SDK field | Notes                                      |
+| ---------------------- | ------------------- | ------------------------------------------ |
 | `company`              | `company`           | NOT `companyname` — different from Web API |
-| `fullname`             | `fullname`          | Computed/read-only — omit from `$select`  |
+| `fullname`             | `fullname`          | Computed/read-only — omit from `$select`   |
 | `mj_primarystore`      | `mj_primarystore`   | Lookup (object type) — omit from `$select` |
 
 Invalid field names in `$select` cause the SDK to silently return empty data without errors.
@@ -2775,3 +2775,87 @@ npm run deploy   # runs: npm run build && pac code push --solutionName CodeApps
 ```
 
 Always specify `--solutionName CodeApps` to keep the app in the correct solution.
+
+## Contact Energy Dashboard — D365 Web Resource (March 2026)
+
+### Overview
+
+A single-file HTML web resource (`contact-single-html/contact-energy-dashboard.html`) embedded on the D365 Contact form. Uses `Xrm.WebApi` for data access — no external servers, no secrets, no CSP configuration needed.
+
+| Property              | Value                                                 |
+| --------------------- | ----------------------------------------------------- |
+| **Project Folder**    | `contact-single-html/`                                |
+| **Current Version**   | v1.2.0                                                |
+| **Web Resource Name** | `mj_contact_energy_dashboard`                         |
+| **Web Resource ID**   | `a665e256-0f17-f111-8341-7c1e52fc4a22`                |
+| **Form**              | Contact for Utilities (Interactive)                   |
+| **Form ID**           | `b45b0a55-3d74-f011-b4cc-002248a0aee6`                |
+| **Form Control**      | `WebResource_EnergyDashboard`                         |
+| **Data Access**       | `Xrm.WebApi` (parent frame, user-context)             |
+| **Fallback Contact**  | Chris Walker (`7fba73b9-2461-ef11-bfe2-002248a36d0e`) |
+
+### CRITICAL: Web Resource Name
+
+The form references `mj_contact_energy_dashboard` — **NOT** `mj_/html/contactenergydashboard.html`. There is a second web resource with the longer name that was created by mistake. Always deploy to the correct name.
+
+The deploy script (`contact-single-html/scripts/deploy-webresource.py`) has `WEB_RESOURCE_NAME = "mj_contact_energy_dashboard"` — this is correct.
+
+### Deploy Command
+
+```powershell
+.\.venv\Scripts\python.exe contact-single-html\scripts\deploy-webresource.py
+```
+
+This: base64-encodes the HTML file, updates the web resource in Dataverse via PATCH, then publishes via `PublishXml`.
+
+### Verify Deployment
+
+```powershell
+.\.venv\Scripts\python.exe contact-single-html\scripts\verify-webresource.py
+```
+
+Checks the actual content in Dataverse for version, auto-save presence, etc.
+
+### Auto-Save Architecture (v1.2.0)
+
+- **No Save button** — fields auto-save individually
+- **Toggles/dropdowns/dates**: save immediately on change via `setFieldAndSave()`
+- **Text inputs**: save on blur (when user tabs/clicks away) via `autoSaveField()`
+- **Sequential save queue**: `saveQueue = saveQueue.then(...)` prevents race conditions
+- **Status overlay**: floating top-right "Saving…" → "✓ Saved" (fades after 3s)
+- **Version badge**: floating bottom-right, subtle grey text
+
+### Layout
+
+- No top bar — fields start at the very top to maximise screen space inside the D365 IFrame
+- Fields section → energy charts below
+- Chart sizing accounts for IFrame viewport constraints (`Math.min(window.innerHeight, 700)`)
+
+### Key Functions
+
+| Function             | Purpose                                                    |
+| -------------------- | ---------------------------------------------------------- |
+| `autoSaveField(k,v)` | Builds minimal payload for one field, queues save          |
+| `setFieldAndSave()`  | Sets formState + triggers immediate save                   |
+| `setField()`         | Sets formState only (for text oninput — defer save)        |
+| `showSaveStatus()`   | Updates the floating save status overlay                   |
+| `toggleBool()`       | Toggles a boolean field + calls autoSaveField              |
+| `getXrmWebApi()`     | Gets Xrm.WebApi from parent frame or self                  |
+| `getContactId()`     | Resolves contact ID from Xrm.Page, URL params, or fallback |
+
+### Formatter Warning
+
+The Prettier/VS Code formatter can **re-add deleted code** from undo history or cause merge conflicts when reformatting. After any edit, always verify:
+
+1. Old dead code (`isDirty`, `updateDirtyState`, `handleSave`, `btn-save`) is NOT present
+2. Auto-save functions (`autoSaveField`, `setFieldAndSave`, `showSaveStatus`) ARE present
+3. Deploy and verify with the check scripts before confirming to user
+
+### Utility Scripts
+
+| Script                               | Purpose                                          |
+| ------------------------------------ | ------------------------------------------------ |
+| `scripts/deploy-webresource.py`      | Deploy HTML to Dataverse web resource + publish  |
+| `scripts/verify-webresource.py`      | Verify deployed content (version, features)      |
+| `scripts/check-form-iframes.py`      | List IFrame/WebResource controls on contact form |
+| `scripts/check-both-webresources.py` | Compare both web resources side by side          |
