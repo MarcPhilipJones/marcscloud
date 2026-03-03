@@ -53,3 +53,13 @@ Thumbs.db
 tmp/
 temp/
 *.tmp
+temp_*.json
+create_dashboard.py
+
+# Azurite local storage emulator
+__azurite_db_*
+__blobstorage__/
+
+# Sensitive output / tokens
+scripts/pp_token.txt
+scripts/csp_output.txt
