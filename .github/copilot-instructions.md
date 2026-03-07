@@ -56,6 +56,56 @@ az configure --defaults group=NewGroupName
 
 Or override per-command with `--resource-group` when needed.
 
+## Azure Authentication & Conditional Access Rules
+
+This tenant has Microsoft Entra Conditional Access policies that enforce MFA on ARM write operations. These rules prevent auth dead-ends where a command silently fails or prompts for MFA that can't be satisfied.
+
+### ARM vs Kudu/SCM Operations
+
+| Operation Type | Examples | Subject to ARM MFA? |
+|---------------|----------|---------------------|
+| **ARM writes** | `az webapp config appsettings set`, `az resource create`, `az deployment group create`, `az webapp update` | **Yes** — requires MFA-capable auth |
+| **Kudu / SCM** | `az webapp up` (ZIP deploy), `az webapp deployment source config-zip`, Kudu REST API | **No** — uses SCM credentials, bypasses ARM MFA |
+
+**Key implication**: A deployment via `az webapp up` may succeed while `az webapp config appsettings set` in the same session fails, if the auth method can't satisfy MFA.
+
+### Authentication Method Rules
+
+1. **Always use interactive browser authentication**:
+   - VS Code "Azure: Sign In" (Azure Account extension)
+   - `az login` (opens browser — satisfies MFA interactively)
+   - **NEVER use `az login --use-device-code` for ARM changes** — device code flow cannot satisfy MFA `acrs` claims challenges
+
+2. **For non-interactive / automated scenarios, use a Service Principal**:
+   - Client credentials with certificate or secret
+   - `az login --service-principal --username <appId> --password <secret> --tenant <tenantId>`
+   - Service Principals bypass interactive MFA (they authenticate via credential, not user identity)
+   - This is already the pattern used for Dataverse scripts (MSAL client credentials)
+
+3. **Before suggesting any ARM write command**, verify the current auth method can satisfy MFA. If device-code or token-based auth was used, warn that the command may fail and recommend re-authenticating via browser.
+
+### Pre-Command Checklist for ARM Writes
+
+Before running any of these commands, Copilot should verify auth:
+- `az webapp config appsettings set`
+- `az webapp update`
+- `az resource create` / `az resource update`
+- `az deployment group create` / `az deployment group validate`
+- `az functionapp config appsettings set`
+- Any `az` command that creates, updates, or deletes Azure resources
+
+**Recommended approach**: Run the command with browser-based `az login` auth.
+**Why this works**: Browser flow completes MFA interactively, satisfying Conditional Access.
+**Fallback**: Use a Service Principal if non-interactive access is required.
+
+### Answer Format for Azure Operations
+
+When answering questions about Azure CLI commands, deployment, or configuration, prefer this structure:
+
+1. **Recommended approach** — the lowest-friction option that satisfies MFA
+2. **Why this works** — one sentence
+3. **Fallback options** — only if needed
+
 ## Azure Web Apps Project
 
 Deployed Node.js + Express demo app with multi-customer pages.

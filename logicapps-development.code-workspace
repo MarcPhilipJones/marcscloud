@@ -5,12 +5,28 @@
             "path": ".",
         },
         {
+            "name": "☁️ Azure Web Apps",
+            "path": "azure-webapps",
+        },
+        {
             "name": "🔧 AzureWorkCLI",
             "path": "AzureWorkCLI",
         },
         {
             "name": "💬 CCASS Conversations",
             "path": "ccass-conversations",
+        },
+        {
+            "name": "💻 Code Apps",
+            "path": "code-apps",
+        },
+        {
+            "name": "📇 Contact Code App",
+            "path": "contact-code-app",
+        },
+        {
+            "name": "📄 Contact Single HTML",
+            "path": "contact-single-html",
         },
         {
             "name": "🌐 Contractor Portal (Frontend)",
@@ -21,8 +37,24 @@
             "path": "contractor-portal-dataverse",
         },
         {
+            "name": "🛠️ Field Service (MikeO)",
+            "path": "field-service-mikeo",
+        },
+        {
+            "name": "🔩 Field Service (Wessex)",
+            "path": "field-service-wessex",
+        },
+        {
             "name": "🏠 Marc Home Assistant",
             "path": "marc-home-assistant",
+        },
+        {
+            "name": "🏎️ McLaren Power App",
+            "path": "mcclaren-powerapp",
+        },
+        {
+            "name": "🏁 McLaren Solution",
+            "path": "mcclaren-solution",
         },
         {
             "name": "🔌 MCP Dataverse Server",
@@ -37,12 +69,32 @@
             "path": "Personal",
         },
         {
+            "name": "⚡ Power Automate Solutions",
+            "path": "power-automate-solutions",
+        },
+        {
+            "name": "🚪 Blank Power Portal",
+            "path": "blank-power-portal",
+        },
+        {
             "name": "🌍 Power Pages Demo",
             "path": "PowerPagesContosoDemo002",
         },
         {
+            "name": "🔋 Power Platform",
+            "path": "PowerPlatform",
+        },
+        {
+            "name": "🎤 Presenter",
+            "path": "Presenter",
+        },
+        {
             "name": "🍓 Raspberry Pi",
             "path": "raspberry-pi",
+        },
+        {
+            "name": "👋 Hello Power Page",
+            "path": "hello-power-page",
         },
     ],
     "settings": {
@@ -58,6 +110,7 @@
             "**/.venv": true,
             "**/dist": true,
         },
+        "sarif-viewer.connectToGithubCodeScanning": "off",
     },
     "extensions": {
         "recommendations": [

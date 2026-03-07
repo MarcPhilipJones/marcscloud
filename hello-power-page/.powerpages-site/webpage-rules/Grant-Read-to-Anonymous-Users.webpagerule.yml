@@ -1,0 +1,6 @@
+id: d78fa647-131a-4a72-8af4-dd8844693130
+name: Grant Read to Anonymous Users
+right: 1
+webpageid: 22302f07-6702-4862-8a2e-05e87a334113
+adx_webpageaccesscontrolrule_webrole:
+  - 93dcd603-57f5-4ce7-b346-39b78ee9cfe9

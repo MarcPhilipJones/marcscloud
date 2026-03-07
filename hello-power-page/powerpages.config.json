@@ -1,0 +1,5 @@
+{
+  "siteName": "MJ Hello World",
+  "defaultLandingPage": "index.html",
+  "compiledPath": "./dist"
+}
