@@ -1,0 +1,55 @@
+import type { CaseRecord } from "../types";
+
+export const MOCK_CASES: CaseRecord[] = [
+  {
+    incidentid: "aaa-111",
+    title: "No hot water since Tuesday",
+    ticketnumber: "CAS-10001",
+    createdon: "2026-03-01T09:15:00Z",
+    modifiedon: "2026-03-02T14:30:00Z",
+    statuscode: 1,
+    statecode: 0,
+    prioritycode: 1,
+    caseorigincode: 1,
+    "statuscode@OData.Community.Display.V1.FormattedValue": "In Progress",
+    "prioritycode@OData.Community.Display.V1.FormattedValue": "High",
+    "caseorigincode@OData.Community.Display.V1.FormattedValue": "Phone",
+    _customerid_value: "7fba73b9-2461-ef11-bfe2-002248a36d0e",
+    "_customerid_value@OData.Community.Display.V1.FormattedValue":
+      "Chris Walker",
+  },
+  {
+    incidentid: "bbb-222",
+    title: "Smart meter not sending readings",
+    ticketnumber: "CAS-10002",
+    createdon: "2026-02-28T11:00:00Z",
+    modifiedon: "2026-03-05T16:00:00Z",
+    statuscode: 5,
+    statecode: 1,
+    prioritycode: 2,
+    caseorigincode: 3,
+    "statuscode@OData.Community.Display.V1.FormattedValue": "Problem Solved",
+    "prioritycode@OData.Community.Display.V1.FormattedValue": "Normal",
+    "caseorigincode@OData.Community.Display.V1.FormattedValue": "Web",
+    _customerid_value: "7fba73b9-2461-ef11-bfe2-002248a36d0e",
+    "_customerid_value@OData.Community.Display.V1.FormattedValue":
+      "Chris Walker",
+  },
+  {
+    incidentid: "ccc-333",
+    title: "Billing query - incorrect tariff",
+    ticketnumber: "CAS-10003",
+    createdon: "2026-03-05T08:30:00Z",
+    modifiedon: "2026-03-06T10:15:00Z",
+    statuscode: 1,
+    statecode: 0,
+    prioritycode: 3,
+    caseorigincode: 2,
+    "statuscode@OData.Community.Display.V1.FormattedValue": "In Progress",
+    "prioritycode@OData.Community.Display.V1.FormattedValue": "Low",
+    "caseorigincode@OData.Community.Display.V1.FormattedValue": "Email",
+    _customerid_value: "7fba73b9-2461-ef11-bfe2-002248a36d0e",
+    "_customerid_value@OData.Community.Display.V1.FormattedValue":
+      "Chris Walker",
+  },
+];

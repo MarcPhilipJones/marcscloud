@@ -1,0 +1,15 @@
+{
+  "name": "create-power-page",
+  "version": "1.0.0",
+  "description": "Scaffold a branded Power Pages SPA demo site",
+  "type": "module",
+  "bin": {
+    "create-power-page": "./index.mjs"
+  },
+  "scripts": {
+    "start": "node index.mjs"
+  },
+  "dependencies": {
+    "prompts": "^2.4.2"
+  }
+}
