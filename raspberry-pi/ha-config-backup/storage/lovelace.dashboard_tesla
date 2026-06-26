@@ -1,0 +1,514 @@
+{
+  "version": 1,
+  "minor_version": 1,
+  "key": "lovelace.dashboard_tesla",
+  "data": {
+    "config": {
+      "views": [
+        {
+          "title": "Tesla",
+          "sections": [
+            {
+              "type": "grid",
+              "cards": [
+                {
+                  "type": "heading",
+                  "heading": "New section"
+                },
+                {
+                  "type": "grid",
+                  "square": false,
+                  "columns": 1,
+                  "cards": [
+                    {
+                      "type": "entities",
+                      "entities": [
+                        {
+                          "entity": "number.tesla_model_y_charge_limit",
+                          "name": "Charge limit"
+                        },
+                        {
+                          "entity": "lock.tesla_model_y_charge_port_latch",
+                          "name": "Charge port latch"
+                        },
+                        {
+                          "entity": "switch.tesla_model_y_charger",
+                          "name": "Charger"
+                        },
+                        {
+                          "entity": "cover.tesla_model_y_charger_door",
+                          "name": "Charger door"
+                        },
+                        {
+                          "entity": "number.tesla_model_y_charging_amps",
+                          "name": "Charging amps"
+                        },
+                        {
+                          "entity": "lock.tesla_model_y_doors",
+                          "name": "Doors"
+                        },
+                        {
+                          "entity": "button.tesla_model_y_flash_lights",
+                          "name": "Flash lights"
+                        },
+                        {
+                          "entity": "cover.tesla_model_y_frunk",
+                          "name": "Frunk"
+                        },
+                        {
+                          "entity": "select.tesla_model_y_heated_seat_left",
+                          "name": "Heated seat left"
+                        },
+                        {
+                          "entity": "select.tesla_model_y_heated_seat_rear_center",
+                          "name": "Heated seat rear center"
+                        },
+                        {
+                          "entity": "select.tesla_model_y_heated_seat_rear_left",
+                          "name": "Heated seat rear left"
+                        },
+                        {
+                          "entity": "select.tesla_model_y_heated_seat_rear_right",
+                          "name": "Heated seat rear right"
+                        },
+                        {
+                          "entity": "select.tesla_model_y_heated_seat_right",
+                          "name": "Heated seat right"
+                        },
+                        {
+                          "entity": "select.tesla_model_y_heated_steering_wheel",
+                          "name": "Heated steering"
+                        },
+                        {
+                          "entity": "select.tesla_model_y_heated_steering_wheel",
+                          "name": "Heated steering wheel"
+                        },
+                        {
+                          "entity": "button.tesla_model_y_horn",
+                          "name": "Horn"
+                        },
+                        {
+                          "entity": "button.tesla_model_y_remote_start",
+                          "name": "Remote start"
+                        },
+                        {
+                          "entity": "cover.tesla_model_y_trunk",
+                          "name": "Trunk"
+                        },
+                        {
+                          "entity": "switch.tesla_model_y_valet_mode",
+                          "name": "Valet mode"
+                        },
+                        {
+                          "entity": "cover.tesla_model_y_windows",
+                          "name": "Windows"
+                        }
+                      ],
+                      "title": "Tesla Model Y"
+                    },
+                    {
+                      "type": "thermostat",
+                      "entity": "climate.tesla_model_y_hvac_climate_system",
+                      "features": [
+                        {
+                          "type": "climate-hvac-modes",
+                          "hvac_modes": [
+                            "heat_cool",
+                            "off"
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "grid",
+              "cards": [
+                {
+                  "type": "heading",
+                  "heading": "New section"
+                },
+                {
+                  "type": "entities",
+                  "entities": [
+                    {
+                      "entity": "sensor.tesla_model_y_arrival_time",
+                      "name": "Arrival time"
+                    },
+                    {
+                      "entity": "binary_sensor.tesla_model_y_asleep",
+                      "name": "Asleep"
+                    },
+                    {
+                      "entity": "sensor.tesla_model_y_battery",
+                      "name": "Battery"
+                    },
+                    {
+                      "entity": "binary_sensor.tesla_model_y_charger",
+                      "name": "Charger"
+                    },
+                    {
+                      "entity": "sensor.tesla_model_y_charger_power",
+                      "name": "Charger power"
+                    },
+                    {
+                      "entity": "binary_sensor.tesla_model_y_charging",
+                      "name": "Charging"
+                    },
+                    {
+                      "entity": "sensor.tesla_model_y_charging_rate",
+                      "name": "Charging rate"
+                    },
+                    {
+                      "entity": "sensor.tesla_model_y_distance_to_arrival",
+                      "name": "Distance to arrival"
+                    },
+                    {
+                      "entity": "binary_sensor.tesla_model_y_doors",
+                      "name": "Doors"
+                    },
+                    {
+                      "entity": "sensor.tesla_model_y_energy_added",
+                      "name": "Energy added"
+                    },
+                    {
+                      "entity": "sensor.tesla_model_y_odometer",
+                      "name": "Odometer"
+                    },
+                    {
+                      "entity": "binary_sensor.tesla_model_y_online",
+                      "name": "Online"
+                    },
+                    {
+                      "entity": "binary_sensor.tesla_model_y_parking_brake",
+                      "name": "Parking brake"
+                    },
+                    {
+                      "entity": "sensor.tesla_model_y_range",
+                      "name": "Range"
+                    },
+                    {
+                      "entity": "binary_sensor.tesla_model_y_scheduled_charging",
+                      "name": "Scheduled charging"
+                    },
+                    {
+                      "entity": "binary_sensor.tesla_model_y_scheduled_departure",
+                      "name": "Scheduled departure"
+                    },
+                    {
+                      "entity": "sensor.tesla_model_y_shift_state",
+                      "name": "Shift state"
+                    },
+                    {
+                      "entity": "sensor.tesla_model_y_temperature_inside",
+                      "name": "Temperature (inside)"
+                    },
+                    {
+                      "entity": "sensor.tesla_model_y_temperature_outside",
+                      "name": "Temperature (outside)"
+                    },
+                    {
+                      "entity": "sensor.tesla_model_y_time_charge_complete",
+                      "name": "Time charge complete"
+                    },
+                    {
+                      "entity": "sensor.tesla_model_y_tpms_front_left",
+                      "name": "Tpms front left"
+                    },
+                    {
+                      "entity": "sensor.tesla_model_y_tpms_front_right",
+                      "name": "Tpms front right"
+                    },
+                    {
+                      "entity": "sensor.tesla_model_y_tpms_rear_left",
+                      "name": "Tpms rear left"
+                    },
+                    {
+                      "entity": "sensor.tesla_model_y_tpms_rear_right",
+                      "name": "Tpms rear right"
+                    },
+                    {
+                      "entity": "binary_sensor.tesla_model_y_user_present",
+                      "name": "User present"
+                    },
+                    {
+                      "entity": "binary_sensor.tesla_model_y_windows",
+                      "name": "Windows"
+                    }
+                  ],
+                  "title": "Tesla Model Y"
+                }
+              ]
+            },
+            {
+              "type": "grid",
+              "cards": [
+                {
+                  "type": "heading",
+                  "heading": "New section"
+                },
+                {
+                  "type": "entities",
+                  "entities": [
+                    {
+                      "entity": "button.tesla_model_y_force_data_update",
+                      "name": "Force data update"
+                    },
+                    {
+                      "entity": "switch.tesla_model_y_polling",
+                      "name": "Polling"
+                    },
+                    {
+                      "entity": "update.tesla_model_y_software_update",
+                      "name": "Software update"
+                    },
+                    {
+                      "entity": "button.tesla_model_y_wake_up",
+                      "name": "Wake up"
+                    },
+                    {
+                      "entity": "sensor.tesla_model_y_data_last_update_time",
+                      "name": "Data last update time"
+                    },
+                    {
+                      "entity": "device_tracker.tesla_model_y_destination_location_tracker",
+                      "name": "Destination location tracker"
+                    },
+                    {
+                      "entity": "device_tracker.tesla_model_y_location_tracker",
+                      "name": "Location tracker"
+                    },
+                    {
+                      "entity": "sensor.tesla_model_y_polling_interval",
+                      "name": "Polling interval"
+                    }
+                  ],
+                  "title": "Tesla Model Y"
+                },
+                {
+                  "type": "entities",
+                  "entities": [
+                    {
+                      "entity": "select.tesla_model_y_cabin_overheat_protection",
+                      "name": "Cabin overheat protection"
+                    }
+                  ],
+                  "title": "Tesla Model Y"
+                }
+              ]
+            }
+          ],
+          "cards": [],
+          "type": "sections",
+          "max_columns": 4,
+          "icon": "mdi:car"
+        },
+        {
+          "title": "Cameras",
+          "path": "cameras",
+          "icon": "mdi:webcam",
+          "panel": true,
+          "cards": [
+            {
+              "type": "grid",
+              "columns": 2,
+              "square": false,
+              "cards": [
+                {
+                  "type": "picture-entity",
+                  "entity": "camera.dvr_204q_m10420250308ccwrfx3431707wcvu_101",
+                  "name": "Front Garden",
+                  "camera_view": "live",
+                  "show_state": false,
+                  "show_name": true,
+                  "aspect_ratio": "16x9"
+                },
+                {
+                  "type": "picture-entity",
+                  "entity": "camera.dvr_204q_m10420250308ccwrfx3431707wcvu_201",
+                  "name": "Driveway",
+                  "camera_view": "live",
+                  "show_state": false,
+                  "show_name": true,
+                  "aspect_ratio": "16x9"
+                },
+                {
+                  "type": "picture-entity",
+                  "entity": "camera.dvr_204q_m10420250308ccwrfx3431707wcvu_301",
+                  "name": "Extension Roof",
+                  "camera_view": "live",
+                  "show_state": false,
+                  "show_name": true,
+                  "aspect_ratio": "16x9"
+                },
+                {
+                  "type": "picture-entity",
+                  "entity": "camera.dvr_204q_m10420250308ccwrfx3431707wcvu_401",
+                  "name": "Back Garden",
+                  "camera_view": "live",
+                  "show_state": false,
+                  "show_name": true,
+                  "aspect_ratio": "16x9"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "sections",
+          "max_columns": 4,
+          "title": "Energy",
+          "path": "energy",
+          "icon": "mdi:lightning-bolt",
+          "sections": [
+            {
+              "type": "grid",
+              "cards": [
+                {
+                  "type": "heading",
+                  "heading": "Consumption",
+                  "heading_style": "title"
+                },
+                {
+                  "graph": "none",
+                  "type": "sensor",
+                  "name": "Live Consumption",
+                  "entity": "sensor.living_room_plug_cost_daily",
+                  "unit": "W",
+                  "detail": 1
+                },
+                {
+                  "graph": "line",
+                  "type": "sensor",
+                  "name": "Today",
+                  "entity": "sensor.living_room_plug_cost_daily",
+                  "detail": 2,
+                  "unit": "kWh"
+                },
+                {
+                  "type": "statistics-graph",
+                  "title": "Living Room Plug – Power (last 24h)",
+                  "entities": [
+                    {
+                      "entity": "sensor.living_room_plug_cost_daily"
+                    }
+                  ],
+                  "period": "day",
+                  "stat_types": [
+                    "mean"
+                  ]
+                },
+                {
+                  "chart_type": "line",
+                  "period": "week",
+                  "type": "statistics-graph",
+                  "title": "Living Room Plug – Daily kWh (last 7 days)",
+                  "entities": [
+                    "sensor.living_room_plug_cost_daily"
+                  ],
+                  "stat_types": [
+                    "sum"
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "grid",
+              "cards": [
+                {
+                  "type": "heading",
+                  "heading": "New section"
+                },
+                {
+                  "chart_type": "line",
+                  "period": "week",
+                  "type": "statistics-graph",
+                  "title": "Daily kWh (Month)",
+                  "entities": [
+                    "sensor.living_room_plug_cost_monthly"
+                  ],
+                  "stat_types": [
+                    "sum",
+                    "state",
+                    "change"
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "grid",
+              "cards": [
+                {
+                  "type": "heading",
+                  "heading": "New section"
+                },
+                {
+                  "type": "sensor",
+                  "name": "Living Room Plug – Today's Cost",
+                  "entity": "sensor.living_room_plug_cost_daily",
+                  "unit": "£"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "sections",
+          "max_columns": 4,
+          "title": "Temperatures",
+          "path": "temperatures",
+          "icon": "mdi:home-thermometer",
+          "sections": [
+            {
+              "type": "grid",
+              "cards": [
+                {
+                  "type": "heading",
+                  "heading": "New section"
+                },
+                {
+                  "type": "tile",
+                  "entity": "sensor.kitchen_tado_smart_x_smart_radiator_thermostat_temperature"
+                }
+              ]
+            },
+            {
+              "type": "grid",
+              "cards": [
+                {
+                  "type": "heading",
+                  "heading": "New section"
+                },
+                {
+                  "type": "glance",
+                  "title": "Room Temperatures",
+                  "entities": [
+                    {
+                      "entity": "sensor.kitchen_tado_smart_x_smart_radiator_thermostat_temperature"
+                    }
+                  ]
+                },
+                {
+                  "type": "history-graph",
+                  "hours_to_show": 24,
+                  "refresh_interval": 60,
+                  "entities": [
+                    {
+                      "entity": "sensor.kitchen_tado_smart_x_smart_radiator_thermostat_temperature"
+                    }
+                  ],
+                  "title": "Kitchen",
+                  "min_y_axis": 0,
+                  "max_y_axis": 40,
+                  "fit_y_data": false
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,90 @@
+{
+  "version": 1,
+  "minor_version": 1,
+  "key": "lovelace_dashboards",
+  "data": {
+    "items": [
+      {
+        "id": "wol_dashboard",
+        "url_path": "wol",
+        "require_admin": false,
+        "show_in_sidebar": true,
+        "icon": "mdi:laptop",
+        "title": "WOL",
+        "mode": "storage"
+      },
+      {
+        "id": "office_occupancy",
+        "url_path": "office-occupancy",
+        "title": "Occupancy",
+        "icon": "mdi:account-eye",
+        "mode": "storage",
+        "require_admin": false,
+        "show_in_sidebar": true
+      },
+      {
+        "id": "dashboard_cctv",
+        "url_path": "dashboard-cctv",
+        "title": "CCTV",
+        "icon": "mdi:cctv",
+        "mode": "storage",
+        "require_admin": false,
+        "show_in_sidebar": true
+      },
+      {
+        "id": "dashboard_cctv2",
+        "url_path": "dashboard-cctv2",
+        "title": "CCTV2 WebRTC",
+        "icon": "mdi:webcam",
+        "mode": "storage",
+        "require_admin": false,
+        "show_in_sidebar": true
+      },
+      {
+        "id": "dashboard_fp300",
+        "url_path": "dashboard-fp300",
+        "title": "FP300 Monitor",
+        "icon": "mdi:motion-sensor",
+        "mode": "storage",
+        "require_admin": false,
+        "show_in_sidebar": true
+      },
+      {
+        "id": "dashboard_networking",
+        "url_path": "dashboard-networking",
+        "title": "Networking",
+        "icon": "mdi:network",
+        "mode": "storage",
+        "require_admin": false,
+        "show_in_sidebar": true
+      },
+      {
+        "id": "dashboard_temperatures",
+        "url_path": "dashboard-temperatures",
+        "title": "Temperatures",
+        "icon": "mdi:thermometer",
+        "mode": "storage",
+        "require_admin": false,
+        "show_in_sidebar": true
+      },
+      {
+        "id": "dashboard_tesla",
+        "url_path": "dashboard-tesla",
+        "title": "Tesla",
+        "icon": "mdi:car-electric",
+        "mode": "storage",
+        "require_admin": false,
+        "show_in_sidebar": true
+      },
+      {
+        "id": "map",
+        "url_path": "map-view",
+        "title": "Map",
+        "icon": "mdi:map",
+        "mode": "storage",
+        "require_admin": false,
+        "show_in_sidebar": true
+      }
+    ]
+  }
+}

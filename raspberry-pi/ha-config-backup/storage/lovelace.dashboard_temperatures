@@ -1,0 +1,161 @@
+{
+  "version": 1,
+  "minor_version": 1,
+  "key": "lovelace.dashboard_temperatures",
+  "data": {
+    "config": {
+      "views": [
+        {
+          "title": "All Rooms",
+          "path": "all-rooms",
+          "icon": "mdi:thermometer",
+          "panel": true,
+          "cards": [
+            {
+              "type": "vertical-stack",
+              "cards": [
+                {
+                  "type": "horizontal-stack",
+                  "cards": [
+                    {
+                      "type": "custom:mini-graph-card",
+                      "name": "Living Room",
+                      "icon": "mdi:sofa",
+                      "entities": [
+                        {
+                          "entity": "sensor.living_room_tado_smart_x_smart_radiator_thermostat_temperature",
+                          "name": "Temperature"
+                        }
+                      ],
+                      "hours_to_show": 24,
+                      "points_per_hour": 4,
+                      "line_width": 2,
+                      "font_size": 75,
+                      "animate": true,
+                      "show": {
+                        "labels": true,
+                        "points": false,
+                        "legend": false,
+                        "state": true,
+                        "name": true,
+                        "icon": true,
+                        "extrema": true,
+                        "average": true
+                      },
+                      "color_thresholds": [
+                        {
+                          "value": 16,
+                          "color": "#1e88e5"
+                        },
+                        {
+                          "value": 18,
+                          "color": "#43a047"
+                        },
+                        {
+                          "value": 20,
+                          "color": "#fb8c00"
+                        },
+                        {
+                          "value": 22,
+                          "color": "#e53935"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "custom:mini-graph-card",
+                      "name": "Marcs Bedroom",
+                      "icon": "mdi:bed",
+                      "entities": [
+                        {
+                          "entity": "sensor.marcs_bedroom_tado_smart_x_smart_radiator_thermostat_temperature",
+                          "name": "Temperature"
+                        }
+                      ],
+                      "hours_to_show": 24,
+                      "points_per_hour": 4,
+                      "line_width": 2,
+                      "font_size": 75,
+                      "animate": true,
+                      "show": {
+                        "labels": true,
+                        "points": false,
+                        "legend": false,
+                        "state": true,
+                        "name": true,
+                        "icon": true,
+                        "extrema": true,
+                        "average": true
+                      },
+                      "color_thresholds": [
+                        {
+                          "value": 16,
+                          "color": "#1e88e5"
+                        },
+                        {
+                          "value": 18,
+                          "color": "#43a047"
+                        },
+                        {
+                          "value": 20,
+                          "color": "#fb8c00"
+                        },
+                        {
+                          "value": 22,
+                          "color": "#e53935"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "custom:mini-graph-card",
+                  "name": "Kitchen",
+                  "icon": "mdi:stove",
+                  "entities": [
+                    {
+                      "entity": "sensor.kitchen_tado_smart_x_smart_radiator_thermostat_temperature",
+                      "name": "Temperature"
+                    }
+                  ],
+                  "hours_to_show": 24,
+                  "points_per_hour": 4,
+                  "line_width": 2,
+                  "font_size": 75,
+                  "animate": true,
+                  "show": {
+                    "labels": true,
+                    "points": false,
+                    "legend": false,
+                    "state": true,
+                    "name": true,
+                    "icon": true,
+                    "extrema": true,
+                    "average": true
+                  },
+                  "color_thresholds": [
+                    {
+                      "value": 16,
+                      "color": "#1e88e5"
+                    },
+                    {
+                      "value": 18,
+                      "color": "#43a047"
+                    },
+                    {
+                      "value": 20,
+                      "color": "#fb8c00"
+                    },
+                    {
+                      "value": 22,
+                      "color": "#e53935"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

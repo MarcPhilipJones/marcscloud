@@ -1,6 +1,7 @@
 """CLI entry point for Raspberry Pi SSH client."""
 
 import argparse
+import logging
 import sys
 
 from rich.console import Console
@@ -12,6 +13,14 @@ from .client import PiClient
 
 
 console = Console()
+logger = logging.getLogger(__name__)
+
+
+def setup_logging(verbose: bool = False) -> None:
+    """Configure logging to console and file."""
+    level = logging.DEBUG if verbose else logging.INFO
+    fmt = "%(asctime)s %(levelname)-8s %(name)s: %(message)s"
+    logging.basicConfig(level=level, format=fmt, datefmt="%Y-%m-%d %H:%M:%S")
 
 
 def main() -> int:
@@ -55,8 +64,14 @@ def main() -> int:
         action="store_true",
         help="Open interactive shell (basic)"
     )
+    parser.add_argument(
+        "--verbose", "-v",
+        action="store_true",
+        help="Enable verbose/debug logging"
+    )
     
     args = parser.parse_args()
+    setup_logging(args.verbose)
     
     try:
         with PiClient() as pi:

@@ -1,0 +1,65 @@
+{
+  "version": 1,
+  "minor_version": 1,
+  "key": "lovelace.dashboard_cctv2",
+  "data": {
+    "config": {
+      "views": [
+        {
+          "title": "CCTV2 WebRTC",
+          "path": "cctv2",
+          "panel": true,
+          "cards": [
+            {
+              "type": "vertical-stack",
+              "cards": [
+                {
+                  "type": "horizontal-stack",
+                  "cards": [
+                    {
+                      "type": "picture-entity",
+                      "entity": "camera.dvr_204q_m10420250308ccwrfx3431707wcvu_101",
+                      "camera_view": "live",
+                      "show_state": false,
+                      "show_name": true,
+                      "aspect_ratio": "16:9"
+                    },
+                    {
+                      "type": "picture-entity",
+                      "entity": "camera.dvr_204q_m10420250308ccwrfx3431707wcvu_201",
+                      "camera_view": "live",
+                      "show_state": false,
+                      "show_name": true,
+                      "aspect_ratio": "16:9"
+                    }
+                  ]
+                },
+                {
+                  "type": "horizontal-stack",
+                  "cards": [
+                    {
+                      "type": "picture-entity",
+                      "entity": "camera.dvr_204q_m10420250308ccwrfx3431707wcvu_301",
+                      "camera_view": "live",
+                      "show_state": false,
+                      "show_name": true,
+                      "aspect_ratio": "16:9"
+                    },
+                    {
+                      "type": "picture-entity",
+                      "entity": "camera.dvr_204q_m10420250308ccwrfx3431707wcvu_401",
+                      "camera_view": "live",
+                      "show_state": false,
+                      "show_name": true,
+                      "aspect_ratio": "16:9"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "version": 1,
+  "skills": {
+    "home-assistant-automation-scripts": {
+      "source": "bradsjm/hassio-addons",
+      "sourceType": "github",
+      "skillPath": "addon-opencode/skills/home-assistant-automation-scripts/SKILL.md",
+      "computedHash": "6a66eab9e3d52a3db8dd97e3cfd9e899be608e510dc1ff4c0eba143db62cf0b4"
+    },
+    "home-assistant-best-practices": {
+      "source": "homeassistant-ai/skills",
+      "sourceType": "github",
+      "skillPath": "skills/home-assistant-best-practices/SKILL.md",
+      "computedHash": "c6a3b7fdd1fea8be019cd2f9156bb6c7df492c28f2dabfb78bdbb5a9a72393d1"
+    },
+    "home-assistant-dashboards-cards": {
+      "source": "bradsjm/hassio-addons",
+      "sourceType": "github",
+      "skillPath": "addon-opencode/skills/home-assistant-dashboards-cards/SKILL.md",
+      "computedHash": "fd3332511f033ca7c727773d90ac43445c2e398b97be2d0c143ac530c5c07e3a"
+    },
+    "home-assistant-entities-services": {
+      "source": "bradsjm/hassio-addons",
+      "sourceType": "github",
+      "skillPath": "addon-opencode/skills/home-assistant-entities-services/SKILL.md",
+      "computedHash": "00414d86f9f7ceef6d52ca3362b03bcd6ac2edb7aaa227efcfa7e49dbd9c365a"
+    }
+  }
+}

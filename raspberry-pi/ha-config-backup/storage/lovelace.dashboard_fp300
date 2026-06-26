@@ -1,0 +1,150 @@
+{
+  "version": 1,
+  "minor_version": 1,
+  "key": "lovelace.dashboard_fp300",
+  "data": {
+    "config": {
+      "title": "FP300 Presence Sensor",
+      "views": [
+        {
+          "title": "FP300 Monitor",
+          "path": "fp300-monitor",
+          "icon": "mdi:motion-sensor",
+          "cards": [
+            {
+              "type": "entity",
+              "entity": "binary_sensor.presence_multi_sensor_fp300_occupancy",
+              "name": "Occupancy Status",
+              "icon": "mdi:motion-sensor"
+            },
+            {
+              "type": "history-graph",
+              "title": "Occupancy (Last 1 Hour)",
+              "hours_to_show": 1,
+              "entities": [
+                {
+                  "entity": "binary_sensor.presence_multi_sensor_fp300_occupancy",
+                  "name": "Occupancy"
+                }
+              ]
+            },
+            {
+              "type": "horizontal-stack",
+              "cards": [
+                {
+                  "type": "sensor",
+                  "entity": "sensor.presence_multi_sensor_fp300_temperature",
+                  "name": "Temperature",
+                  "graph": "line",
+                  "hours_to_show": 24,
+                  "detail": 2
+                },
+                {
+                  "type": "sensor",
+                  "entity": "sensor.presence_multi_sensor_fp300_humidity",
+                  "name": "Humidity",
+                  "graph": "line",
+                  "hours_to_show": 24,
+                  "detail": 2
+                },
+                {
+                  "type": "sensor",
+                  "entity": "sensor.presence_multi_sensor_fp300_illuminance",
+                  "name": "Light Level",
+                  "graph": "line",
+                  "hours_to_show": 24,
+                  "detail": 2
+                }
+              ]
+            },
+            {
+              "type": "history-graph",
+              "title": "Occupancy History (48h)",
+              "hours_to_show": 48,
+              "entities": [
+                {
+                  "entity": "binary_sensor.presence_multi_sensor_fp300_occupancy",
+                  "name": "Occupancy"
+                }
+              ]
+            },
+            {
+              "type": "history-graph",
+              "title": "Light Level History (48h)",
+              "hours_to_show": 48,
+              "entities": [
+                {
+                  "entity": "sensor.presence_multi_sensor_fp300_illuminance",
+                  "name": "Illuminance (lux)"
+                }
+              ]
+            },
+            {
+              "type": "history-graph",
+              "title": "Office Plug (Correlation)",
+              "hours_to_show": 48,
+              "entities": [
+                {
+                  "entity": "switch.smart_wi_fi_plug",
+                  "name": "Tapo Plug"
+                }
+              ]
+            },
+            {
+              "type": "history-graph",
+              "title": "Temperature History (48h)",
+              "hours_to_show": 48,
+              "entities": [
+                {
+                  "entity": "sensor.presence_multi_sensor_fp300_temperature",
+                  "name": "Temperature"
+                }
+              ]
+            },
+            {
+              "type": "history-graph",
+              "title": "Occupancy vs Light (False Positive Check)",
+              "hours_to_show": 48,
+              "entities": [
+                {
+                  "entity": "binary_sensor.presence_multi_sensor_fp300_occupancy",
+                  "name": "Occupancy"
+                },
+                {
+                  "entity": "sensor.presence_multi_sensor_fp300_illuminance",
+                  "name": "Light (lux)"
+                }
+              ]
+            },
+            {
+              "type": "entities",
+              "title": "Sensor Settings & Status",
+              "entities": [
+                {
+                  "entity": "select.presence_multi_sensor_fp300_sensitivity",
+                  "name": "Sensitivity"
+                },
+                {
+                  "entity": "number.presence_multi_sensor_fp300_hold_time",
+                  "name": "Hold Time (s)"
+                },
+                {
+                  "entity": "sensor.presence_multi_sensor_fp300_battery",
+                  "name": "Battery %"
+                },
+                {
+                  "entity": "sensor.presence_multi_sensor_fp300_battery_voltage",
+                  "name": "Battery Voltage"
+                },
+                {
+                  "entity": "update.presence_multi_sensor_fp300_firmware",
+                  "name": "Firmware Update"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

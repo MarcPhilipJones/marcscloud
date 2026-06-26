@@ -1,11 +1,15 @@
 """SSH client for Raspberry Pi 5."""
 
+import logging
 import os
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Any, Optional
 
 import paramiko
 from dotenv import load_dotenv
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -42,6 +46,7 @@ class PiClient:
         port: Optional[int] = None,
         user: Optional[str] = None,
         password: Optional[str] = None,
+        key_path: Optional[str] = None,
     ):
         """
         Initialize the Pi SSH client.
@@ -50,7 +55,8 @@ class PiClient:
             host: Pi IP address (or set PI_HOST env var)
             port: SSH port (or set PI_PORT env var, default 22)
             user: SSH username (or set PI_USER env var)
-            password: SSH password (or set PI_PASSWORD env var)
+            password: SSH password (or set PI_PASSWORD env var); optional if key auth works
+            key_path: Path to SSH private key (default: ~/.ssh/id_rsa)
         """
         load_dotenv()
         
@@ -58,24 +64,47 @@ class PiClient:
         self.port = port or int(os.getenv("PI_PORT", "22"))
         self.user = user or os.getenv("PI_USER", "admin")
         self.password = password or os.getenv("PI_PASSWORD", "")
-        
-        if not self.password:
-            raise ValueError(
-                "Missing SSH password. Set PI_PASSWORD environment variable "
-                "or pass password parameter."
-            )
+        self.key_path = key_path or os.getenv(
+            "PI_KEY_PATH", str(Path.home() / ".ssh" / "id_rsa")
+        )
         
         self._client: Optional[paramiko.SSHClient] = None
         self._sftp: Optional[paramiko.SFTPClient] = None
     
     def connect(self) -> None:
-        """Establish SSH connection to the Pi."""
+        """Establish SSH connection to the Pi. Tries key auth first, then password."""
         if self._client is not None:
             return
         
         self._client = paramiko.SSHClient()
         self._client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         
+        # Try SSH key authentication first
+        if Path(self.key_path).is_file():
+            try:
+                logger.info("Connecting to %s@%s:%d via SSH key", self.user, self.host, self.port)
+                self._client.connect(
+                    hostname=self.host,
+                    port=self.port,
+                    username=self.user,
+                    key_filename=self.key_path,
+                    timeout=10,
+                )
+                logger.info("SSH key auth successful")
+                return
+            except paramiko.AuthenticationException:
+                logger.warning("SSH key auth failed, falling back to password")
+                self._client = paramiko.SSHClient()
+                self._client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+        
+        # Fall back to password authentication
+        if not self.password:
+            raise ValueError(
+                "SSH key auth unavailable and no password set. "
+                "Provide a key at ~/.ssh/id_rsa or set PI_PASSWORD."
+            )
+        
+        logger.info("Connecting to %s@%s:%d via password", self.user, self.host, self.port)
         self._client.connect(
             hostname=self.host,
             port=self.port,
@@ -83,6 +112,7 @@ class PiClient:
             password=self.password,
             timeout=10,
         )
+        logger.info("Password auth successful")
     
     def disconnect(self) -> None:
         """Close the SSH connection."""
@@ -107,18 +137,24 @@ class PiClient:
         """
         self.connect()
         
+        logger.debug("Running command: %s", command)
         stdin, stdout, stderr = self._client.exec_command(command, timeout=timeout)
         
         exit_code = stdout.channel.recv_exit_status()
         stdout_text = stdout.read().decode("utf-8").strip()
         stderr_text = stderr.read().decode("utf-8").strip()
         
-        return CommandResult(
+        result = CommandResult(
             command=command,
             stdout=stdout_text,
             stderr=stderr_text,
             exit_code=exit_code,
         )
+        
+        if not result.success:
+            logger.warning("Command failed (exit %d): %s — %s", exit_code, command, stderr_text)
+        
+        return result
     
     @property
     def sftp(self) -> paramiko.SFTPClient:

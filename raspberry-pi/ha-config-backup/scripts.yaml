@@ -1,0 +1,235 @@
+open_netflix_on_apple_tv:
+  alias: Open Netflix on Apple TV
+  sequence:
+  - target:
+      entity_id: media_player.living_room_apple_tv
+    data:
+      source: Netflix
+    action: media_player.select_source
+  mode: single
+  description: ''
+prepare_the_tesla:
+  alias: Prepare Tesla
+  mode: single
+  sequence:
+  - variables:
+      car_asleep: '{{ is_state(''binary_sensor.tesla_model_y_asleep'', ''on'') }}'
+      car_temp: '{{ states(''sensor.tesla_model_y_temperature_outside'') | float(nan) }}'
+      wx_temp: '{{ state_attr(''weather.forecast_home'', ''temperature'') | float(nan)
+        }}'
+      t_eff: "{% if not car_asleep and (car_temp == car_temp) %}\n  {{ car_temp }}\n{%
+        else %}\n  {{ wx_temp }}\n{% endif %}"
+      temp_source: '{% if not car_asleep and (car_temp == car_temp) %}car{% else %}weather{%
+        endif %}'
+      t_winter: 5
+      t_summer: 23
+      target_temp: 21
+  - data:
+      title: Tesla Prepare
+      message: "\U0001F697 Prepare Tesla started. Source={{ temp_source }}, Ambient={{
+        t_eff | round(1) }}°C."
+    action: notify.pushover
+  - choose:
+    - conditions:
+      - condition: template
+        value_template: '{{ (t_eff | float) <= (t_winter | float) }}'
+      sequence:
+      - target:
+          entity_id: climate.tesla_model_y_hvac_climate_system
+        data:
+          hvac_mode: heat_cool
+        action: climate.set_hvac_mode
+      - target:
+          entity_id: climate.tesla_model_y_hvac_climate_system
+        data:
+          temperature: '{{ target_temp }}'
+        action: climate.set_temperature
+      - target:
+          entity_id: climate.tesla_model_y_hvac_climate_system
+        data:
+          preset_mode: defrost
+        action: climate.set_preset_mode
+      - choose:
+        - conditions:
+          - condition: template
+            value_template: '{{ states(''select.tesla_model_y_heated_seat_left'') not in [''unknown'',''unavailable'']
+              }}'
+          sequence:
+          - target:
+              entity_id: select.tesla_model_y_heated_seat_left
+            data:
+              option: High
+            action: select.select_option
+        default: []
+      - choose:
+        - conditions:
+          - condition: template
+            value_template: '{{ states(''select.tesla_model_y_heated_seat_right'') not in
+              [''unknown'',''unavailable''] }}'
+          sequence:
+          - target:
+              entity_id: select.tesla_model_y_heated_seat_right
+            data:
+              option: High
+            action: select.select_option
+        default: []
+      - choose:
+        - conditions:
+          - condition: template
+            value_template: '{{ states(''select.tesla_model_y_heated_steering_wheel'') not
+              in [''unknown'',''unavailable''] }}'
+          sequence:
+          - target:
+              entity_id: select.tesla_model_y_heated_steering_wheel
+            data:
+              option: High
+            action: select.select_option
+        default: []
+      - data:
+          title: Tesla Prepare (Winter)
+          message: ❄️ {{ temp_source }}={{ t_eff | round(1) }}°C → heat_cool @ {{
+            target_temp }}°C + DEFROST; seats High; wheel heat on (if available).
+        action: notify.pushover
+    - conditions:
+      - condition: template
+        value_template: '{{ (t_eff | float) >= (t_summer | float) }}'
+      sequence:
+      - target:
+          entity_id: climate.tesla_model_y_hvac_climate_system
+        data:
+          preset_mode: normal
+        action: climate.set_preset_mode
+      - target:
+          entity_id: climate.tesla_model_y_hvac_climate_system
+        data:
+          hvac_mode: heat_cool
+        action: climate.set_hvac_mode
+      - target:
+          entity_id: climate.tesla_model_y_hvac_climate_system
+        data:
+          temperature: '{{ target_temp }}'
+        action: climate.set_temperature
+      - choose:
+        - conditions:
+          - condition: template
+            value_template: '{{ states(''select.tesla_model_y_heated_seat_left'') not in [''unknown'',''unavailable'']
+              }}'
+          sequence:
+          - target:
+              entity_id: select.tesla_model_y_heated_seat_left
+            data:
+              option: 'Off'
+            action: select.select_option
+        default: []
+      - choose:
+        - conditions:
+          - condition: template
+            value_template: '{{ states(''select.tesla_model_y_heated_seat_right'') not in
+              [''unknown'',''unavailable''] }}'
+          sequence:
+          - target:
+              entity_id: select.tesla_model_y_heated_seat_right
+            data:
+              option: 'Off'
+            action: select.select_option
+        default: []
+      - choose:
+        - conditions:
+          - condition: template
+            value_template: '{{ states(''select.tesla_model_y_heated_steering_wheel'') not
+              in [''unknown'',''unavailable''] }}'
+          sequence:
+          - target:
+              entity_id: select.tesla_model_y_heated_steering_wheel
+            data:
+              option: 'Off'
+            action: select.select_option
+        default: []
+      - data:
+          title: Tesla Prepare (Summer)
+          message: ☀️ {{ temp_source }}={{ t_eff | round(1) }}°C → heat_cool @ {{
+            target_temp }}°C (preset NORMAL); seats & wheel heat off.
+        action: notify.pushover
+    default:
+    - target:
+        entity_id: climate.tesla_model_y_hvac_climate_system
+      data:
+        preset_mode: normal
+      action: climate.set_preset_mode
+    - target:
+        entity_id: climate.tesla_model_y_hvac_climate_system
+      data:
+        hvac_mode: heat_cool
+      action: climate.set_hvac_mode
+    - target:
+        entity_id: climate.tesla_model_y_hvac_climate_system
+      data:
+        temperature: '{{ target_temp }}'
+      action: climate.set_temperature
+    - choose:
+      - conditions:
+        - condition: template
+          value_template: '{{ states(''select.tesla_model_y_heated_seat_left'') not in [''unknown'',''unavailable'']
+            }}'
+        sequence:
+        - target:
+            entity_id: select.tesla_model_y_heated_seat_left
+          data:
+            option: Low
+          action: select.select_option
+      default: []
+    - choose:
+      - conditions:
+        - condition: template
+          value_template: '{{ states(''select.tesla_model_y_heated_seat_right'') not in [''unknown'',''unavailable'']
+            }}'
+        sequence:
+        - target:
+            entity_id: select.tesla_model_y_heated_seat_right
+          data:
+            option: Low
+          action: select.select_option
+      default: []
+    - choose:
+      - conditions:
+        - condition: template
+          value_template: '{{ states(''select.tesla_model_y_heated_steering_wheel'') not in
+            [''unknown'',''unavailable''] }}'
+        sequence:
+        - target:
+            entity_id: select.tesla_model_y_heated_steering_wheel
+          data:
+            option: 'Off'
+          action: select.select_option
+      default: []
+    - data:
+        title: Tesla Prepare (Mild)
+        message: "\U0001F324️ {{ temp_source }}={{ t_eff | round(1) }}°C → heat_cool
+          @ {{ target_temp }}°C (preset NORMAL); seats Low; wheel off."
+      action: notify.pushover
+'1757004053790':
+  sequence:
+  - target:
+      entity_id: media_player.living_room_apple_tv
+    data:
+      source: EE TV
+    action: media_player.select_source
+  alias: Open EE TV on Apple TV
+  mode: single
+  description: ''
+navigate_tesla_to_ets_tutoring:
+  alias: Navigate Tesla to Tutoring
+  mode: single
+  sequence:
+  - data:
+      command: SEND_TO_VEHICLE
+      parameters:
+        path_vars:
+          vehicle_id: '{{ state_attr(''binary_sensor.tesla_model_y_online'', ''id'') }}'
+        wake_if_asleep: true
+        type: share_ext_content_raw
+        locale: en-gb
+        value:
+          android.intent.extra.TEXT: 166 Perry Wood Rd, Birmingham B42 2BH
+        timestamp_ms: '{{ as_timestamp(now()) | int }}'
+    action: tesla_custom.api

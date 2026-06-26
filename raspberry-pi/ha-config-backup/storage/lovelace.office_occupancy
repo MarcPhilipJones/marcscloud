@@ -1,0 +1,159 @@
+{
+  "version": 1,
+  "minor_version": 1,
+  "key": "lovelace.office_occupancy",
+  "data": {
+    "config": {
+      "views": [
+        {
+          "title": "Occupancy",
+          "path": "occupancy",
+          "icon": "mdi:account-eye",
+          "cards": [
+            {
+              "type": "heading",
+              "heading": "Current Status",
+              "heading_style": "title"
+            },
+            {
+              "type": "entities",
+              "title": "FP300 Presence Sensor",
+              "show_header_toggle": false,
+              "entities": [
+                {
+                  "entity": "binary_sensor.presence_multi_sensor_fp300_occupancy",
+                  "name": "Office Occupancy"
+                },
+                {
+                  "entity": "sensor.presence_multi_sensor_fp300_illuminance",
+                  "name": "Light Level"
+                },
+                {
+                  "entity": "sensor.presence_multi_sensor_fp300_temperature",
+                  "name": "Temperature"
+                },
+                {
+                  "entity": "sensor.presence_multi_sensor_fp300_humidity",
+                  "name": "Humidity"
+                }
+              ]
+            },
+            {
+              "type": "heading",
+              "heading": "Today",
+              "heading_style": "title"
+            },
+            {
+              "type": "history-graph",
+              "title": "Occupancy Today",
+              "hours_to_show": 24,
+              "entities": [
+                {
+                  "entity": "binary_sensor.presence_multi_sensor_fp300_occupancy",
+                  "name": "Occupancy"
+                }
+              ]
+            },
+            {
+              "type": "history-graph",
+              "title": "Light Level Today",
+              "hours_to_show": 24,
+              "entities": [
+                {
+                  "entity": "sensor.presence_multi_sensor_fp300_illuminance",
+                  "name": "Illuminance (lux)"
+                }
+              ]
+            },
+            {
+              "type": "heading",
+              "heading": "This Week",
+              "heading_style": "title"
+            },
+            {
+              "type": "history-graph",
+              "title": "Occupancy — Last 7 Days",
+              "hours_to_show": 168,
+              "entities": [
+                {
+                  "entity": "binary_sensor.presence_multi_sensor_fp300_occupancy",
+                  "name": "Occupancy"
+                }
+              ]
+            },
+            {
+              "type": "statistics-graph",
+              "title": "Daily Illuminance — This Week",
+              "period": "day",
+              "days_to_show": 7,
+              "stat_types": [
+                "mean",
+                "max",
+                "min"
+              ],
+              "entities": [
+                "sensor.presence_multi_sensor_fp300_illuminance"
+              ]
+            },
+            {
+              "type": "statistics-graph",
+              "title": "Daily Temperature — This Week",
+              "period": "day",
+              "days_to_show": 7,
+              "stat_types": [
+                "mean",
+                "max",
+                "min"
+              ],
+              "entities": [
+                "sensor.presence_multi_sensor_fp300_temperature"
+              ]
+            },
+            {
+              "type": "heading",
+              "heading": "This Month",
+              "heading_style": "title"
+            },
+            {
+              "type": "history-graph",
+              "title": "Occupancy — Last 30 Days",
+              "hours_to_show": 720,
+              "entities": [
+                {
+                  "entity": "binary_sensor.presence_multi_sensor_fp300_occupancy",
+                  "name": "Occupancy"
+                }
+              ]
+            },
+            {
+              "type": "statistics-graph",
+              "title": "Daily Illuminance — This Month",
+              "period": "day",
+              "days_to_show": 30,
+              "stat_types": [
+                "mean",
+                "max"
+              ],
+              "entities": [
+                "sensor.presence_multi_sensor_fp300_illuminance"
+              ]
+            },
+            {
+              "type": "statistics-graph",
+              "title": "Daily Temperature & Humidity — This Month",
+              "period": "day",
+              "days_to_show": 30,
+              "stat_types": [
+                "mean"
+              ],
+              "entities": [
+                "sensor.presence_multi_sensor_fp300_temperature",
+                "sensor.presence_multi_sensor_fp300_humidity"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,59 @@
+# configuration.yaml
+# Loads default set of integrations. Do not remove.
+default_config:
+
+# Load packages (TeslaMate MQTT entities live in packages/teslamate.yaml)
+homeassistant:
+  packages: !include_dir_named packages
+
+# Load frontend themes from the themes folder
+frontend:
+  themes: !include_dir_merge_named themes
+
+automation: !include automations.yaml
+script: !include scripts.yaml
+scene: !include scenes.yaml
+
+# Needed for RTSP playback and camera live view
+stream:
+
+# Statistics sensor for office overnight low temperature
+sensor:
+  - platform: statistics
+    name: "Office Overnight Low Temperature"
+    entity_id: sensor.presence_multi_sensor_fp300_temperature
+    state_characteristic: value_min
+    max_age:
+      hours: 12
+
+# Command-line sensors for Raspberry Pi health monitoring
+# Note: HA runs in Alpine/BusyBox container, so use /proc and /sys paths directly
+command_line:
+  - sensor:
+      name: "Pi CPU Temperature"
+      command: "cat /sys/class/thermal/thermal_zone0/temp"
+      unit_of_measurement: "°C"
+      value_template: "{{ value | int / 1000 }}"
+      scan_interval: 60
+  - sensor:
+      name: "Pi Memory Used Percent"
+      command: "free | grep Mem | awk '{printf \"%.1f\", $3/$2 * 100}'"
+      unit_of_measurement: "%"
+      scan_interval: 60
+  - sensor:
+      name: "Pi Disk Used Percent"
+      command: "df / | tail -1 | awk '{print $5}' | tr -d '%'"
+      unit_of_measurement: "%"
+      scan_interval: 300
+  - sensor:
+      name: "Pi CPU Load"
+      command: "cat /proc/loadavg | cut -d' ' -f1"
+      unit_of_measurement: ""
+      scan_interval: 60
+  - sensor:
+      name: "Pi Uptime"
+      command: "awk '{d=int($1/86400);h=int($1%86400/3600);m=int($1%3600/60);printf \"%dd %dh %dm\",d,h,m}' /proc/uptime"
+      scan_interval: 300
+
+# Wake-on-LAN integration (added 2026-03-11)
+wake_on_lan:

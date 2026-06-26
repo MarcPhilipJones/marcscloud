@@ -42,3 +42,15 @@ logs/
 *.pem
 *.key
 id_rsa*
+
+# Script logs
+scripts/last-run.log
+
+# Backup temp files (*.bak copies on Pi)
+*.bak
+
+# Chat-session transcript logs (may contain secrets) — never commit
+.specstory/
+
+# Firecrawl tooling cache (may hold API keys)
+.firecrawl/

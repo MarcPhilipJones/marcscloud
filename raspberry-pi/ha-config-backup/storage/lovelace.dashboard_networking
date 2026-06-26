@@ -1,0 +1,475 @@
+{
+  "version": 1,
+  "minor_version": 1,
+  "key": "lovelace.dashboard_networking",
+  "data": {
+    "config": {
+      "views": [
+        {
+          "title": "Network",
+          "path": "network",
+          "icon": "mdi:network",
+          "sections": [
+            {
+              "type": "grid",
+              "cards": [
+                {
+                  "type": "heading",
+                  "heading": "Internet & WAN",
+                  "heading_style": "title"
+                },
+                {
+                  "type": "entity",
+                  "entity": "binary_sensor.gateway_lite_wan_status",
+                  "name": "WAN Status",
+                  "icon": "mdi:wan"
+                },
+                {
+                  "type": "entity",
+                  "entity": "sensor.gateway_lite_external_ip",
+                  "name": "External IP",
+                  "icon": "mdi:ip-network"
+                },
+                {
+                  "type": "sensor",
+                  "entity": "sensor.gateway_lite_download_speed",
+                  "name": "Download",
+                  "icon": "mdi:download-network",
+                  "graph": "line",
+                  "hours_to_show": 24,
+                  "detail": 2
+                },
+                {
+                  "type": "sensor",
+                  "entity": "sensor.gateway_lite_upload_speed",
+                  "name": "Upload",
+                  "icon": "mdi:upload-network",
+                  "graph": "line",
+                  "hours_to_show": 24,
+                  "detail": 2
+                }
+              ]
+            },
+            {
+              "type": "grid",
+              "cards": [
+                {
+                  "type": "heading",
+                  "heading": "UniFi Gateway Lite",
+                  "heading_style": "title"
+                },
+                {
+                  "type": "entity",
+                  "entity": "sensor.gateway_lite_state",
+                  "name": "State",
+                  "icon": "mdi:router-network"
+                },
+                {
+                  "type": "gauge",
+                  "entity": "sensor.gateway_lite_cpu_utilization",
+                  "name": "CPU",
+                  "needle": true,
+                  "severity": {
+                    "green": 0,
+                    "yellow": 60,
+                    "red": 85
+                  }
+                },
+                {
+                  "type": "gauge",
+                  "entity": "sensor.gateway_lite_memory_utilization",
+                  "name": "Memory",
+                  "needle": true,
+                  "severity": {
+                    "green": 0,
+                    "yellow": 60,
+                    "red": 85
+                  }
+                },
+                {
+                  "type": "entity",
+                  "entity": "sensor.gateway_lite_uptime",
+                  "name": "Uptime",
+                  "icon": "mdi:clock-check"
+                },
+                {
+                  "type": "entity",
+                  "entity": "update.gateway_lite",
+                  "name": "Firmware Update"
+                },
+                {
+                  "type": "button",
+                  "entity": "button.gateway_lite_restart",
+                  "name": "Restart Gateway",
+                  "icon": "mdi:restart",
+                  "show_state": false,
+                  "tap_action": {
+                    "action": "call-service",
+                    "service": "button.press",
+                    "target": {
+                      "entity_id": "button.gateway_lite_restart"
+                    },
+                    "confirmation": {
+                      "text": "Are you sure you want to restart the gateway?"
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "type": "grid",
+              "cards": [
+                {
+                  "type": "heading",
+                  "heading": "WiFi 6 AP (Living Room)",
+                  "heading_style": "title"
+                },
+                {
+                  "type": "entity",
+                  "entity": "sensor.living_room_wifi_6_state",
+                  "name": "State",
+                  "icon": "mdi:wifi"
+                },
+                {
+                  "type": "gauge",
+                  "entity": "sensor.living_room_wifi_6_cpu_utilization",
+                  "name": "CPU",
+                  "needle": true,
+                  "severity": {
+                    "green": 0,
+                    "yellow": 60,
+                    "red": 85
+                  }
+                },
+                {
+                  "type": "gauge",
+                  "entity": "sensor.living_room_wifi_6_memory_utilization",
+                  "name": "Memory",
+                  "needle": true,
+                  "severity": {
+                    "green": 0,
+                    "yellow": 60,
+                    "red": 85
+                  }
+                },
+                {
+                  "type": "entity",
+                  "entity": "sensor.living_room_wifi_6_uptime",
+                  "name": "Uptime",
+                  "icon": "mdi:clock-check"
+                },
+                {
+                  "type": "entity",
+                  "entity": "update.living_room_wifi_6",
+                  "name": "Firmware Update"
+                },
+                {
+                  "type": "button",
+                  "entity": "button.living_room_wifi_6_restart",
+                  "name": "Restart AP",
+                  "icon": "mdi:restart",
+                  "show_state": false,
+                  "tap_action": {
+                    "action": "call-service",
+                    "service": "button.press",
+                    "target": {
+                      "entity_id": "button.living_room_wifi_6_restart"
+                    },
+                    "confirmation": {
+                      "text": "Are you sure you want to restart the WiFi AP?"
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "type": "grid",
+              "cards": [
+                {
+                  "type": "heading",
+                  "heading": "USW Flex Mini Switch",
+                  "heading_style": "title"
+                },
+                {
+                  "type": "entity",
+                  "entity": "sensor.usw_flex_mini_state",
+                  "name": "State",
+                  "icon": "mdi:lan"
+                },
+                {
+                  "type": "gauge",
+                  "entity": "sensor.usw_flex_mini_cpu_utilization",
+                  "name": "CPU",
+                  "needle": true,
+                  "severity": {
+                    "green": 0,
+                    "yellow": 60,
+                    "red": 85
+                  }
+                },
+                {
+                  "type": "gauge",
+                  "entity": "sensor.usw_flex_mini_memory_utilization",
+                  "name": "Memory",
+                  "needle": true,
+                  "severity": {
+                    "green": 0,
+                    "yellow": 60,
+                    "red": 85
+                  }
+                },
+                {
+                  "type": "entity",
+                  "entity": "sensor.usw_flex_mini_uptime",
+                  "name": "Uptime",
+                  "icon": "mdi:clock-check"
+                },
+                {
+                  "type": "entity",
+                  "entity": "update.usw_flex_mini",
+                  "name": "Firmware Update"
+                },
+                {
+                  "type": "button",
+                  "entity": "button.usw_flex_mini_restart",
+                  "name": "Restart Switch",
+                  "icon": "mdi:restart",
+                  "show_state": false,
+                  "tap_action": {
+                    "action": "call-service",
+                    "service": "button.press",
+                    "target": {
+                      "entity_id": "button.usw_flex_mini_restart"
+                    },
+                    "confirmation": {
+                      "text": "Are you sure you want to restart the switch?"
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "type": "grid",
+              "cards": [
+                {
+                  "type": "heading",
+                  "heading": "Connected Devices",
+                  "heading_style": "title"
+                },
+                {
+                  "type": "entities",
+                  "entities": [
+                    {
+                      "entity": "device_tracker.marcslaptop_2",
+                      "name": "Marc's Laptop",
+                      "icon": "mdi:laptop"
+                    },
+                    {
+                      "entity": "device_tracker.marcs_iphone_15",
+                      "name": "Marc's iPhone 15",
+                      "icon": "mdi:cellphone"
+                    },
+                    {
+                      "entity": "device_tracker.marcs_ipad",
+                      "name": "Marc's iPad",
+                      "icon": "mdi:tablet"
+                    },
+                    {
+                      "entity": "device_tracker.watch",
+                      "name": "Watch",
+                      "icon": "mdi:watch"
+                    },
+                    {
+                      "entity": "device_tracker.galaxy_s25_ultra",
+                      "name": "Galaxy S25 Ultra",
+                      "icon": "mdi:cellphone"
+                    },
+                    {
+                      "entity": "device_tracker.ps5",
+                      "name": "PS5",
+                      "icon": "mdi:sony-playstation"
+                    },
+                    {
+                      "entity": "device_tracker.xbox_series_x",
+                      "name": "Xbox Series X",
+                      "icon": "mdi:microsoft-xbox"
+                    },
+                    {
+                      "entity": "device_tracker.lg_tv",
+                      "name": "LG TV",
+                      "icon": "mdi:television"
+                    },
+                    {
+                      "entity": "device_tracker.tesla_model_y_location_tracker",
+                      "name": "Tesla Model Y",
+                      "icon": "mdi:car-electric"
+                    }
+                  ],
+                  "state_color": true,
+                  "show_header_toggle": false
+                }
+              ]
+            },
+            {
+              "type": "grid",
+              "cards": [
+                {
+                  "type": "heading",
+                  "heading": "Infrastructure Devices",
+                  "heading_style": "title"
+                },
+                {
+                  "type": "entities",
+                  "entities": [
+                    {
+                      "entity": "device_tracker.gateway_lite",
+                      "name": "Gateway Lite",
+                      "icon": "mdi:router-network"
+                    },
+                    {
+                      "entity": "device_tracker.living_room_wifi_6",
+                      "name": "WiFi 6 AP",
+                      "icon": "mdi:wifi"
+                    },
+                    {
+                      "entity": "device_tracker.usw_flex_mini",
+                      "name": "Flex Mini Switch",
+                      "icon": "mdi:lan"
+                    },
+                    {
+                      "entity": "device_tracker.switch",
+                      "name": "Switch",
+                      "icon": "mdi:ethernet"
+                    },
+                    {
+                      "entity": "device_tracker.ethernet_over_powerline",
+                      "name": "Powerline Adapter",
+                      "icon": "mdi:power-plug"
+                    },
+                    {
+                      "entity": "device_tracker.uck_g2_plus",
+                      "name": "Cloud Key G2+",
+                      "icon": "mdi:server"
+                    },
+                    {
+                      "entity": "device_tracker.cctv_netgear",
+                      "name": "CCTV Netgear Switch",
+                      "icon": "mdi:cctv"
+                    },
+                    {
+                      "entity": "device_tracker.broadlink_rm4_pro",
+                      "name": "Broadlink RM4 Pro",
+                      "icon": "mdi:remote"
+                    },
+                    {
+                      "entity": "device_tracker.garage",
+                      "name": "Garage",
+                      "icon": "mdi:garage"
+                    },
+                    {
+                      "entity": "device_tracker.office_in_wall",
+                      "name": "Office In-Wall",
+                      "icon": "mdi:light-switch"
+                    },
+                    {
+                      "entity": "device_tracker.home_assistant_voice_0a8bdf",
+                      "name": "HA Voice PE",
+                      "icon": "mdi:microphone"
+                    }
+                  ],
+                  "state_color": true,
+                  "show_header_toggle": false
+                }
+              ]
+            },
+            {
+              "type": "grid",
+              "cards": [
+                {
+                  "type": "heading",
+                  "heading": "Switch PoE Ports",
+                  "heading_style": "title"
+                },
+                {
+                  "type": "grid",
+                  "columns": 4,
+                  "square": false,
+                  "cards": [
+                    {
+                      "type": "button",
+                      "entity": "button.switch_port_5_power_cycle",
+                      "name": "Port 5",
+                      "icon": "mdi:ethernet",
+                      "show_state": false,
+                      "tap_action": {
+                        "action": "call-service",
+                        "service": "button.press",
+                        "target": {
+                          "entity_id": "button.switch_port_5_power_cycle"
+                        },
+                        "confirmation": {
+                          "text": "Power cycle port 5?"
+                        }
+                      }
+                    },
+                    {
+                      "type": "button",
+                      "entity": "button.switch_port_6_power_cycle",
+                      "name": "Port 6",
+                      "icon": "mdi:ethernet",
+                      "show_state": false,
+                      "tap_action": {
+                        "action": "call-service",
+                        "service": "button.press",
+                        "target": {
+                          "entity_id": "button.switch_port_6_power_cycle"
+                        },
+                        "confirmation": {
+                          "text": "Power cycle port 6?"
+                        }
+                      }
+                    },
+                    {
+                      "type": "button",
+                      "entity": "button.switch_port_7_power_cycle",
+                      "name": "Port 7",
+                      "icon": "mdi:ethernet",
+                      "show_state": false,
+                      "tap_action": {
+                        "action": "call-service",
+                        "service": "button.press",
+                        "target": {
+                          "entity_id": "button.switch_port_7_power_cycle"
+                        },
+                        "confirmation": {
+                          "text": "Power cycle port 7?"
+                        }
+                      }
+                    },
+                    {
+                      "type": "button",
+                      "entity": "button.switch_port_8_power_cycle",
+                      "name": "Port 8",
+                      "icon": "mdi:ethernet",
+                      "show_state": false,
+                      "tap_action": {
+                        "action": "call-service",
+                        "service": "button.press",
+                        "target": {
+                          "entity_id": "button.switch_port_8_power_cycle"
+                        },
+                        "confirmation": {
+                          "text": "Power cycle port 8?"
+                        }
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

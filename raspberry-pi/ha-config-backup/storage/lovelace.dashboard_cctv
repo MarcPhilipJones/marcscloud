@@ -1,0 +1,69 @@
+{
+  "version": 1,
+  "minor_version": 1,
+  "key": "lovelace.dashboard_cctv",
+  "data": {
+    "config": {
+      "views": [
+        {
+          "title": "CCTV",
+          "path": "cctv",
+          "panel": true,
+          "cards": [
+            {
+              "type": "vertical-stack",
+              "cards": [
+                {
+                  "type": "horizontal-stack",
+                  "cards": [
+                    {
+                      "type": "picture-entity",
+                      "entity": "camera.dvr_204q_m10420250308ccwrfx3431707wcvu_101",
+                      "name": "Front Garden",
+                      "camera_view": "live",
+                      "show_state": false,
+                      "show_name": true,
+                      "image": "/api/camera_proxy_stream/camera.dvr_204q_m10420250308ccwrfx3431707wcvu_101"
+                    },
+                    {
+                      "type": "picture-entity",
+                      "entity": "camera.dvr_204q_m10420250308ccwrfx3431707wcvu_201",
+                      "name": "Driveway",
+                      "camera_view": "live",
+                      "show_state": false,
+                      "show_name": true,
+                      "image": "/api/camera_proxy_stream/camera.dvr_204q_m10420250308ccwrfx3431707wcvu_201"
+                    }
+                  ]
+                },
+                {
+                  "type": "horizontal-stack",
+                  "cards": [
+                    {
+                      "type": "picture-entity",
+                      "entity": "camera.dvr_204q_m10420250308ccwrfx3431707wcvu_301",
+                      "name": "Extension Roof",
+                      "camera_view": "live",
+                      "show_state": false,
+                      "show_name": true,
+                      "image": "/api/camera_proxy_stream/camera.dvr_204q_m10420250308ccwrfx3431707wcvu_301"
+                    },
+                    {
+                      "type": "picture-entity",
+                      "entity": "camera.dvr_204q_m10420250308ccwrfx3431707wcvu_401",
+                      "name": "Back Garden",
+                      "camera_view": "live",
+                      "show_state": false,
+                      "show_name": true,
+                      "image": "/api/camera_proxy_stream/camera.dvr_204q_m10420250308ccwrfx3431707wcvu_401"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

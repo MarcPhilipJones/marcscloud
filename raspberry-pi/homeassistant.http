@@ -1,0 +1,145 @@
+### Home Assistant REST API — Quick Reference
+### Usage: Open this file in VS Code, click "Send Request" above any request
+### Requires: REST Client extension (humao.rest-client) + .env with HA_TOKEN
+
+@baseUrl = http://192.168.0.111:8123
+@token = {{$dotenv HA_TOKEN}}
+
+# ═══════════════════════════════════════════
+# System
+# ═══════════════════════════════════════════
+
+### Check API status
+GET {{baseUrl}}/api/ HTTP/1.1
+Authorization: Bearer {{token}}
+
+### Get HA config (version, location, units)
+GET {{baseUrl}}/api/config HTTP/1.1
+Authorization: Bearer {{token}}
+
+### Validate configuration before restart
+POST {{baseUrl}}/api/config/core/check_config HTTP/1.1
+Authorization: Bearer {{token}}
+
+### Restart Home Assistant
+POST {{baseUrl}}/api/services/homeassistant/restart HTTP/1.1
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{}
+
+# ═══════════════════════════════════════════
+# States & Entities
+# ═══════════════════════════════════════════
+
+### Get all entity states
+GET {{baseUrl}}/api/states HTTP/1.1
+Authorization: Bearer {{token}}
+
+### Get single entity state (change entity_id as needed)
+GET {{baseUrl}}/api/states/light.smart_multicolor_bulb HTTP/1.1
+Authorization: Bearer {{token}}
+
+### Get FP300 occupancy sensor
+GET {{baseUrl}}/api/states/binary_sensor.presence_multi_sensor_fp300_occupancy HTTP/1.1
+Authorization: Bearer {{token}}
+
+### Get gateway WAN status
+GET {{baseUrl}}/api/states/binary_sensor.gateway_lite_wan_status HTTP/1.1
+Authorization: Bearer {{token}}
+
+# ═══════════════════════════════════════════
+# Lights
+# ═══════════════════════════════════════════
+
+### Turn on office bulb (warm white, full brightness)
+POST {{baseUrl}}/api/services/light/turn_on HTTP/1.1
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "entity_id": "light.smart_multicolor_bulb",
+  "brightness": 255,
+  "color_temp_kelvin": 4000
+}
+
+### Turn off office bulb
+POST {{baseUrl}}/api/services/light/turn_off HTTP/1.1
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "entity_id": "light.smart_multicolor_bulb"
+}
+
+# ═══════════════════════════════════════════
+# History
+# ═══════════════════════════════════════════
+
+### Get entity history (last 24h) — change entity_id and dates
+GET {{baseUrl}}/api/history/period/2026-03-15T00:00:00Z?end_time=2026-03-16T00:00:00Z&filter_entity_id=binary_sensor.presence_multi_sensor_fp300_occupancy&no_attributes HTTP/1.1
+Authorization: Bearer {{token}}
+
+# ═══════════════════════════════════════════
+# Tesla
+# ═══════════════════════════════════════════
+
+### Get Tesla battery level
+GET {{baseUrl}}/api/states/sensor.tesla_model_y_battery HTTP/1.1
+Authorization: Bearer {{token}}
+
+### Get Tesla location
+GET {{baseUrl}}/api/states/device_tracker.tesla_model_y_location_tracker HTTP/1.1
+Authorization: Bearer {{token}}
+
+### Flash Tesla lights
+POST {{baseUrl}}/api/services/button/press HTTP/1.1
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "entity_id": "button.tesla_model_y_flash_lights"
+}
+
+# ═══════════════════════════════════════════
+# Network
+# ═══════════════════════════════════════════
+
+### Get external IP
+GET {{baseUrl}}/api/states/sensor.gateway_lite_external_ip HTTP/1.1
+Authorization: Bearer {{token}}
+
+### Get download speed
+GET {{baseUrl}}/api/states/sensor.gateway_lite_download_speed HTTP/1.1
+Authorization: Bearer {{token}}
+
+### Restart gateway (careful!)
+POST {{baseUrl}}/api/services/button/press HTTP/1.1
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "entity_id": "button.gateway_lite_restart"
+}
+
+# ═══════════════════════════════════════════
+# Automations
+# ═══════════════════════════════════════════
+
+### List all automations
+GET {{baseUrl}}/api/states?filter_entity_id=automation. HTTP/1.1
+Authorization: Bearer {{token}}
+
+### Create/update an automation (change ID in URL)
+POST {{baseUrl}}/api/config/automation/config/my_automation_id HTTP/1.1
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "alias": "My Automation",
+  "description": "",
+  "trigger": [],
+  "condition": [],
+  "action": [],
+  "mode": "single"
+}

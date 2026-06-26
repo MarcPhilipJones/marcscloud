@@ -1,0 +1,252 @@
+- id: office_morning_arrival_power_on
+  alias: Office Morning Arrival - Power On
+  description: Weekday mornings, when presence detected in office for 3 seconds, turn
+    on Tapo plug, greet with temperature report, then wake the laptop via WOL with
+    retry until it responds to ping.
+  triggers:
+  - trigger: state
+    entity_id: binary_sensor.presence_multi_sensor_fp300_occupancy
+    to: 'on'
+    for:
+      seconds: 3
+  conditions:
+  - condition: time
+    weekday:
+    - mon
+    - tue
+    - wed
+    - thu
+    - fri
+  - condition: time
+    after: 07:30:00
+    before: '10:00:00'
+  - condition: state
+    entity_id: switch.smart_wi_fi_plug
+    state: 'off'
+  actions:
+  - action: switch.turn_on
+    target:
+      entity_id: switch.smart_wi_fi_plug
+  - action: tts.speak
+    target:
+      entity_id: tts.google_translate_en_com
+    data:
+      media_player_entity_id: media_player.home_assistant_voice_nabu_media_player
+      message: '{% if now().hour < 12 %}Good morning{% else %}Good afternoon{% endif
+        %}, power turned on. The lowest temperature in the office last night was {{
+        states(''sensor.office_overnight_low_temperature'') }} degrees.'
+  - delay:
+      seconds: 10
+  - repeat:
+      count: 60
+      sequence:
+      - action: wake_on_lan.send_magic_packet
+        data:
+          mac: 48:7b:2f:d4:a6:65
+      - delay:
+          seconds: 5
+      - condition: state
+        entity_id: binary_sensor.192_168_0_210
+        state: 'on'
+      - stop: Laptop is awake
+  - if:
+    - condition: state
+      entity_id: binary_sensor.192_168_0_210
+      state: 'on'
+    then:
+    - action: tts.speak
+      target:
+        entity_id: tts.google_translate_en_com
+      data:
+        media_player_entity_id: media_player.home_assistant_voice_nabu_media_player
+        message: Your laptop is awake.
+    else:
+    - action: tts.speak
+      target:
+        entity_id: tts.google_translate_en_com
+      data:
+        media_player_entity_id: media_player.home_assistant_voice_nabu_media_player
+        message: Laptop did not respond after 5 minutes.
+  mode: single
+- id: office_evening_auto_off
+  alias: Office Evening Auto-Off
+  description: After 6pm, if no occupancy for 10 minutes, turn off the Tapo plug with
+    voice announcement and Pushover notification.
+  triggers:
+  - trigger: state
+    entity_id: binary_sensor.presence_multi_sensor_fp300_occupancy
+    to: 'off'
+    for:
+      minutes: 10
+  conditions:
+  - condition: time
+    after: '18:00:00'
+  - condition: state
+    entity_id: switch.smart_wi_fi_plug
+    state: 'on'
+  actions:
+  - action: tts.speak
+    target:
+      entity_id: tts.google_translate_en_com
+    data:
+      media_player_entity_id: media_player.home_assistant_voice_nabu_media_player
+      message: Good evening, power turning off.
+  - action: notify.pushover
+    data:
+      title: Office Power Off
+      message: Office power turned off - no occupancy detected for 10 minutes.
+  - delay:
+      seconds: 5
+  - action: switch.turn_off
+    target:
+      entity_id: switch.smart_wi_fi_plug
+  mode: single
+- id: office_hard_safety_cutoff_2000
+  alias: Office Hard Safety Cutoff (20:00)
+  description: Daily safety cutoff at 8pm. If the plug is still on, force it off with
+    voice announcement and Pushover notification.
+  triggers:
+  - trigger: time
+    at: '20:00:00'
+  conditions:
+  - condition: state
+    entity_id: switch.smart_wi_fi_plug
+    state: 'on'
+  actions:
+  - action: tts.speak
+    target:
+      entity_id: tts.google_translate_en_com
+    data:
+      media_player_entity_id: media_player.home_assistant_voice_nabu_media_player
+      message: Office safety cutoff, power turning off.
+  - action: notify.pushover
+    data:
+      title: Office Safety Cutoff
+      message: Office power turned off by 8pm daily safety cutoff.
+  - delay:
+      seconds: 5
+  - action: switch.turn_off
+    target:
+      entity_id: switch.smart_wi_fi_plug
+  mode: single
+- id: office_welcome_back
+  alias: Office Welcome Back
+  description: When returning to the office after 5+ minutes away during working hours,
+    announce welcome back. 15-minute cooldown prevents repeated announcements.
+  triggers:
+  - trigger: state
+    entity_id: binary_sensor.presence_multi_sensor_fp300_occupancy
+    from: 'off'
+    to: 'on'
+  conditions:
+  - condition: time
+    after: 09:00:00
+    before: '18:00:00'
+  - condition: state
+    entity_id: switch.smart_wi_fi_plug
+    state: 'on'
+  - condition: template
+    value_template: '{{ (as_timestamp(now()) - as_timestamp(trigger.from_state.last_changed))
+      > 300 }}'
+  actions:
+  - action: tts.speak
+    target:
+      entity_id: tts.google_translate_en_com
+    data:
+      media_player_entity_id: media_player.home_assistant_voice_nabu_media_player
+      message: Welcome back.
+  - delay:
+      minutes: 15
+  mode: single
+- id: office_light_getting_low
+  alias: Office Light Getting Low
+  description: Early warning when light drops below 150 lux during working hours.
+    30-minute cooldown.
+  triggers:
+  - trigger: numeric_state
+    entity_id: sensor.presence_multi_sensor_fp300_illuminance
+    below: 150
+  conditions:
+  - condition: time
+    after: 09:00:00
+    before: '18:00:00'
+  - condition: state
+    entity_id: binary_sensor.presence_multi_sensor_fp300_occupancy
+    state: 'on'
+  - condition: state
+    entity_id: switch.smart_wi_fi_plug
+    state: 'on'
+  actions:
+  - action: tts.speak
+    target:
+      entity_id: tts.google_translate_en_com
+    data:
+      media_player_entity_id: media_player.home_assistant_voice_nabu_media_player
+      message: Light levels are getting low in the office.
+  - delay:
+      minutes: 30
+  mode: single
+- id: office_low_light_warning
+  alias: Office Low Light Warning
+  description: When light drops below 50 lux during working hours with someone present,
+    remind to turn on a light. 60-minute cooldown.
+  triggers:
+  - trigger: numeric_state
+    entity_id: sensor.presence_multi_sensor_fp300_illuminance
+    below: 50
+  conditions:
+  - condition: time
+    after: 09:00:00
+    before: '18:00:00'
+  - condition: state
+    entity_id: binary_sensor.presence_multi_sensor_fp300_occupancy
+    state: 'on'
+  - condition: state
+    entity_id: switch.smart_wi_fi_plug
+    state: 'on'
+  actions:
+  - action: tts.speak
+    target:
+      entity_id: tts.google_translate_en_com
+    data:
+      media_player_entity_id: media_player.home_assistant_voice_nabu_media_player
+      message: It's getting dark in the office, consider turning on a light.
+  - delay:
+      minutes: 60
+  mode: single
+- id: office_light_auto_on_occupied_low_light
+  alias: Office Light Auto-On (Occupied + Low Light)
+  description: Turn on office Tapo bulb when FP300 detects occupancy and illuminance
+    is below 200 lux
+  triggers:
+  - platform: state
+    to: 'on'
+    entity_id: binary_sensor.presence_multi_sensor_fp300_occupancy
+  - platform: numeric_state
+    below: 200
+    entity_id: sensor.presence_multi_sensor_fp300_illuminance
+  conditions:
+  - entity_id: binary_sensor.presence_multi_sensor_fp300_occupancy
+    condition: state
+    state: 'on'
+  - entity_id: sensor.presence_multi_sensor_fp300_illuminance
+    condition: numeric_state
+    below: 200
+  actions:
+  - target:
+      entity_id: light.smart_multicolor_bulb
+    action: light.turn_on
+  mode: single
+- id: office_light_auto_off_no_occupancy
+  alias: Office Light Auto-Off (No Occupancy)
+  description: Turn off office Tapo bulb when FP300 detects no occupancy
+  triggers:
+  - platform: state
+    to: 'off'
+    entity_id: binary_sensor.presence_multi_sensor_fp300_occupancy
+  conditions: []
+  actions:
+  - target:
+      entity_id: light.smart_multicolor_bulb
+    action: light.turn_off
+  mode: single

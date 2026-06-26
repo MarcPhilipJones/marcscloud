@@ -1,0 +1,40 @@
+{
+  "version": 1,
+  "minor_version": 1,
+  "key": "lovelace.wol_dashboard",
+  "data": {
+    "config": {
+      "views": [
+        {
+          "type": "masonry",
+          "title": "Wake on LAN",
+          "path": "wol",
+          "icon": "mdi:laptop",
+          "cards": [
+            {
+              "type": "markdown",
+              "content": "# Wake-on-LAN\nSend a magic packet to wake Marc's laptop."
+            },
+            {
+              "type": "button",
+              "name": "Wake Laptop",
+              "icon": "mdi:power",
+              "icon_height": "60px",
+              "tap_action": {
+                "action": "perform-action",
+                "perform_action": "wake_on_lan.send_magic_packet",
+                "data": {
+                  "mac": "48:7b:2f:d4:a6:65"
+                }
+              }
+            },
+            {
+              "type": "markdown",
+              "content": "**Target:** MarcsLaptop\n\n**MAC:** `48:7b:2f:d4:a6:65`\n\n**IP:** 192.168.0.210"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

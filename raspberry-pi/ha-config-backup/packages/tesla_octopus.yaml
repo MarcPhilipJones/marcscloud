@@ -1,0 +1,37 @@
+# Tesla x Octopus template helpers (cheap-rate badge).
+# Cheap-rate signal = live Intelligent Go price < £0.10/kWh, which catches BOTH the
+# fixed 23:30-05:30 window AND smart-charge dispatch slots outside it (~£0.07),
+# whereas binary_sensor.octopus_off_peak only covers the fixed window.
+template:
+  - binary_sensor:
+      - name: "Octopus Cheap Rate Active"
+        unique_id: octopus_cheap_rate_active
+        icon: mdi:cash-clock
+        state: >
+          {{ states('sensor.octopus_intelligent_go_price') | float(99) < 0.10 }}
+      - name: "Tesla Charging On Cheap Rate"
+        unique_id: tesla_charging_on_cheap_rate
+        icon: >
+          {% set charging = states('sensor.tesla_charger_power') | float(0) > 0 %}
+          {% set cheap = states('sensor.octopus_intelligent_go_price') | float(99) < 0.10 %}
+          {{ 'mdi:cash-check' if (charging and cheap) else 'mdi:cash-remove' }}
+        state: >
+          {{ (states('sensor.tesla_charger_power') | float(0) > 0)
+             and (states('sensor.octopus_intelligent_go_price') | float(99) < 0.10) }}
+  - sensor:
+      - name: "Tesla Charging Status Summary"
+        unique_id: tesla_charging_status_summary
+        icon: mdi:ev-station
+        state: >
+          {% set plugged = is_state('binary_sensor.tesla_plugged_in', 'on') %}
+          {% set power = states('sensor.tesla_charger_power') | float(0) %}
+          {% set cheap = states('sensor.octopus_intelligent_go_price') | float(99) < 0.10 %}
+          {% if not plugged %}
+            Unplugged
+          {% elif power > 0 and cheap %}
+            Charging — cheap rate ⚡
+          {% elif power > 0 %}
+            Charging — peak rate
+          {% else %}
+            Plugged in — idle
+          {% endif %}
