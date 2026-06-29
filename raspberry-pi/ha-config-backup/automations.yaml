@@ -250,3 +250,142 @@
       entity_id: light.smart_multicolor_bulb
     action: light.turn_off
   mode: single
+- id: voice_web_search
+  alias: Voice Web Search
+  description: When user asks to search the web, route the question to Google Search
+    agent and speak the answer
+  triggers:
+  - trigger: conversation
+    command:
+    - search for {query}
+    - search the web for {query}
+    - look up {query}
+    - google {query}
+    - web search {query}
+    - find out {query}
+  actions:
+  - action: conversation.process
+    data:
+      agent_id: conversation.google_search_agent
+      text: '{{ trigger.slots.query }}'
+    response_variable: search_result
+  - set_conversation_response: '{{ search_result.response.speech.plain.speech }}'
+  mode: single
+- id: office_light_auto_off_vacant_15min
+  alias: Office Light Auto-Off (Vacant 15 min)
+  description: Turn off office Tapo bulb when FP300 has reported no occupancy for
+    15 minutes
+  triggers:
+  - platform: state
+    to: 'off'
+    entity_id: binary_sensor.presence_multi_sensor_fp300_occupancy
+    for:
+      minutes: 15
+  conditions:
+  - state: 'on'
+    condition: state
+    entity_id: light.smart_multicolor_bulb
+  actions:
+  - action: light.turn_off
+    target:
+      entity_id: light.smart_multicolor_bulb
+  mode: single
+- id: tesla_drive_started_destination
+  alias: Tesla Drive Started - Destination Alert
+  description: Fires once per drive (passive TeslaMate MQTT - never wakes/polls the
+    car). Trigger = sensor.tesla_state -> 'driving' (stable for the whole trip, immune
+    to the P/R/N/D gear shuffle on the driveway). With a nav destination set it sends
+    the full ETA/distance/etc card; without one it says 'new drive started' and reports
+    the origin in words (geofence name, else reverse-geocoded street via Nominatim).
+  triggers:
+  - trigger: state
+    entity_id: sensor.tesla_state
+    to: driving
+  conditions: []
+  actions:
+  - variables:
+      start_clock: '{{ now().strftime(''%H:%M'') }}'
+      start_lat: '{{ state_attr(''device_tracker.tesla_location'', ''latitude'') }}'
+      start_lon: '{{ state_attr(''device_tracker.tesla_location'', ''longitude'')
+        }}'
+  - wait_template: '{{ states(''sensor.tesla_active_route_destination'') not in [''unknown'',
+      ''unavailable'', ''''] }}'
+    timeout:
+      seconds: 25
+    continue_on_timeout: true
+  - variables:
+      origin: '{{ states(''sensor.tesla_geofence'') }}'
+  - if:
+    - condition: template
+      value_template: '{{ origin in [''Away'', ''unknown'', ''unavailable'', '''']
+        }}'
+    then:
+    - action: rest_command.reverse_geocode
+      continue_on_error: true
+      data:
+        lat: '{{ state_attr(''device_tracker.tesla_location'', ''latitude'') }}'
+        lon: '{{ state_attr(''device_tracker.tesla_location'', ''longitude'') }}'
+      response_variable: rev
+    - variables:
+        origin: '{% set a = rev.content.address if rev is defined and rev.content
+          is defined and rev.content is mapping else {} %}{% set road = a.road or
+          a.pedestrian or a.footway or a.neighbourhood %}{% set place = a.town or
+          a.village or a.suburb or a.city or a.hamlet or a.county %}{% set parts =
+          [road, place] | select(''string'') | reject(''equalto'', '''') | list %}{{
+          parts | join('', '') if parts else ''an unknown location'' }}'
+  - choose:
+    - conditions:
+      - condition: template
+        value_template: '{{ states(''sensor.tesla_active_route_destination'') not
+          in [''unknown'', ''unavailable'', ''''] }}'
+      sequence:
+      - action: shell_command.build_drive_map
+        data:
+          start: '{{ start_lat }},{{ start_lon }}'
+          dest: '{{ state_attr(''sensor.tesla_active_route_location'',''latitude'')
+            }},{{ state_attr(''sensor.tesla_active_route_location'',''longitude'')
+            }}'
+      - action: notify.pushover
+        data:
+          title: "\U0001F697 Drive started"
+          data:
+            html: 1
+            attachment: /config/www/drive_maps/last_drive.png
+          message: "\U0001F697 Drive Started: {{ start_clock }}\n⬅️ From: {{ origin
+            }}\n\U0001F4CD Destination: {% set d = states('sensor.tesla_active_route_destination')
+            | trim %}{{ 'Home' if d == 'Work' else d }}\n\U0001F552 ETA: {{ (now()
+            + timedelta(minutes=states('sensor.tesla_active_route_minutes_to_arrival')|int(0))).strftime('%H:%M')
+            }} ({{ states('sensor.tesla_active_route_minutes_to_arrival')|int(0) }}
+            min)\n\U0001F6E3️ Distance: {{ (states('sensor.tesla_active_route_distance_to_arrival')|float(0)
+            / 1.60934)|round(0)|int }} miles\n\U0001F50B Battery: {{ states('sensor.tesla_battery_level')
+            }}% ({{ (states('sensor.tesla_rated_battery_range')|float(0) / 1.60934)|round(0)|int
+            }} mi) → {{ states('sensor.tesla_active_route_energy_at_arrival') }}%
+            ({% set bl = states('sensor.tesla_battery_level')|float(0) %}{% set rng
+            = states('sensor.tesla_rated_battery_range')|float(0) %}{% set arr = states('sensor.tesla_active_route_energy_at_arrival')|float(0)
+            %}{{ ((rng / bl * arr) / 1.60934)|round(0)|int if bl > 0 else 0 }} mi)
+            on arrival\n\U0001F321️ Climate: {{ states('sensor.tesla_inside_temp')|float(0)|round(0)|int
+            }}°C cabin\n\U0001F6A6 Traffic: {% set d = states('sensor.tesla_active_route_traffic_minutes_delay')|float(0)
+            %}{% if d <= 0 %}None{% elif d < 5 %}Light{% elif d < 15 %}Moderate{%
+            else %}Heavy{% endif %}{% if d > 0 %} (+{{ d|round(0)|int }} min){% endif
+            %}\n\U0001F517 <a href=\"https://www.google.com/maps/search/?api=1&query={{
+            start_lat }},{{ start_lon }}\">Start</a> | <a href=\"https://www.google.com/maps/search/?api=1&query={{
+            state_attr('sensor.tesla_active_route_location', 'latitude') }},{{ state_attr('sensor.tesla_active_route_location',
+            'longitude') }}\">Destination</a>"
+    default:
+    - action: shell_command.build_drive_map
+      data:
+        start: '{{ start_lat }},{{ start_lon }}'
+        dest: None,None
+    - action: notify.pushover
+      data:
+        title: "\U0001F697 New drive started"
+        data:
+          html: 1
+          attachment: /config/www/drive_maps/last_drive.png
+        message: "\U0001F697 Drive Started: {{ start_clock }}\n⬅️ From: {{ origin
+          }}\n\U0001F4CD Destination: Not set\n\U0001F50B Battery: {{ states('sensor.tesla_battery_level')
+          }}% ({{ (states('sensor.tesla_rated_battery_range')|float(0) / 1.60934)|round(0)|int
+          }} mi range)\n\U0001F321️ Climate: {{ states('sensor.tesla_inside_temp')|float(0)|round(0)|int
+          }}°C cabin\n\U0001F517 <a href=\"https://www.google.com/maps/search/?api=1&query={{
+          start_lat }},{{ start_lon }}\">Start</a>"
+  mode: single

@@ -5,6 +5,9 @@ default_config:
 # Load packages (TeslaMate MQTT entities live in packages/teslamate.yaml)
 homeassistant:
   packages: !include_dir_named packages
+  # Allow notify.pushover to attach the generated drive map (local file).
+  allowlist_external_dirs:
+    - /config/www
 
 # Load frontend themes from the themes folder
 frontend:

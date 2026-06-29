@@ -145,3 +145,147 @@ Cloudflare Pages — also £0.
 
 - No code, config, container, port-forward, DNS, or HA change has been made.
 - This file is a review artifact only.
+
+## 10. TeslaMate geofences + "drive started" alert (DONE 2026-06-27)
+
+Reproduces the old TeslaFi "car started, here's the destination" alert, using
+TeslaMate MQTT data only. **100% passive — nothing here ever wakes or polls the
+car** (no Fleet API, no `update_entity`, no forced refresh).
+
+### Geofences (TeslaMate Postgres `geofences` table)
+Named locations report through `sensor.tesla_geofence`. Created directly in the
+TeslaMate DB (`docker exec teslamate-db psql -U teslamate -d teslamate`). Radius
+is in **metres**. Effective immediately on the car's next location publish.
+
+| Name | Radius | Notes |
+|------|--------|-------|
+| Home | 30 m | Driveway |
+| Tuition | 50 m | 11-plus tuition |
+| St. John Bosco | 100 m | School — parks around site |
+| New Square Shopping Centre | 100 m | Large car park |
+| Nan and Grandad's | 40 m | On-street parking |
+| Bicester Village | 250 m | Outlet + car parks |
+| Birmingham Bullring | 700 m | Centred to also cover the Arcadian |
+| Royal Leamington Spa | 2500 m | Whole town |
+| Microsoft Reading | 400 m | Thames Valley Park |
+| Sandwell and Dudley Station | 100 m | Station + car park |
+| Lyng Jon | 40 m | On-street parking |
+| Lidl Wednesbury | 100 m | Friar Park Road store car park |
+
+`sensor.tesla_geofence` has a `value_template` so it shows **"Away"** when
+outside every fence (instead of blank). While the car is asleep it reads
+`unknown` until the next MQTT publish — expected, and it does not wake the car.
+
+### Automation `tesla_drive_started_destination`
+(entity `automation.tesla_drive_started_destination_alert` — HA slugs the alias.)
+
+- **Trigger:** `sensor.tesla_state` → `driving` (TeslaMate `state` topic). This
+  flips to `driving` **once** at the start of a trip and stays for the whole
+  journey, so it fires exactly once and is immune to the P/R/N/D gear shuffle on
+  the driveway. No conditions/guard.
+  - ⚠️ Earlier the trigger was `sensor.tesla_shift_state → D` with a guard
+    `from_state in [P, N, unknown, unavailable]`. That **missed drives that start
+    Reverse→Drive** (reversing off the driveway): `from_state` was `R`, which the
+    guard excluded, so it never fired. Fixed 2026-06-27.
+- **Wait:** up to 25 s for `sensor.tesla_active_route_destination` to populate
+  (`continue_on_timeout`).
+**Fires on EVERY drive start** (passive). With a nav destination set it sends the
+full card below; **without** one it sends a "new drive started" note with the
+origin **in words** — the geofence name if inside one, otherwise the start GPS is
+reverse-geocoded via OpenStreetMap **Nominatim** (the same geocoder TeslaMate
+uses) to a street/town, e.g. "Rydding Lane, Hill Top"; falls back to "an unknown
+location" if geocoding fails. The Tesla feed itself only reports raw lat/lon —
+there is no text address in the MQTT data, which is why we reverse-geocode.
+
+The geocoder is a `rest_command.reverse_geocode` defined in the package. NOTE: a
+brand-new `rest_command` domain is NOT picked up by `homeassistant.reload_all` —
+it needs a one-time HA restart to register (restart does not wake the car).
+
+- **Action (nav set):** `notify.pushover` with a rich multi-line message. The top
+  three lines are ALWAYS the same (with emoji), then the rest:
+
+  ```
+  🚗 Drive Started: 07:45
+  ⬅️ From: Home
+  📍 Destination: Microsoft Reading
+  🕒 ETA: 09:17 (92 min)
+  🛣️ Distance: 92 miles
+  🔋 Battery: 78% (148 mi) → 46% (87 mi) on arrival
+  🌡️ Climate: 21°C cabin
+  🚦 Traffic: Heavy (+18 min)
+  🔗 Start | Destination
+  ```
+
+  Fields and how they're derived (all passive TeslaMate MQTT):
+  - **Drive Started** = `start_clock`, captured as the FIRST automation action
+    (before the 25 s wait) so it's the real departure time, not +25 s.
+  - **From** = origin resolved ONCE up front (geofence name, else Nominatim
+    reverse-geocode of the start GPS), reused by both branches.
+  - **Destination** = `sensor.tesla_active_route_destination` (the Tesla onboard-nav
+    favourite LABEL, not a geofence). **OVERRIDE:** Marc works from home, so the
+    template maps `Work` → `Home` (`{{ 'Home' if d == 'Work' else d }}`).
+  - Battery-on-arrival / minutes → `active_route` sensors.
+  - **ETA clock** = `now() + timedelta(minutes = minutes_to_arrival)`, `%H:%M`.
+  - **Distance (miles)** = km sensor `/ 1.60934` (TeslaMate distance is km).
+  - **Battery now** = `sensor.tesla_battery_level`; **Climate** = `sensor.tesla_inside_temp`.
+  - **Traffic** = `sensor.tesla_active_route_traffic_minutes_delay` bucketed
+    None / Light / Moderate / Heavy (+N min).
+  - **🔗 Start / Destination** = tappable Google Maps links (`html=1`). Start =
+    captured start GPS (`start_lat`/`start_lon` from `device_tracker.tesla_location`);
+    Destination = new `sensor.tesla_active_route_location` lat/lon attributes.
+    URL is `https://www.google.com/maps/search/?api=1&query=LAT,LON` — opens the
+    Google Maps app on iPhone via universal link when installed.
+    ⚠️ `html` must be nested under the notify service `data` key
+    (`data: { data: { html: 1 } }`); a top-level `html` is rejected with HTTP 400.
+  - **Attached thumbnail map (PNG)** = Google Static Maps. Drive-start calls
+    `shell_command.build_drive_map` → Pi-only `/config/drive_map.sh` (repo
+    [`scripts/drive_map.sh`](scripts/drive_map.sh)) which reads the API key from
+    `/config/.google_maps_key` (mode 600, not in git) and curls a 600×320@2x PNG
+    (A=green start, B=red destination, blue route) to
+    `/config/www/drive_maps/last_drive.png`. Attached via pushover nested data
+    `attachment: /config/www/drive_maps/last_drive.png` (a **local file path** — HA
+    pushover rejects URL attachments with "Path is not whitelisted"). Requires
+    `/config/www` in `homeassistant: allowlist_external_dirs:`. The key never
+    reaches the phone (HA uploads the bytes).
+    ⚠️ HA `shell_command` runs **without a shell** (`$(...)`, pipes, `&&` don't
+    work) → the logic lives in the script. Changing the shell_command *definition*
+    needs an HA restart; editing the *script* doesn't.
+
+- **Action (no nav):** same three-line header (`📍 Destination: Not set`) + Battery
+  + Climate + a single 🔗 Start Google Maps link.
+
+### Deploy notes
+- `~/homeassistant/packages/*.yaml` are root-owned → stage to `/tmp`, then `sudo cp`.
+- Automations added via REST `POST /api/config/automation/config/<id>` (does not
+  disturb UI-made automations); reload with `homeassistant.reload_all`.
+- Helper: [`scripts/deploy_tesla_drive_alert.py`](scripts/deploy_tesla_drive_alert.py).
+
+## 11. Fleet Telemetry vs TeslaMate for alerts — research verdict (2026-06-27)
+
+**Objective constraint:** cancel paid TeslaFi, stay **free + fully locally hosted**.
+No replacement subscriptions (Teslemetry/Tessie ruled out).
+
+**Question researched:** is Tesla Fleet (or Fleet Telemetry streaming) a better source
+than TeslaMate for the "car started driving" alert?
+
+**Findings (grounded in the live system + Tesla docs):**
+- The native HA `tesla_fleet` integration is **polling-only** and exposes **no
+  shift/driving entity** (only online/asleep `status`, `device_tracker`, route +
+  ETA/distance). So it cannot cleanly detect "started driving".
+- **TeslaMate** exposes the drive state over MQTT and uses the Owner API (no Fleet
+  credit, sleep-safe). We trigger on `sensor.tesla_state` → `driving` (fires once
+  per trip). NOTE: `sensor.tesla_shift_state` (P/R/N/D) also exists but is a poor
+  trigger — a drive that starts Reverse→Drive bounces the gear, so a naive
+  shift-state trigger/guard can miss it (learned 2026-06-27).
+- The car (Model Y, fw 2026.20.0, Fleet Telemetry client 1.2.0, key paired, 0/5 slots)
+  **does support Fleet Telemetry streaming**, but using it requires hosting a public
+  Fleet Telemetry server (FQDN + mTLS) or a paid managed service. The native integration
+  does not stream.
+
+**Decision (Marc + GPT + Copilot agree):** keep the **TeslaMate `sensor.tesla_state
+→ driving`** trigger.
+It is free, local, sleep-safe, needs no public exposure, and is already working. The only
+constraint-compliant way to ever add streaming would be **self-hosting** the free
+`tesla/fleet-telemetry` server locally (heavy + opens an inbound endpoint) — not worth it
+for a single notification. Fleet route entities remain a valid free **destination
+fallback** if ever needed.

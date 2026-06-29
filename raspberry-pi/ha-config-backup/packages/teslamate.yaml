@@ -2,6 +2,30 @@
 # Source of truth backup; deployed to the Pi at ~/homeassistant/packages/teslamate.yaml.
 # Entities are published by TeslaMate over the local Mosquitto broker.
 # They appear once you have signed in at http://192.168.0.111:4000 and the car wakes.
+
+# Reverse-geocode (OpenStreetMap Nominatim) used by the "drive started" alert to
+# turn raw GPS into a human-readable street/town when the car starts OUTSIDE every
+# geofence. Same geocoder TeslaMate itself uses. Passive: only called on a drive
+# start with no geofence match (a few times a day) - well within Nominatim's usage
+# policy. A User-Agent is required by that policy.
+rest_command:
+  reverse_geocode:
+    url: >-
+      https://nominatim.openstreetmap.org/reverse?format=jsonv2&zoom=18&addressdetails=1&lat={{ lat }}&lon={{ lon }}
+    method: GET
+    headers:
+      User-Agent: "ha-teslamate-drivealert/1.0 (raspberry-pi home lab)"
+
+# Static thumbnail maps for the "drive started" alert. HA shell_command runs
+# WITHOUT a shell (no $(...), pipes or &&), so the real work lives in the Pi-only
+# script /config/drive_map.sh (NOT in git) which reads the Google Static Maps API
+# key from /config/.google_maps_key (mode 600, also Pi-only). The committed line
+# below therefore contains no key and no shell features. Args: $1=start "lat,lon",
+# $2=dest "lat,lon" (pass "None,None" / empty for a start-only map). Output PNG is
+# served at /local/drive_maps/last_drive.png and attached to the Pushover alert.
+shell_command:
+  build_drive_map: "/bin/sh /config/drive_map.sh {{ start }} {{ dest }}"
+
 mqtt:
   # --- Identity --------------------------------------------------------------
   - sensor:
@@ -57,6 +81,9 @@ mqtt:
       unique_id: teslamate_1_geofence
       device: *teslamate_device_info
       state_topic: "teslamate/cars/1/geofence"
+      # TeslaMate publishes an empty payload when the car is outside every
+      # geo-fence; surface that as "Away" instead of a blank/unknown state.
+      value_template: "{{ value if value | trim != '' else 'Away' }}"
       icon: mdi:earth
   # --- Location --------------------------------------------------------------
   - device_tracker:
@@ -420,3 +447,45 @@ mqtt:
       device_class: duration
       unit_of_measurement: min
       icon: mdi:clock-outline
+  - sensor:
+      name: Active route traffic delay
+      default_entity_id: sensor.tesla_active_route_traffic_minutes_delay
+      unique_id: teslamate_1_active_route_traffic_minutes_delay
+      availability: *teslamate_active_route_availability
+      device: *teslamate_device_info
+      state_topic: "teslamate/cars/1/active_route"
+      value_template: >
+        {% if not value_json.error and value_json.traffic_minutes_delay is defined %}
+          {{ value_json.traffic_minutes_delay | round(1) }}
+        {% else %}
+          0
+        {% endif %}
+      device_class: duration
+      unit_of_measurement: min
+      icon: mdi:traffic-light
+  # Destination coordinates of the active nav route, exposed as latitude/longitude
+  # attributes so the "drive started" alert can build a Google Maps link to where
+  # the car is heading. TeslaMate's active_route payload carries the destination
+  # under `location`; key names vary by version, so accept lat/lon OR
+  # latitude/longitude defensively.
+  - sensor:
+      name: Active route location
+      default_entity_id: sensor.tesla_active_route_location
+      unique_id: teslamate_1_active_route_location
+      availability: *teslamate_active_route_availability
+      device: *teslamate_device_info
+      state_topic: "teslamate/cars/1/active_route"
+      value_template: >
+        {% set loc = value_json.location if value_json.location is defined else {} %}
+        {% set la = loc.latitude if loc.latitude is defined else loc.lat | default(none) %}
+        {% set lo = loc.longitude if loc.longitude is defined else loc.lon | default(none) %}
+        {% if not value_json.error and la is not none and lo is not none %}
+          {{ la }},{{ lo }}
+        {% endif %}
+      json_attributes_topic: "teslamate/cars/1/active_route"
+      json_attributes_template: >
+        {% set loc = value_json.location if value_json.location is defined else {} %}
+        {% set la = loc.latitude if loc.latitude is defined else loc.lat | default(none) %}
+        {% set lo = loc.longitude if loc.longitude is defined else loc.lon | default(none) %}
+        {{ {'latitude': la, 'longitude': lo} | to_json }}
+      icon: mdi:map-marker-radius
